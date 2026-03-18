@@ -1,0 +1,23 @@
+{
+  "code": "sz.000960",
+  "name": "锡业股份",
+  "industry": "锡",
+  "date": "2026-03-16",
+  "price": 34.95,
+  "change_pct": -5.258877744646239,
+  "pe": 15,
+  "pb": 1.5,
+  "market_cap": 150,
+  "dividend_yield": 2.0,
+  "roe": 10,
+  "gross_margin": 20,
+  "net_margin": 10,
+  "score": 65,
+  "reasons": [
+    "锡行业",
+    "大跌-5.3%（关注机会）"
+  ],
+  "target_price": 41.94,
+  "stop_loss": 29.71,
+  "recommendation": "推荐"
+}

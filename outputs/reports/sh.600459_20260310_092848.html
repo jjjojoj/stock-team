@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sh.600459 - 股票分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'vc-dark': '#0d1117',
+                        'vc-card': '#161b22',
+                        'vc-border': '#30363d',
+                        'vc-blue': '#1f6feb',
+                        'vc-green': '#3fb950',
+                        'vc-red': '#f85149',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+        }
+        .gradient-card-blue { background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 5%, rgba(29, 78, 216, 0.35) 100%); }
+        .gradient-card-purple { background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 5%, rgba(124, 58, 237, 0.3) 100%); }
+        .gradient-card-green { background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 5%, rgba(34, 197, 94, 0.3) 100%); }
+        .gradient-card-pink { background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 5%, rgba(219, 39, 119, 0.25) 100%); }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- 标题 -->
+        <header class="mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <span class="text-4xl">📊</span>
+                        sh.600459
+                        <span class="text-lg font-normal text-gray-500">sh.600459</span>
+                    </h1>
+                    <p class="text-gray-500 mt-2">股票分析报告 · 生成时间：2026-03-10 09:28</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold">¥--</div>
+                    <div class="text-vc-green">
+                        +0.00%
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 核心指标 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="gradient-card-blue rounded-xl p-5 border border-vc-border">
+                <p class="text-gray-400 text-sm">市值</p>
+                <p class="text-2xl font-bold mt-1">--亿</p>
+            </div>
+            <div class="gradient-card-purple rounded-xl p-5 border border-vc-border">
+                <p class="text-gray-400 text-sm">PB</p>
+                <p class="text-2xl font-bold mt-1">--</p>
+            </div>
+            <div class="gradient-card-green rounded-xl p-5 border border-vc-border">
+                <p class="text-gray-400 text-sm">ROE</p>
+                <p class="text-2xl font-bold mt-1">--%</p>
+            </div>
+            <div class="gradient-card-pink rounded-xl p-5 border border-vc-border">
+                <p class="text-gray-400 text-sm">综合评分</p>
+                <p class="text-2xl font-bold mt-1">--/100</p>
+            </div>
+        </div>
+        
+        <!-- 价格走势图 -->
+        <div class="bg-vc-card border border-vc-border rounded-xl p-5 mb-6">
+            <h3 class="text-lg font-semibold mb-4">📈 价格走势</h3>
+            <div id="price-chart" style="height: 300px;"></div>
+        </div>
+        
+        <!-- 技术指标 + 分析 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            
+            <!-- 技术指标 -->
+            <div class="bg-vc-card border border-vc-border rounded-xl p-5">
+                <h3 class="text-lg font-semibold mb-4">📊 技术指标</h3>
+                <div class="space-y-4">
+                    <!-- RSI -->
+                    <div class="bg-vc-dark rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-400">RSI (14)</span>
+                            <span class="font-bold text-white">68.3</span>
+                        </div>
+                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-vc-green via-yellow-500 to-vc-red" style="width: 68.3%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>超卖(30)</span>
+                            <span>超买(70)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- MACD -->
+                    <div class="bg-vc-dark rounded-lg p-4">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-gray-400 text-xs">MACD</p>
+                                <p class="font-bold text-vc-green">0.602</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-xs">信号线</p>
+                                <p class="font-bold">0.448</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-xs">柱状图</p>
+                                <p class="font-bold text-vc-green">0.387</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 布林带 -->
+                    <div class="bg-vc-dark rounded-lg p-4">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-gray-400 text-xs">上轨</p>
+                                <p class="font-bold">¥29.13</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-xs">中轨</p>
+                                <p class="font-bold">¥25.23</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-xs">下轨</p>
+                                <p class="font-bold">¥22.55</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI 分析 -->
+            <div class="bg-vc-card border border-vc-border rounded-xl p-5">
+                <h3 class="text-lg font-semibold mb-4">🤖 AI 分析结论</h3>
+                <div class="space-y-4">
+                    
+                    
+                    <div class="bg-vc-dark rounded-lg p-4">
+                        <p class="text-gray-400 text-sm mb-2">分析要点</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-vc-green">✓</span>
+                                <span>央企/国企背景，政策支持力度强</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-vc-green">✓</span>
+                                <span>市值小于200亿，弹性较大</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-yellow-500">⚠</span>
+                                <span>近期商品价格波动，需关注</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-vc-dark rounded-lg p-4">
+                        <p class="text-gray-400 text-sm mb-2">风险提示</p>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li>• 市场整体风险偏好变化</li>
+                            <li>• 行业政策调整风险</li>
+                            <li>• 商品价格波动风险</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 持仓信息 -->
+        
+        <div class="bg-vc-card border border-vc-border rounded-xl p-5 mb-6">
+            <h3 class="text-lg font-semibold mb-4">💼 当前持仓</h3>
+                    <div class="grid grid-cols-4 gap-4">
+                <div class="bg-vc-dark rounded-lg p-4 text-center">
+                    <p class="text-gray-400 text-sm">成本价</p>
+                    <p class="text-xl font-bold">¥26.27</p>
+                </div>
+                <div class="bg-vc-dark rounded-lg p-4 text-center">
+                    <p class="text-gray-400 text-sm">当前价</p>
+                    <p class="text-xl font-bold">¥26.27</p>
+                </div>
+                <div class="bg-vc-dark rounded-lg p-4 text-center">
+                    <p class="text-gray-400 text-sm">盈亏</p>
+                    <p class="text-xl font-bold text-vc-green">
+                        +0.00 (+0.00%)
+                    </p>
+                </div>
+                <div class="bg-vc-dark rounded-lg p-4 text-center">
+                    <p class="text-gray-400 text-sm">持仓数量</p>
+                    <p class="text-xl font-bold">3800股</p>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- 预测历史 -->
+        <!-- 无预测历史 -->
+        
+        <!-- 页脚 -->
+        <footer class="mt-8 text-center text-gray-600 text-sm">
+            <p>股票分析报告 · 由 AI 股票团队生成</p>
+            <p class="mt-1">投资有风险，决策需谨慎</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 价格图表
+        const priceChart = echarts.init(document.getElementById('price-chart'));
+        priceChart.setOption({
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: '#161b22',
+                borderColor: '#30363d',
+                textStyle: { color: '#e6edf3' }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                top: '5%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: ["2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10"],
+                axisLine: { lineStyle: { color: '#30363d' } },
+                axisLabel: { color: '#8b949e', fontSize: 10 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: { lineStyle: { color: '#30363d' } },
+                axisLabel: { color: '#8b949e', formatter: '¥{value}' },
+                splitLine: { lineStyle: { color: '#21262d' } }
+            },
+            series: [{
+                type: 'line',
+                data: [24.32, 23.69, 23.74, 24.4, 23.87, 23.8, 24.02, 24.52, 24.28, 23.79, 23.74, 23.14, 24.26, 24.29, 25.08, 25.03, 25.16, 24.31, 24.95, 24.72, 25.73, 26.5, 26.53, 25.64, 24.91, 24.78, 25.43, 24.58, 24.63, 25.66, 26.87, 25.68, 26.15, 27.43, 28.47, 27.28, 26.7, 26.49, 25.52, 24.97, 24.75, 23.65],
+                smooth: true,
+                showSymbol: false,
+                lineStyle: { color: '#1f6feb', width: 2 },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(31, 111, 235, 0.3)' },
+                        { offset: 1, color: 'rgba(31, 111, 235, 0)' }
+                    ])
+                }
+            }]
+        });
+        
+        window.addEventListener('resize', () => priceChart.resize());
+    </script>
+</body>
+</html>

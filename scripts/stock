@@ -1,0 +1,15 @@
+#!/bin/bash
+# 中国股市智能投资团队 - Python 虚拟环境 wrapper
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/../venv"
+VENV_PYTHON="$VENV_DIR/bin/python3"
+
+# 检查虚拟环境是否存在
+if [ ! -d "$VENV_DIR" ]; then
+    echo "❌ 苟拟环境不存在，    echo "请先运行: python3 -m venv venv"
+    exit 1
+fi
+
+# 使用虚拟环境的 Python 迧行
+exec "$VENV_PYTHON" "$@"

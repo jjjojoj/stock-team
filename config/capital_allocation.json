@@ -1,0 +1,64 @@
+{
+  "total_capital": 200000,
+  "allocation_strategy": "balanced",
+  "max_positions": 5,
+  "single_stock_max_pct": 40,
+  "single_industry_max_pct": 50,
+  "cash_reserve_pct": 0,
+  "allocations": {
+    "贵研铂业": {
+      "code": "sh.600459",
+      "target_amount": 100000,
+      "target_pct": 50,
+      "industry": "铂族金属",
+      "reason": "美伊冲突受益，战略金属涨价预期"
+    },
+    "宝地矿业": {
+      "code": "sh.601121",
+      "target_amount": 100000,
+      "target_pct": 50,
+      "industry": "铁矿",
+      "reason": "小盘资源股，铁矿周期底部"
+    }
+  },
+  "industry_limits": {
+    "铂族金属": {
+      "max_pct": 50,
+      "current_pct": 50,
+      "stocks": ["sh.600459"]
+    },
+    "铁矿": {
+      "max_pct": 50,
+      "current_pct": 50,
+      "stocks": ["sh.601121"]
+    },
+    "稀土": {
+      "max_pct": 40,
+      "current_pct": 0,
+      "stocks": []
+    },
+    "黄金": {
+      "max_pct": 30,
+      "current_pct": 0,
+      "stocks": []
+    },
+    "铜": {
+      "max_pct": 30,
+      "current_pct": 0,
+      "stocks": []
+    }
+  },
+  "risk_control": {
+    "stop_loss_pct": 8,
+    "take_profit_pct": 30,
+    "max_drawdown_pct": 15,
+    "daily_loss_limit_pct": 3
+  },
+  "notes": [
+    "当前策略：双持仓均衡配置",
+    "贵研铂业：美伊冲突催化，铂族金属受益",
+    "宝地矿业：小盘资源，铁矿周期底部",
+    "风险控制：单只止损-8%，总止损-15%"
+  ],
+  "update_time": "2026-03-02"
+}

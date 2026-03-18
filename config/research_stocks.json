@@ -1,0 +1,119 @@
+{
+  "watchlist": [
+    {
+      "code": "sh.600111",
+      "name": "北方稀土",
+      "industry": "稀土",
+      "reason": "行业龙头",
+      "short_term": "↗ +5%",
+      "medium_term": "↗ +10%",
+      "confidence": 65,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.000831",
+      "name": "中国稀土",
+      "industry": "稀土",
+      "reason": "央企整合预期",
+      "short_term": "→ 0%",
+      "medium_term": "↗ +10%",
+      "confidence": 55,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "industry": "黄金/铜",
+      "reason": "避险属性",
+      "short_term": "↗ +5%",
+      "medium_term": "→ +3%",
+      "confidence": 60,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.002466",
+      "name": "天齐锂业",
+      "industry": "锂",
+      "reason": "锂价底部",
+      "short_term": "→ +2%",
+      "medium_term": "↗ +15%",
+      "confidence": 58,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "industry": "铝",
+      "reason": "央企龙头",
+      "short_term": "→ +2%",
+      "medium_term": "↘ -5%",
+      "confidence": 45,
+      "added_date": "2026-03-02"
+    }
+  ],
+  "peers": [
+    {
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "industry": "黄金",
+      "short_term": "↗ +5%",
+      "medium_term": "↗ +12%",
+      "confidence": 68,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.002155",
+      "name": "湖南黄金",
+      "industry": "黄金",
+      "short_term": "↗ +6%",
+      "medium_term": "↗ +15%",
+      "confidence": 70,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "industry": "铜",
+      "short_term": "→ +2%",
+      "medium_term": "↘ -5%",
+      "confidence": 45,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.002092",
+      "name": "中泰化学",
+      "industry": "化工",
+      "short_term": "→ +3%",
+      "medium_term": "↗ +10%",
+      "confidence": 60,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.000707",
+      "name": "双环科技",
+      "industry": "化工",
+      "short_term": "→ +3%",
+      "medium_term": "↗ +12%",
+      "confidence": 58,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.002226",
+      "name": "江南化工",
+      "industry": "民爆",
+      "short_term": "→ +2%",
+      "medium_term": "↗ +8%",
+      "confidence": 55,
+      "added_date": "2026-03-02"
+    },
+    {
+      "code": "sz.000758",
+      "name": "中色股份",
+      "industry": "其他有色",
+      "short_term": "→ +3%",
+      "medium_term": "↗ +10%",
+      "confidence": 55,
+      "added_date": "2026-03-02"
+    }
+  ]
+}

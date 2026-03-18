@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "feishu_webhook": null,
+  "monitor_indices": ["000001.SH", "399001.SZ"],
+  "thresholds": {
+    "market_drop_level1": -5.0,
+    "market_drop_level2": -7.0,
+    "market_drop_level3": -10.0,
+    "stock_surge": 7.0,
+    "stock_plummet": -7.0,
+    "panic_high": 30.0
+  }
+}

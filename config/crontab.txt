@@ -1,0 +1,23 @@
+# 中国股市智能投资团队 - Cron任务配置
+# 
+# 安装方法:
+# crontab -e
+# 粘贴以下内容
+
+# 每日9:00 - 开盘前新闻分析和预测
+0 9 * * 1-5 /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/scripts/news_monitor.py check
+
+# 每日15:30 - 收盘后事件驱动扫描（新增）
+30 15 * * 1-5 /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/scripts/event_driven_daily_scan.py
+
+# 每日21:00 - 学习复盘
+0 21 * * 1-5 /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/scripts/learning_engine.py review
+
+# 每小时检查仪表盘状态（确保服务运行）
+0 * * * * /usr/bin/pgrep -f "dashboard_claude.py" || /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/web/dashboard_claude.py > /tmp/dashboard.log 2>&1 &
+
+# 每周一20:00 - 周总结
+0 20 * * 1 /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/scripts/weekly_summary.py
+
+# 清理日志（每月1号）
+0 3 1 * * find /Users/joe/.openclaw/workspace/china-stock-team/logs -name "*.log" -mtime +30 -delete

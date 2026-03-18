@@ -1,0 +1,719 @@
+[
+  {
+    "date": "2026-03-10T20:01:16.495000",
+    "type": "book_learning",
+    "book": "聪明的投资者",
+    "author": "本杰明·格雷厄姆",
+    "key_points_learned": 3,
+    "rules_created": 2,
+    "key_points": [
+      {
+        "id": "book_002.point_001",
+        "content": "安全边际原则",
+        "category": "估值"
+      },
+      {
+        "id": "book_002.point_002",
+        "content": "市场先生理论",
+        "category": "心态"
+      },
+      {
+        "id": "book_002.point_003",
+        "content": "分散投资",
+        "category": "仓位管理"
+      }
+    ],
+    "rules_added_to_pool": [
+      {
+        "rule_id": "rule_book_002_1",
+        "content": "安全边际原则",
+        "testable_form": "PB<1 的股票长期收益>市场平均"
+      },
+      {
+        "rule_id": "rule_book_002_2",
+        "content": "市场先生理论",
+        "testable_form": "逆向投资策略在波动市场中收益更高"
+      }
+    ],
+    "progress": {
+      "books_completed": 2,
+      "books_total": 3,
+      "rules_in_pool": 4
+    },
+    "next_book": "笑傲股市"
+  },
+  {
+    "date": "2026-03-06T00:54:33.773760",
+    "verify_result": {
+      "verified": 0,
+      "results": []
+    },
+    "position_analysis": {
+      "total": 7,
+      "profitable": 7,
+      "losing": 0,
+      "lessons": []
+    },
+    "case_studies": [],
+    "strategy_updates": {
+      "rules_adjusted": [],
+      "rules_removed": [],
+      "new_rules_suggested": []
+    }
+  },
+  {
+    "date": "2026-03-06T00:54:44.364167",
+    "verify_result": {
+      "verified": 0,
+      "results": []
+    },
+    "position_analysis": {
+      "total": 7,
+      "profitable": 7,
+      "losing": 0,
+      "lessons": []
+    },
+    "case_studies": [],
+    "strategy_updates": {
+      "rules_adjusted": [],
+      "rules_removed": [],
+      "new_rules_suggested": []
+    }
+  },
+  {
+    "date": "2026-03-06T15:31:49.953968",
+    "verify_result": {
+      "verified": 0,
+      "results": []
+    },
+    "position_analysis": {
+      "total": 7,
+      "profitable": 7,
+      "losing": 0,
+      "lessons": []
+    },
+    "case_studies": [],
+    "strategy_updates": {
+      "rules_adjusted": [],
+      "rules_removed": [],
+      "new_rules_suggested": []
+    }
+  },
+  {
+    "date": "2026-03-07T10:20:11.554020",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-06",
+    "trading_days": 282,
+    "stock": "sh.600459 (云南白药)",
+    "initial_capital": 100000,
+    "final_capital": 103204.29,
+    "total_return": 0.032,
+    "annual_return": 0.0286,
+    "sharpe_ratio": 0.02,
+    "max_drawdown": 0.0565,
+    "win_rate": 0.857,
+    "profit_loss_ratio": 1.29,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937,
+    "avg_loss": 13132,
+    "conclusion": "策略一般，需要优化",
+    "strengths": [
+      "胜率高 (85.7%)",
+      "最大回撤控制好 (5.65%)"
+    ],
+    "weaknesses": [
+      "收益率偏低 (年化 2.86%)",
+      "夏普比率极低 (0.02)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前 1.29，目标>1.5",
+      "需要优化止盈策略：赚小钱太多，单笔盈利不够",
+      "夏普比率极低说明风险调整后收益差，需要降低波动或提高收益"
+    ]
+  },
+  {
+    "date": "2026-03-07T10:37:03.778648",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-06",
+    "trading_days": 282,
+    "stock": "sh.600459",
+    "initial_capital": 100000,
+    "final_capital": 103204.29,
+    "total_return": 0.032,
+    "annual_return": 0.0286,
+    "sharpe_ratio": 0.02,
+    "max_drawdown": 0.0565,
+    "win_rate": 0.857,
+    "profit_loss_ratio": 1.29,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937,
+    "avg_loss": 13132,
+    "conclusion": "策略需要优化",
+    "strengths": [
+      "胜率高 (85.7%)",
+      "回撤控制好 (5.65%)"
+    ],
+    "weaknesses": [
+      "收益率偏低 (年化 2.86%)",
+      "夏普比率低 (0.02)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前1.29，目标>1.5",
+      "建议：延长止盈区间，让利润奔跑",
+      "夏普比率低说明风险调整后收益差",
+      "建议：降低仓位波动或提高收益"
+    ]
+  },
+  {
+    "date": "2026-03-07T11:56:40.035343",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-06",
+    "trading_days": 282,
+    "stock": "sh.600459",
+    "initial_capital": 100000,
+    "final_capital": 103204.29,
+    "total_return": 0.032,
+    "annual_return": 0.0286,
+    "sharpe_ratio": 0.02,
+    "max_drawdown": 0.0565,
+    "win_rate": 0.857,
+    "profit_loss_ratio": 1.29,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937,
+    "avg_loss": 13132,
+    "conclusion": "策略需要优化",
+    "strengths": [
+      "胜率高 (85.7%)",
+      "回撤控制好 (5.65%)"
+    ],
+    "weaknesses": [
+      "收益率偏低 (年化 2.86%)",
+      "夏普比率低 (0.02)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前1.29，目标>1.5",
+      "建议：延长止盈区间，让利润奔跑",
+      "夏普比率低说明风险调整后收益差",
+      "建议：降低仓位波动或提高收益"
+    ]
+  },
+  {
+    "date": "2026-03-07T11:56:40.696093",
+    "type": "event_trade",
+    "event_id": "test_001",
+    "event_type": "war_middle_east",
+    "event_name": "中东冲突",
+    "severity": "medium",
+    "trades": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "action": "buy",
+        "price": 8.5,
+        "shares": 1000,
+        "amount": 8500,
+        "reason": "中东冲突",
+        "status": "opened"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "action": "buy",
+        "price": 6.2,
+        "shares": 1500,
+        "amount": 9300,
+        "reason": "中东冲突",
+        "status": "opened"
+      }
+    ],
+    "total_cost": 17800,
+    "success_count": 2,
+    "failed_count": 0
+  },
+  {
+    "date": "2026-03-07T12:08:11.722368",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-06",
+    "trading_days": 282,
+    "stock": "sh.600459",
+    "initial_capital": 100000,
+    "final_capital": 103204.29,
+    "total_return": 0.032,
+    "annual_return": 0.0286,
+    "sharpe_ratio": 0.02,
+    "max_drawdown": 0.0565,
+    "win_rate": 0.857,
+    "profit_loss_ratio": 1.29,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937,
+    "avg_loss": 13132,
+    "conclusion": "策略需要优化",
+    "strengths": [
+      "胜率高 (85.7%)",
+      "回撤控制好 (5.65%)"
+    ],
+    "weaknesses": [
+      "收益率偏低 (年化 2.86%)",
+      "夏普比率低 (0.02)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前1.29，目标>1.5",
+      "建议：延长止盈区间，让利润奔跑",
+      "夏普比率低说明风险调整后收益差",
+      "建议：降低仓位波动或提高收益"
+    ]
+  },
+  {
+    "date": "2026-03-07T12:08:12.624879",
+    "type": "event_trade",
+    "event_id": "test_001",
+    "event_type": "war_middle_east",
+    "event_name": "中东冲突",
+    "severity": "medium",
+    "trades": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "action": "buy",
+        "price": 8.5,
+        "shares": 1000,
+        "amount": 8500,
+        "reason": "中东冲突",
+        "status": "opened"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "action": "buy",
+        "price": 6.2,
+        "shares": 1500,
+        "amount": 9300,
+        "reason": "中东冲突",
+        "status": "opened"
+      }
+    ],
+    "total_cost": 17800,
+    "success_count": 2,
+    "failed_count": 0
+  },
+  {
+    "date": "2026-03-07T12:09:03.369340",
+    "type": "prediction_verification",
+    "total_verified": 2,
+    "correct": 1,
+    "partial": 0,
+    "incorrect": 1,
+    "details": [
+      {
+        "name": "贵研铂业",
+        "code": "sh.600459",
+        "direction": "up",
+        "change": 5.2,
+        "correct": true,
+        "reasons": [
+          "央企",
+          "市值<200 亿"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "宝地矿业",
+        "code": "sh.601121",
+        "direction": "up",
+        "change": -2.1,
+        "correct": false,
+        "reasons": [
+          "央企",
+          "资源股"
+        ],
+        "updates_count": 0
+      }
+    ]
+  },
+  {
+    "date": "2026-03-07T12:10:39.368077",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-06",
+    "trading_days": 282,
+    "stock": "sh.600459",
+    "initial_capital": 100000,
+    "final_capital": 103204.29,
+    "total_return": 0.032,
+    "annual_return": 0.0286,
+    "sharpe_ratio": 0.02,
+    "max_drawdown": 0.0565,
+    "win_rate": 0.857,
+    "profit_loss_ratio": 1.29,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937,
+    "avg_loss": 13132,
+    "conclusion": "策略需要优化",
+    "strengths": [
+      "胜率高 (85.7%)",
+      "回撤控制好 (5.65%)"
+    ],
+    "weaknesses": [
+      "收益率偏低 (年化 2.86%)",
+      "夏普比率低 (0.02)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前1.29，目标>1.5",
+      "建议：延长止盈区间，让利润奔跑",
+      "夏普比率低说明风险调整后收益差",
+      "建议：降低仓位波动或提高收益"
+    ]
+  },
+  {
+    "date": "2026-03-07T12:10:39.945277",
+    "type": "event_trade",
+    "event_id": "test_001",
+    "event_type": "war_middle_east",
+    "event_name": "中东冲突",
+    "severity": "medium",
+    "trades": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "action": "buy",
+        "price": 8.5,
+        "shares": 1000,
+        "amount": 8500,
+        "reason": "中东冲突",
+        "status": "opened"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "action": "buy",
+        "price": 6.2,
+        "shares": 1500,
+        "amount": 9300,
+        "reason": "中东冲突",
+        "status": "opened"
+      }
+    ],
+    "total_cost": 17800,
+    "success_count": 2,
+    "failed_count": 0
+  },
+  {
+    "date": "2026-03-07T12:10:40.059852",
+    "type": "prediction_verification",
+    "total_verified": 2,
+    "correct": 1,
+    "partial": 0,
+    "incorrect": 1,
+    "details": [
+      {
+        "name": "贵研铂业",
+        "code": "sh.600459",
+        "direction": "up",
+        "change": 5.2,
+        "correct": true,
+        "reasons": [
+          "央企",
+          "市值<200 亿"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "宝地矿业",
+        "code": "sh.601121",
+        "direction": "up",
+        "change": -2.1,
+        "correct": false,
+        "reasons": [
+          "央企",
+          "资源股"
+        ],
+        "updates_count": 0
+      }
+    ]
+  },
+  {
+    "date": "2026-03-09T10:19:52.289648",
+    "type": "prediction_verification",
+    "total_verified": 0,
+    "correct": 0,
+    "partial": 0,
+    "incorrect": 0,
+    "details": []
+  },
+  {
+    "date": "2026-03-09T10:20:34.623709",
+    "verify_result": {
+      "verified": 0,
+      "results": []
+    },
+    "position_analysis": {
+      "total": 7,
+      "profitable": 7,
+      "losing": 0,
+      "lessons": []
+    },
+    "case_studies": [],
+    "strategy_updates": {
+      "rules_adjusted": [],
+      "rules_removed": [],
+      "new_rules_suggested": []
+    }
+  },
+  {
+    "date": "2026-03-09T15:30:08.631847",
+    "type": "prediction_verification",
+    "total_verified": 0,
+    "correct": 0,
+    "partial": 0,
+    "incorrect": 0,
+    "details": []
+  },
+  {
+    "date": "2026-03-10T15:30:17.109296",
+    "type": "prediction_verification",
+    "total_verified": 11,
+    "correct": 2,
+    "partial": 1,
+    "incorrect": 8,
+    "details": [
+      {
+        "name": "北方稀土",
+        "code": "",
+        "direction": "up",
+        "change": -6.17,
+        "correct": false,
+        "reasons": [
+          "行业处于周期低位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "贵研铂业",
+        "code": "",
+        "direction": "up",
+        "change": -7.03,
+        "correct": false,
+        "reasons": [
+          "行业处于周期低位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "宝地矿业",
+        "code": "",
+        "direction": "up",
+        "change": -6.02,
+        "correct": false,
+        "reasons": [
+          "行业处于周期低位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "中色股份",
+        "code": "",
+        "direction": "neutral",
+        "change": -7.0,
+        "correct": false,
+        "reasons": [],
+        "updates_count": 0
+      },
+      {
+        "name": "盐湖股份",
+        "code": "",
+        "direction": "up",
+        "change": 4.56,
+        "correct": false,
+        "reasons": [
+          "行业处于周期低位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "西部矿业",
+        "code": "",
+        "direction": "neutral",
+        "change": -9.11,
+        "correct": false,
+        "reasons": [
+          "行业处于周期高位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "江西铜业",
+        "code": "",
+        "direction": "neutral",
+        "change": -8.67,
+        "correct": false,
+        "reasons": [
+          "行业处于周期高位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "中国铝业",
+        "code": "",
+        "direction": "neutral",
+        "change": -3.99,
+        "correct": true,
+        "reasons": [],
+        "updates_count": 0
+      },
+      {
+        "name": "云铝股份",
+        "code": "",
+        "direction": "neutral",
+        "change": -1.56,
+        "correct": true,
+        "reasons": [],
+        "updates_count": 0
+      },
+      {
+        "name": "山东黄金",
+        "code": "",
+        "direction": "neutral",
+        "change": -9.56,
+        "correct": false,
+        "reasons": [
+          "行业处于周期高位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "紫金矿业",
+        "code": "",
+        "direction": "neutral",
+        "change": -6.14,
+        "correct": false,
+        "reasons": [
+          "行业处于周期高位"
+        ],
+        "updates_count": 0
+      }
+    ]
+  },
+  {
+    "date": "2026-03-11T11:32:22.676034",
+    "type": "prediction_verification",
+    "total_verified": 4,
+    "correct": 2,
+    "partial": 0,
+    "incorrect": 2,
+    "details": [
+      {
+        "name": "云铝股份",
+        "code": "",
+        "direction": "neutral",
+        "change": 0.52,
+        "correct": true,
+        "reasons": [],
+        "updates_count": 0
+      },
+      {
+        "name": "五矿稀土",
+        "code": "",
+        "direction": "up",
+        "change": -4.87,
+        "correct": false,
+        "reasons": [
+          "行业处于周期低位"
+        ],
+        "updates_count": 0
+      },
+      {
+        "name": "锡业股份",
+        "code": "",
+        "direction": "neutral",
+        "change": -8.06,
+        "correct": false,
+        "reasons": [],
+        "updates_count": 0
+      },
+      {
+        "name": "驰宏锌锗",
+        "code": "",
+        "direction": "neutral",
+        "change": -3.01,
+        "correct": true,
+        "reasons": [],
+        "updates_count": 0
+      }
+    ]
+  },
+  {
+    "date": "2026-03-11T11:32:35.802982",
+    "type": "prediction_verification",
+    "total_verified": 0,
+    "correct": 0,
+    "partial": 0,
+    "incorrect": 0,
+    "details": []
+  },
+  {
+    "date": "2026-03-11T15:30:10.644599",
+    "type": "prediction_verification",
+    "total_verified": 0,
+    "correct": 0,
+    "partial": 0,
+    "incorrect": 0,
+    "details": []
+  },
+  {
+    "date": "2026-03-12T15:30:07.522866",
+    "type": "prediction_verification",
+    "total_verified": 0,
+    "correct": 0,
+    "partial": 0,
+    "incorrect": 0,
+    "details": []
+  },
+  {
+    "date": "2026-03-14T10:01:25.424672",
+    "type": "weekly_backtest",
+    "period": "2025-01-01 to 2026-03-14",
+    "trading_days": 0,
+    "stock": "unknown",
+    "initial_capital": 200000.0,
+    "final_capital": 201644.42100000006,
+    "total_return": 0.8222105000000303,
+    "annual_return": 0.7215800914090797,
+    "sharpe_ratio": -0.5633590488917194,
+    "max_drawdown": 3.2826364122481904,
+    "win_rate": 85.71428571428571,
+    "profit_loss_ratio": 1.2897502284495888,
+    "total_trades": 35,
+    "winning_trades": 30,
+    "losing_trades": 5,
+    "avg_profit": 16937.0,
+    "avg_loss": 13132.0,
+    "conclusion": "策略需要优化",
+    "strengths": [
+      "胜率高 (8571.4%)"
+    ],
+    "weaknesses": [
+      "夏普比率低 (-0.56)",
+      "盈亏比不足 (1.29)"
+    ],
+    "lessons": [
+      "需要提高盈亏比：当前1.29，目标>1.5",
+      "建议：延长止盈区间，让利润奔跑",
+      "夏普比率低说明风险调整后收益差",
+      "建议：降低仓位波动或提高收益"
+    ]
+  }
+]

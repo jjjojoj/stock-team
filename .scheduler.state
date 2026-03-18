@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-03-16T00:05:22.578491",
+  "last_runs": {
+    "noon_update": "2026-03-13",
+    "news_monitor_14:00": "2026-03-13",
+    "afternoon_review": "2026-03-13",
+    "rule_promotion": "2026-03-13",
+    "book_learning": "2026-03-13",
+    "morning_prediction": "2026-03-13",
+    "news_monitor_09:30": "2026-03-13",
+    "news_monitor_11:00": "2026-03-13"
+  },
+  "total_runs": 13
+}

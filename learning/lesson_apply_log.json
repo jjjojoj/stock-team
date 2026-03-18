@@ -1,0 +1,26 @@
+[
+  {
+    "date": "2026-03-15T15:17:46.480663",
+    "lesson_title": "周回测：盈亏比不足",
+    "lesson_date": "2026-03-07",
+    "rule_id": "lesson_20260307_919",
+    "rule_type": "magnitude_rules",
+    "action": "applied"
+  },
+  {
+    "date": "2026-03-15T15:17:46.480696",
+    "lesson_title": "收盘复盘 - 重大教训 ⚠️ CRITICAL",
+    "lesson_date": "2026-03-09",
+    "rule_id": "lesson_20260309_812",
+    "rule_type": "direction_rules",
+    "action": "applied"
+  },
+  {
+    "date": "2026-03-15T15:17:46.480807",
+    "lesson_title": "有效规则",
+    "lesson_date": "2026-03-15",
+    "rule_id": "lesson_20260315_188",
+    "rule_type": "direction_rules",
+    "action": "applied"
+  }
+]

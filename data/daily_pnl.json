@@ -1,0 +1,20 @@
+[
+  {
+    "date": "2026-03-03",
+    "time": "15:00",
+    "total_cost": 155128.0,
+    "market_value": 152000.0,
+    "pnl": -3128.0,
+    "pnl_pct": -2.02,
+    "positions_count": 5
+  },
+  {
+    "date": "2026-03-04",
+    "time": "12:56",
+    "total_cost": 155128.0,
+    "market_value": 150240.0,
+    "pnl": -4888.0,
+    "pnl_pct": -3.15,
+    "positions_count": 7
+  }
+]

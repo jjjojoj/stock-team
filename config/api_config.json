@@ -1,0 +1,119 @@
+{
+  "news": {
+    "primary": {
+      "name": "NewsAPI",
+      "type": "api",
+      "timeout": 10
+    },
+    "backup1": {
+      "name": "Tavily",
+      "type": "api",
+      "timeout": 15
+    },
+    "backup2": {
+      "name": "SerpAPI",
+      "type": "api",
+      "api_key": "a5e4b1b2aa7b7cd90578309c180f1d6b356cd14590ebf20fd34c6770f12554cd",
+      "timeout": 10
+    },
+    "backup3": {
+      "name": "新浪财经 RSS",
+      "type": "rss",
+      "timeout": 5
+    }
+  },
+  "market": {
+    "primary": {
+      "name": "东方财富",
+      "type": "api",
+      "timeout": 5
+    },
+    "backup1": {
+      "name": "同花顺",
+      "type": "api",
+      "timeout": 5
+    },
+    "backup2": {
+      "name": "腾讯财经",
+      "type": "api",
+      "timeout": 5
+    },
+    "backup3": {
+      "name": "akshare",
+      "type": "library",
+      "timeout": 10
+    }
+  },
+  "search": {
+    "primary": {
+      "name": "Tavily",
+      "type": "api",
+      "timeout": 15
+    },
+    "backup1": {
+      "name": "SerpAPI",
+      "type": "api",
+      "api_key": "a5e4b1b2aa7b7cd90578309c180f1d6b356cd14590ebf20fd34c6770f12554cd",
+      "timeout": 10
+    },
+    "backup2": {
+      "name": "Exa",
+      "type": "api",
+      "timeout": 10
+    },
+    "backup3": {
+      "name": "百度搜索 API",
+      "type": "api",
+      "timeout": 10
+    }
+  },
+  "llm": {
+    "primary": {
+      "name": "智谱 GLM-4.7",
+      "type": "mcp",
+      "provider": "zhipu-cn/glm-4.7",
+      "timeout": 30
+    },
+    "backup1": {
+      "name": "Qwen3.5-Plus",
+      "type": "mcp",
+      "provider": "bailian/qwen3.5-plus",
+      "timeout": 30
+    },
+    "backup2": {
+      "name": "Kimi K2.5",
+      "type": "mcp",
+      "provider": "bailian/kimi-k2.5",
+      "timeout": 30
+    }
+  },
+  "mcp_services": {
+    "serpapi_search": {
+      "enabled": true,
+      "api_key": "a5e4b1b2aa7b7cd90578309c180f1d6b356cd14590ebf20fd34c6770f12554cd"
+    },
+    "zhipu_web_search": {
+      "enabled": true,
+      "type": "联网搜索",
+      "api_key": "be9ac17cfdd14c6fb6142f026e7fa0aa.8SmZ7uHn02ZjnLmJ"
+    },
+    "zhipu_web_reader": {
+      "enabled": true,
+      "type": "网页读取",
+      "api_key": "be9ac17cfdd14c6fb6142f026e7fa0aa.8SmZ7uHn02ZjnLmJ"
+    },
+    "zhipu_vision": {
+      "enabled": true,
+      "type": "视觉理解"
+    },
+    "zhipu_github": {
+      "enabled": true,
+      "type": "开源仓库",
+      "api_key": "be9ac17cfdd14c6fb6142f026e7fa0aa.8SmZ7uHn02ZjnLmJ"
+    }
+  },
+  "zhipu": {
+    "api_key": "be9ac17cfdd14c6fb6142f026e7fa0aa.8SmZ7uHn02ZjnLmJ",
+    "enabled": true
+  }
+}

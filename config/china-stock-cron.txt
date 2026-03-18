@@ -1,0 +1,70 @@
+# 股票团队 CRON 配置
+# 安装方法: crontab china-stock-cron.txt
+# 查看当前: crontab -l
+# 编辑: crontab -e
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+PROJECT_ROOT=/Users/joe/.openclaw/workspace/china-stock-team
+VENV_PYTHON=/Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3
+LOG_DIR=/Users/joe/.openclaw/workspace/china-stock-team/logs
+
+# ============================================
+# 每日任务（13个）
+# ============================================
+
+# 【早上 - 决策流程】
+# 09:00 - 早盘预测生成（量化师）
+0 9 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/ai_predictor.py >> $LOG_DIR/cron_morning.log 2>&1
+
+# 09:30-15:00 - 盘中监控（交易员，每30分钟）
+0,30 9-11,13-15 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/intraday_monitor.py >> $LOG_DIR/cron_intraday.log 2>&1
+
+# 11:30 - 早盘复盘（验证早盘预测，立即调整下午策略）⭐新增
+30 11 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/midday_review.py >> $LOG_DIR/cron_midday.log 2>&1
+
+# 13:00 - 午盘预测更新（量化师）
+0 13 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/ai_predictor.py --update >> $LOG_DIR/cron_noon.log 2>&1
+
+# 15:00 - 午盘复盘（验证午盘预测，总结经验）⭐新增
+0 15 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/midday_review.py --afternoon >> $LOG_DIR/cron_afternoon.log 2>&1
+
+# 【盘后 - 复盘流程】
+# 15:30 - 盘后复盘闭环（量化师）
+30 15 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/daily_review_closed_loop.py >> $LOG_DIR/cron_review.log 2>&1
+
+# 15:45 - 经验学习（研究员-工具）
+45 15 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/experience_learner.py >> $LOG_DIR/cron_learning.log 2>&1
+
+# 16:00 - 规则晋升检查（CIO）
+0 16 * * 1-5 cd $PROJECT_ROOT && $VENV_PYTHON scripts/rule_promotion.py >> $LOG_DIR/cron_promotion.log 2>&1
+
+# 【晚上 - 学习流程】
+# 20:00 - 深度学习-读书（研究员）
+0 20 * * * cd $PROJECT_ROOT && $VENV_PYTHON scripts/daily_book_learning.py >> $LOG_DIR/cron_book.log 2>&1
+
+# 20:30 - 搜集官Agent（研究员-工具）
+30 20 * * * cd $PROJECT_ROOT && $VENV_PYTHON scripts/collector_agent.py >> $LOG_DIR/cron_collector.log 2>&1
+
+# 21:00 - 学习官Agent（研究员-工具）
+0 21 * * * cd $PROJECT_ROOT && $VENV_PYTHON scripts/learner_agent.py >> $LOG_DIR/cron_learner.log 2>&1
+
+# ============================================
+# 每周任务（2个）
+# ============================================
+
+# 周日 20:00 - 周总结
+0 20 * * 0 cd $PROJECT_ROOT && $VENV_PYTHON scripts/weekly_summary.py >> $LOG_DIR/cron_weekly.log 2>&1
+
+# 周日 21:00 - 团队优化评估（CIO-工具）
+0 21 * * 0 cd $PROJECT_ROOT && $VENV_PYTHON scripts/team_optimizer.py >> $LOG_DIR/cron_team_opt.log 2>&1
+
+# ============================================
+# 系统维护（2个）
+# ============================================
+
+# 每天 02:00 - 清理30天前的日志
+0 2 * * * find $LOG_DIR -name "*.log" -mtime +30 -delete
+
+# 每天 08:00 - 心跳检查
+0 8 * * * cd $PROJECT_ROOT && $VENV_PYTHON -c "import json; print(json.dumps({'status': 'alive', 'time': '$(date -Iseconds)'}, indent=2))" >> $LOG_DIR/heartbeat.log 2>&1

@@ -1,0 +1,22 @@
+{
+  "code": "sh.601899",
+  "name": "紫金矿业",
+  "industry": "黄金",
+  "date": "2026-03-17",
+  "price": 35.39,
+  "change_pct": 1.8417266187050376,
+  "pe": 15,
+  "pb": 1.5,
+  "market_cap": 150,
+  "dividend_yield": 2.0,
+  "roe": 10,
+  "gross_margin": 20,
+  "net_margin": 10,
+  "score": 50,
+  "reasons": [
+    "黄金行业"
+  ],
+  "target_price": 42.47,
+  "stop_loss": 30.08,
+  "recommendation": "推荐"
+}

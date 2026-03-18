@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "switch_threshold": 0.03,
+  "switch_days": 5
+}

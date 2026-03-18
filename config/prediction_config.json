@@ -1,0 +1,14 @@
+{
+  "confidence_threshold": 0.9,
+  "confidence_threshold_updated": "2026-03-11T11:35:00",
+  "confidence_threshold_reason": "午盘反思 (3/11): 准确率 26.7%，今日验证 4 个仅 2 个正确。问题：1) 周期股误判为低位实际继续下跌 2) neutral 预测缺乏波动容忍度。提高阈值至 0.90 减少过度自信",
+  "neutral_tolerance_pct": 2.0,
+  "neutral_tolerance_updated": "2026-03-11T11:35:00",
+  "neutral_tolerance_reason": "锡业股份 neutral 预测跌 8% 仍算错，需扩大中性容忍度至±2%",
+  "require_market_sentiment_check": true,
+  "allow_down_predictions": true,
+  "avoid_cyclical_bottom_fishing": true,
+  "avoid_cyclical_reason": "五矿稀土/锡业股份连续误判：'行业周期低位'理由失效，周期股可能持续下跌",
+  "updated_at": "2026-03-11T11:35:00",
+  "updated_reason": "午盘反思：26.7% 准确率仍低，需更严格筛选 + 避免周期股抄底陷阱"
+}

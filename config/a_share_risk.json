@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "monitor_limit_down": true,
+  "monitor_suspension": true,
+  "monitor_policy": true
+}

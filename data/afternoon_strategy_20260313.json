@@ -1,0 +1,143 @@
+{
+  "date": "2026-03-13T13:00:00",
+  "type": "afternoon_strategy",
+  "morning_review": {
+    "verified": 13,
+    "correct": 9,
+    "wrong": 4,
+    "accuracy": 0.692
+  },
+  "failed_predictions": [
+    {
+      "stock": "中国铝业",
+      "code": "sh.601600",
+      "direction": "neutral",
+      "change": -3.39,
+      "reason": "铝板块整体走弱"
+    },
+    {
+      "stock": "五矿稀土",
+      "code": "sz.000831",
+      "direction": "up",
+      "change": -1.26,
+      "reason": "上涨预测条件不足"
+    },
+    {
+      "stock": "锡业股份",
+      "code": "sz.000960",
+      "direction": "neutral",
+      "change": -2.22,
+      "reason": "周期高位风险"
+    },
+    {
+      "stock": "云铝股份",
+      "code": "sz.000807",
+      "direction": "neutral",
+      "change": -2.62,
+      "reason": "铝板块整体走弱"
+    }
+  ],
+  "key_news": [
+    {
+      "theme": "稀土板块",
+      "impact": "positive",
+      "content": "美国稀土库存仅剩2个月，稀土板块迎重磅机遇",
+      "action": "重点关注稀土相关股票"
+    },
+    {
+      "theme": "盐湖股份",
+      "impact": "positive",
+      "content": "机构看好，目标价45-60元",
+      "action": "继续持有观察"
+    }
+  ],
+  "strategy_adjustments": {
+    "rules_updated": [
+      {
+        "rule": "上涨预测条件",
+        "old": "行业周期低位",
+        "new": "周期低位+大盘配合+技术确认",
+        "reason": "五矿稀土失败教训"
+      },
+      {
+        "rule": "铝板块配置",
+        "old": "正常配置",
+        "new": "短期回避",
+        "reason": "中国铝业、云铝股份均下跌>2%"
+      }
+    ],
+    "sector_views": {
+      "稀土": {
+        "view": "看多",
+        "confidence": 0.85,
+        "reason": "美国库存告急+地缘政治催化"
+      },
+      "铝": {
+        "view": "观望",
+        "confidence": 0.5,
+        "reason": "早盘大幅下跌，需等企稳信号"
+      },
+      "黄金": {
+        "view": "中性",
+        "confidence": 0.6,
+        "reason": "避险需求支撑，但价格已在高位"
+      },
+      "锂电": {
+        "view": "看多",
+        "confidence": 0.75,
+        "reason": "盐湖股份表现良好+机构看好"
+      }
+    }
+  },
+  "afternoon_watchlist": [
+    {
+      "stock": "盐湖股份",
+      "code": "sz.000792",
+      "direction": "up",
+      "target": 41.0,
+      "stop_loss": 39.0,
+      "confidence": 0.75,
+      "reason": "早盘+1.75%，机构目标价45-60元"
+    },
+    {
+      "stock": "五矿稀土",
+      "code": "sz.000831",
+      "direction": "neutral",
+      "target": 54.5,
+      "stop_loss": 52.5,
+      "confidence": 0.6,
+      "reason": "稀土利好但早盘下跌，需观察"
+    },
+    {
+      "stock": "北方稀土",
+      "code": "sh.600111",
+      "direction": "up",
+      "target": null,
+      "stop_loss": null,
+      "confidence": 0.8,
+      "reason": "稀土龙头+美国库存告急"
+    }
+  ],
+  "holdings_strategy": [
+    {
+      "stock": "贵研铂业",
+      "code": "sh.600459",
+      "position": 0.5,
+      "cost": 26.27,
+      "action": "持有",
+      "target": 31.52,
+      "stop_loss": 24.17,
+      "reason": "铂族金属需求稳定"
+    },
+    {
+      "stock": "宝地矿业",
+      "code": "sh.601121",
+      "position": 0.5,
+      "cost": 8.91,
+      "action": "持有",
+      "target": 10.69,
+      "stop_loss": 8.20,
+      "reason": "铁矿石价格稳定"
+    }
+  ]
+}

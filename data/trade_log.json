@@ -1,0 +1,41 @@
+[
+  {
+    "date": "2026-03-03 18:00",
+    "action": "rebalance",
+    "sold": [],
+    "held": [
+      {
+        "action": "hold",
+        "code": "sh.600459",
+        "name": "贵研铂业",
+        "reason": "亏损-3.9%但今日上涨25.4%，等反弹"
+      },
+      {
+        "action": "hold",
+        "code": "sh.600111",
+        "name": "北方稀土",
+        "reason": "亏损-3.3%但今日上涨61.4%，等反弹"
+      },
+      {
+        "action": "hold",
+        "code": "sz.000758",
+        "name": "中色股份",
+        "reason": "亏损-3.2%但今日上涨8.7%，等反弹"
+      },
+      {
+        "action": "hold",
+        "code": "sh.601121",
+        "name": "宝地矿业",
+        "reason": "正常持有"
+      },
+      {
+        "action": "hold",
+        "code": "sz.000792",
+        "name": "盐湖股份",
+        "reason": "正常持有"
+      }
+    ],
+    "cash_after": 49165.0,
+    "positions_after": 5
+  }
+]

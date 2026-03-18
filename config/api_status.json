@@ -1,0 +1,64 @@
+{
+  "news": {
+    "api": {
+      "healthy": true,
+      "consecutive_failures": 0,
+      "last_check": "2026-03-18T15:01:44.489060",
+      "last_error": null,
+      "response_time_ms": 2630.5088996887207,
+      "total_checks": 123,
+      "total_failures": 3
+    },
+    "rss": {
+      "healthy": false,
+      "consecutive_failures": 41,
+      "last_check": "2026-03-18T15:01:44.499777",
+      "last_error": "HTTP 400",
+      "response_time_ms": 0,
+      "total_checks": 41,
+      "total_failures": 41
+    }
+  },
+  "market": {
+    "api": {
+      "healthy": true,
+      "consecutive_failures": 0,
+      "last_check": "2026-03-18T15:01:45.374581",
+      "last_error": null,
+      "response_time_ms": 352.6918888092041,
+      "total_checks": 123,
+      "total_failures": 15
+    },
+    "library": {
+      "healthy": true,
+      "consecutive_failures": 0,
+      "last_check": "2026-03-18T15:01:46.265180",
+      "last_error": null,
+      "response_time_ms": 890.516996383667,
+      "total_checks": 41,
+      "total_failures": 20
+    }
+  },
+  "search": {
+    "api": {
+      "healthy": true,
+      "consecutive_failures": 0,
+      "last_check": "2026-03-18T15:01:51.365248",
+      "last_error": null,
+      "response_time_ms": 331.4838409423828,
+      "total_checks": 164,
+      "total_failures": 4
+    }
+  },
+  "llm": {
+    "mcp": {
+      "healthy": true,
+      "consecutive_failures": 0,
+      "last_check": "2026-03-18T15:01:51.365389",
+      "last_error": null,
+      "response_time_ms": 0,
+      "total_checks": 123,
+      "total_failures": 0
+    }
+  }
+}

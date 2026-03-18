@@ -1,0 +1,153 @@
+{
+  "date": "2026-03-09T11:31:15.257055",
+  "results": {
+    "verified": 17,
+    "correct": 3,
+    "wrong": 14,
+    "details": [
+      {
+        "stock": "北方稀土 (sh.600111)",
+        "direction": "up",
+        "created_price": 57.52,
+        "current_price": 52.8,
+        "change": -8.205841446453418,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "贵研铂业 (sh.600459)",
+        "direction": "up",
+        "created_price": 24.74,
+        "current_price": 22.49,
+        "change": -9.094583670169767,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "宝地矿业 (sh.601121)",
+        "direction": "up",
+        "created_price": 8.81,
+        "current_price": 8.18,
+        "change": -7.150964812712834,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "中色股份 (sz.000758)",
+        "direction": "neutral",
+        "created_price": 8.43,
+        "current_price": 7.76,
+        "change": -7.947805456702254,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "盐湖股份 (sz.000792)",
+        "direction": "up",
+        "created_price": 36.85,
+        "current_price": 37.99,
+        "change": 3.093622795115334,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "西部矿业 (sh.601168)",
+        "direction": "neutral",
+        "created_price": 34.8,
+        "current_price": 30.71,
+        "change": -11.752873563218381,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "江西铜业 (sh.600362)",
+        "direction": "neutral",
+        "created_price": 57.42,
+        "current_price": 51.4,
+        "change": -10.484151863462214,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "中国铝业 (sh.601600)",
+        "direction": "neutral",
+        "created_price": 14.27,
+        "current_price": 14.23,
+        "change": -0.28030833917308445,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "云铝股份 (sz.000807)",
+        "direction": "neutral",
+        "created_price": 33.28,
+        "current_price": 34.22,
+        "change": 2.8245192307692237,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "山东黄金 (sh.600547)",
+        "direction": "neutral",
+        "created_price": 52.43,
+        "current_price": 46.63,
+        "change": -11.062368872782754,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "紫金矿业 (sh.601899)",
+        "direction": "neutral",
+        "created_price": 39.56,
+        "current_price": 35.93,
+        "change": -9.175935288169875,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "云铝股份 (sh.000807)",
+        "direction": "neutral",
+        "created_price": 17403.07,
+        "current_price": 17452.51,
+        "change": 0.28408780749602625,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "五矿稀土 (sz.000831)",
+        "direction": "up",
+        "created_price": 57.89,
+        "current_price": 55.72,
+        "change": -3.748488512696496,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "锡业股份 (sz.000960)",
+        "direction": "neutral",
+        "created_price": 42.83,
+        "current_price": 38.17,
+        "change": -10.880224141956566,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "驰宏锌锗 (sh.600497)",
+        "direction": "neutral",
+        "created_price": 10.3,
+        "current_price": 9.58,
+        "change": -6.990291262135928,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "中国石化 (sh.600028)",
+        "direction": "neutral",
+        "created_price": 6.97,
+        "current_price": 7.13,
+        "change": 2.295552367288381,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "广汇能源 (sh.600256)",
+        "direction": "neutral",
+        "created_price": 6.68,
+        "current_price": 7.37,
+        "change": 10.329341317365277,
+        "status": "❌ 错误"
+      }
+    ]
+  },
+  "lessons": [
+    {
+      "type": "success",
+      "content": "早盘3只预测正确",
+      "action": "保持当前分析逻辑"
+    }
+  ]
+}

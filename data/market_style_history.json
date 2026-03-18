@@ -1,0 +1,140 @@
+{
+  "daily_ratios": [
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": 1.349341299495794,
+      "large_small": 0.5687947307101107,
+      "cyclical_defensive": 5.5171331319639
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": 1.349341299495794,
+      "large_small": 0.5687947307101107,
+      "cyclical_defensive": 5.5171331319639
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": null,
+      "large_small": null,
+      "cyclical_defensive": null
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": 1.3444244882791936,
+      "large_small": 0.5649798881299961,
+      "cyclical_defensive": 5.629071746470926
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": 1.3444244882791936,
+      "large_small": 0.5649798881299961,
+      "cyclical_defensive": 5.629071746470926
+    },
+    {
+      "date": "2026-03-06",
+      "value_growth": 1.3444244882791936,
+      "large_small": 0.5649798881299961,
+      "cyclical_defensive": 5.629071746470926
+    },
+    {
+      "date": "2026-03-09",
+      "value_growth": 1.3444244882791936,
+      "large_small": 0.5649798881299961,
+      "cyclical_defensive": 5.629071746470926
+    },
+    {
+      "date": "2026-03-10",
+      "value_growth": 1.3443049573331507,
+      "large_small": 0.5625954579972622,
+      "cyclical_defensive": 5.590016763921841
+    },
+    {
+      "date": "2026-03-11",
+      "value_growth": 1.3021136431004132,
+      "large_small": 0.5598454627435153,
+      "cyclical_defensive": 5.70153655129598
+    },
+    {
+      "date": "2026-03-12",
+      "value_growth": 1.2999167047317084,
+      "large_small": 0.5625017187718583,
+      "cyclical_defensive": 5.6328862168862885
+    },
+    {
+      "date": "2026-03-12",
+      "value_growth": 1.2999167047317084,
+      "large_small": 0.5625017187718583,
+      "cyclical_defensive": 5.6328862168862885
+    },
+    {
+      "date": "2026-03-12",
+      "value_growth": 1.2999167047317084,
+      "large_small": 0.5625017187718583,
+      "cyclical_defensive": 5.6328862168862885
+    },
+    {
+      "date": "2026-03-13",
+      "value_growth": 1.320405001326292,
+      "large_small": 0.5623333265354353,
+      "cyclical_defensive": 5.590805685478734
+    },
+    {
+      "date": "2026-03-16",
+      "value_growth": 1.321033266068127,
+      "large_small": 0.5684167469130016,
+      "cyclical_defensive": 5.576046634870164
+    },
+    {
+      "date": "2026-03-17",
+      "value_growth": 1.2967870313551901,
+      "large_small": 0.5689149774397633,
+      "cyclical_defensive": 5.635926068540623
+    },
+    {
+      "date": "2026-03-18",
+      "value_growth": 1.333984744181509,
+      "large_small": 0.578244508008868,
+      "cyclical_defensive": 5.646551645317314
+    }
+  ],
+  "last_switch": null,
+  "current_style": {
+    "date": "2026-03-18",
+    "dimensions": {
+      "value_growth": "value",
+      "large_small": "small",
+      "cyclical_defensive": "cyclical"
+    },
+    "dominant_style": "value"
+  }
+}

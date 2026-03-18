@@ -1,0 +1,122 @@
+{
+  "book_001": {
+    "title": "股票作手回忆录",
+    "author": "埃德温·勒菲弗",
+    "learned_date": "2026-03-09",
+    "key_points": [
+      {
+        "id": "book_001.point_001",
+        "content": "价格总是沿最小阻力线运动",
+        "category": "趋势",
+        "testable_rule": "突破 20 日高点后，价格继续上涨概率>55%",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-09T20:00:15.369194"
+      },
+      {
+        "id": "book_001.point_002",
+        "content": "关键点突破后加仓",
+        "category": "仓位管理",
+        "testable_rule": "突破关键点后加仓，盈亏比>1.5",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-09T20:00:15.369197"
+      },
+      {
+        "id": "book_001.point_003",
+        "content": "不要与趋势对抗",
+        "category": "趋势",
+        "testable_rule": "顺势交易成功率>逆势交易成功率",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-09T20:00:15.369199"
+      },
+      {
+        "id": "book_001.point_004",
+        "content": "亏损时不要加仓",
+        "category": "风控",
+        "testable_rule": "亏损加仓策略最终亏损>不亏损加仓",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-09T20:00:15.369200"
+      },
+      {
+        "id": "book_001.point_005",
+        "content": "耐心等待关键点",
+        "category": "入场",
+        "testable_rule": "等待关键点突破比提前入场收益更高",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-09T20:00:15.369202"
+      }
+    ]
+  },
+  "book_002": {
+    "title": "聪明的投资者",
+    "author": "本杰明·格雷厄姆",
+    "learned_date": "2026-03-10",
+    "key_points": [
+      {
+        "id": "book_002.point_001",
+        "content": "安全边际原则",
+        "category": "估值",
+        "testable_rule": "PB<1 的股票长期收益>市场平均",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-10T20:01:16.495018"
+      },
+      {
+        "id": "book_002.point_002",
+        "content": "市场先生理论",
+        "category": "心态",
+        "testable_rule": "逆向投资策略在波动市场中收益更高",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-10T20:01:16.495023"
+      },
+      {
+        "id": "book_002.point_003",
+        "content": "分散投资",
+        "category": "仓位管理",
+        "testable_rule": "持有 10-20 只股票风险收益比最优",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-10T20:01:16.495024"
+      }
+    ]
+  },
+  "book_003": {
+    "title": "笑傲股市",
+    "author": "威廉·欧奈尔",
+    "learned_date": "2026-03-11",
+    "key_points": [
+      {
+        "id": "book_003.point_001",
+        "content": "CAN SLIM 选股法",
+        "category": "选股",
+        "testable_rule": "符合 CAN SLIM 标准的股票年化收益>20%",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-11T20:00:20.640376"
+      },
+      {
+        "id": "book_003.point_002",
+        "content": "杯柄形态突破",
+        "category": "技术形态",
+        "testable_rule": "杯柄形态突破后 5 日上涨概率>60%",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-11T20:00:20.640381"
+      },
+      {
+        "id": "book_003.point_003",
+        "content": "止损 8% 原则",
+        "category": "风控",
+        "testable_rule": "8% 止损策略最大回撤<15%",
+        "confidence": 0.5,
+        "verified": false,
+        "created_at": "2026-03-11T20:00:20.640384"
+      }
+    ]
+  }
+}

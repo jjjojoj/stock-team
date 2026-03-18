@@ -1,0 +1,82 @@
+[
+  {
+    "id": "war_middle_east_20260304_110634",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "high",
+    "source": "测试模拟",
+    "details": "美国轰炸胡塞武装，中东冲突升级",
+    "detected_at": "2026-03-04T11:06:34.446155",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_110739",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "low",
+    "source": "新闻监控",
+    "details": "检测到关键词: 中东",
+    "detected_at": "2026-03-04T11:07:39.515924",
+    "processed": true
+  },
+  {
+    "id": "trade_war_20260304_110739",
+    "type": "trade_war",
+    "name": "贸易战",
+    "severity": "low",
+    "source": "新闻监控",
+    "details": "检测到关键词: 关税",
+    "detected_at": "2026-03-04T11:07:39.516797",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_112022",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "medium",
+    "source": "测试",
+    "details": "测试买入功能",
+    "detected_at": "2026-03-04T11:20:22.545938",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_112211",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "medium",
+    "source": "测试",
+    "details": "测试买入功能2",
+    "detected_at": "2026-03-04T11:22:11.391071",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_112313",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "medium",
+    "source": "测试",
+    "details": "完整测试",
+    "detected_at": "2026-03-04T11:23:13.982370",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_112334",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "low",
+    "source": "真实测试",
+    "details": "测试真实买入",
+    "detected_at": "2026-03-04T11:23:34.920243",
+    "processed": true
+  },
+  {
+    "id": "war_middle_east_20260304_112421",
+    "type": "war_middle_east",
+    "name": "中东冲突",
+    "severity": "low",
+    "source": "真实测试",
+    "details": "测试真实买入",
+    "detected_at": "2026-03-04T11:24:21.707303",
+    "processed": true
+  }
+]

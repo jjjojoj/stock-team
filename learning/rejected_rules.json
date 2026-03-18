@@ -1,0 +1,106 @@
+{
+  "dir_industry_cycle_high": {
+    "rule_id": "dir_industry_cycle_high",
+    "rule": "规则 dir_industry_cycle_high",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "rejected",
+    "confidence": 0.5,
+    "created_at": "2026-03-17T15:30:00.818075",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 7,
+      "success_rate": 0.2857142857142857,
+      "started_at": "2026-03-17T15:30:00.818080",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-17T15:30:02.404657",
+    "rejected_at": "2026-03-17T16:00:00.924869",
+    "reject_reason": "胜率 28.6% 低于阈值 35%"
+  },
+  "industry_cycle_up": {
+    "rule_id": "industry_cycle_up",
+    "rule": "规则 industry_cycle_up",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "rejected",
+    "confidence": 0.5,
+    "created_at": "2026-03-15T23:53:19.934443",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 13,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T23:53:19.934451",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-15T23:53:19.934663",
+    "rejected_at": "2026-03-16T16:00:00.393835",
+    "reject_reason": "胜率 0.0% 低于阈值 35%"
+  },
+  "break_ma20": {
+    "rule_id": "break_ma20",
+    "rule": "规则 break_ma20",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "rejected",
+    "confidence": 0.5,
+    "created_at": "2026-03-17T15:30:01.360496",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 6,
+      "success_rate": 0.0,
+      "started_at": "2026-03-17T15:30:01.360502",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-17T15:30:02.922503",
+    "rejected_at": "2026-03-17T16:00:00.924891",
+    "reject_reason": "胜率 0.0% 低于阈值 35%"
+  },
+  "industry_cycle_high": {
+    "rule_id": "industry_cycle_high",
+    "rule": "规则 industry_cycle_high",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "rejected",
+    "confidence": 0.5,
+    "created_at": "2026-03-15T23:53:19.934505",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 13,
+      "success_rate": 0.15384615384615385,
+      "started_at": "2026-03-15T23:53:19.934507",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-15T23:53:19.934659",
+    "rejected_at": "2026-03-16T16:00:00.393851",
+    "reject_reason": "胜率 15.4% 低于阈值 35%"
+  }
+}

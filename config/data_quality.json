@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "auto_fix": true,
+  "validation_rules": {
+    "price": {"min": 0.01, "max": 10000, "critical": true},
+    "change_pct": {"min": -15, "max": 15, "critical": true},
+    "volume": {"min": 0, "critical": true},
+    "pe_ratio": {"min": -100, "max": 1000, "critical": false},
+    "pb_ratio": {"min": 0.1, "max": 50, "critical": false}
+  }
+}

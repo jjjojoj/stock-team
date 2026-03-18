@@ -1,0 +1,23 @@
+{
+  "code": "sz.000831",
+  "name": "中国稀土",
+  "industry": "稀土",
+  "date": "2026-03-16",
+  "price": 52.04,
+  "change_pct": -1.8483591097699055,
+  "pe": 15,
+  "pb": 1.5,
+  "market_cap": 150,
+  "dividend_yield": 2.0,
+  "roe": 10,
+  "gross_margin": 20,
+  "net_margin": 10,
+  "score": 55,
+  "reasons": [
+    "稀土行业",
+    "调整中（-1.8%）"
+  ],
+  "target_price": 62.45,
+  "stop_loss": 44.23,
+  "recommendation": "推荐"
+}

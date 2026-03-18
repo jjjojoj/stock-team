@@ -1,0 +1,17 @@
+{
+  "央企": {
+    "success": 11,
+    "total": 11,
+    "success_rate": 1.0
+  },
+  "市值<200 亿": {
+    "success": 11,
+    "total": 11,
+    "success_rate": 1.0
+  },
+  "PB<2.5": {
+    "success": 11,
+    "total": 11,
+    "success_rate": 1.0
+  }
+}

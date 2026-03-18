@@ -1,0 +1,624 @@
+======================================================================
+⏰ 盘中监控 - 2026-03-12 13:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+
+🎯 预测监控:
+------------------------------------------------------------
+
+======================================================================
+📊 监控完成 - 发现 0 个警报
+======================================================================
+======================================================================
+⏰ 盘中监控 - 2026-03-12 13:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+
+🎯 预测监控:
+------------------------------------------------------------
+
+======================================================================
+📊 监控完成 - 发现 0 个警报
+======================================================================
+======================================================================
+⏰ 盘中监控 - 2026-03-12 14:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+
+🎯 预测监控:
+------------------------------------------------------------
+
+======================================================================
+📊 监控完成 - 发现 0 个警报
+======================================================================
+======================================================================
+⏰ 盘中监控 - 2026-03-12 14:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+
+🎯 预测监控:
+------------------------------------------------------------
+
+======================================================================
+📊 监控完成 - 发现 0 个警报
+======================================================================
+======================================================================
+⏰ 盘中监控 - 2026-03-12 15:00:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+
+🎯 预测监控:
+------------------------------------------------------------
+
+======================================================================
+📊 监控完成 - 发现 0 个警报
+======================================================================
+⏰ 当前时间 15:30 非交易时段，跳过监控
+⏰ 当前时间 09:00 非交易时段，跳过监控
+======================================================================
+⏰ 盘中监控 - 2026-03-13 09:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 10:00:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 10:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 11:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 11:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 13:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 13:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 14:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 14:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-13 15:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+⏰ 当前时间 15:30 非交易时段，跳过监控
+⏰ 当前时间 09:00 非交易时段，跳过监控
+======================================================================
+⏰ 盘中监控 - 2026-03-16 09:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 10:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 10:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 11:00:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 11:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 13:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 13:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 14:00:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 14:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-16 15:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+⏰ 当前时间 15:30 非交易时段，跳过监控
+⏰ 当前时间 09:00 非交易时段，跳过监控
+======================================================================
+⏰ 盘中监控 - 2026-03-17 09:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 10:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 10:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 11:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 11:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 13:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 13:30:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 14:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 14:30:01
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+======================================================================
+⏰ 盘中监控 - 2026-03-17 15:00:00
+======================================================================
+
+📊 持仓监控:
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 275, in <module>
+    main()
+    ~~~~^^
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 266, in main
+    result = monitor.run()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 241, in run
+    position_alerts = self.check_positions()
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py", line 99, in check_positions
+    pnl_pct = (current_price / cost - 1) * 100
+               ~~~~~~~~~~~~~~^~~~~~
+ZeroDivisionError: division by zero
+⏰ 当前时间 15:30 非交易时段，跳过监控
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/joe/.openclaw/workspace/china-stock-team/scripts/intraday_monitor.py': [Errno 2] No such file or directory

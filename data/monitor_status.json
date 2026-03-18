@@ -1,0 +1,54 @@
+{
+  "portfolio": {
+    "total_capital": 200000,
+    "used_capital": 199618.0,
+    "available_capital": 382.0,
+    "usage_pct": 99.81,
+    "total_cost": 199618.0,
+    "total_value": 199618.0,
+    "total_profit": 0.0,
+    "total_profit_pct": 0.0,
+    "details": [
+      {
+        "code": "sh.600459",
+        "name": "贵研铂业",
+        "shares": 3800,
+        "cost_price": 26.27,
+        "current_price": 26.27,
+        "profit": 0.0,
+        "profit_pct": 0.0,
+        "weight": 50.01
+      },
+      {
+        "code": "sh.601121",
+        "name": "宝地矿业",
+        "shares": 11200,
+        "cost_price": 8.91,
+        "current_price": 8.91,
+        "profit": 0.0,
+        "profit_pct": 0.0,
+        "weight": 49.99
+      }
+    ],
+    "update_time": "2026-03-03 00:04:16"
+  },
+  "alerts": [],
+  "prices": {
+    "sh.600459": {
+      "name": "贵研铂业",
+      "price": 26.27,
+      "change_pct": 0.42,
+      "high": 26.76,
+      "low": 24.61,
+      "volume": 908221
+    },
+    "sh.601121": {
+      "name": "宝地矿业",
+      "price": 8.91,
+      "change_pct": 0.1,
+      "high": 9.07,
+      "low": 8.66,
+      "volume": 350734
+    }
+  }
+}

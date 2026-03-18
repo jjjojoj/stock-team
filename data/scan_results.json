@@ -1,0 +1,180 @@
+{
+  "date": "2026-03-03 18:15",
+  "candidates": [
+    {
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "owner": "青海国资委",
+      "industry": "锂",
+      "cycle_pct": 10.4,
+      "cycle_score": 89.6,
+      "current": 35.84,
+      "change": 37.7,
+      "priority": "已持仓",
+      "held": true
+    },
+    {
+      "code": "sz.000831",
+      "name": "五矿稀土",
+      "owner": "央企",
+      "industry": "稀土",
+      "cycle_pct": 28.1,
+      "cycle_score": 71.9,
+      "current": 57.46,
+      "change": 62.5,
+      "priority": "🟢 优先买入",
+      "held": false
+    },
+    {
+      "code": "sh.600111",
+      "name": "北方稀土",
+      "owner": "央企",
+      "industry": "稀土",
+      "cycle_pct": 28.1,
+      "cycle_score": 71.9,
+      "current": 55.62,
+      "change": 61.38,
+      "priority": "已持仓",
+      "held": true
+    },
+    {
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "owner": "云南国资委",
+      "industry": "锡",
+      "cycle_pct": 40,
+      "cycle_score": 60,
+      "current": 43.92,
+      "change": 45.69,
+      "priority": "🟡 可以买",
+      "held": false
+    },
+    {
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "owner": "央企",
+      "industry": "锌",
+      "cycle_pct": 50,
+      "cycle_score": 50,
+      "current": 10.2,
+      "change": 11.0,
+      "priority": "🟡 可以买",
+      "held": false
+    },
+    {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "owner": "央企",
+      "industry": "铂族",
+      "cycle_pct": 50,
+      "cycle_score": 50,
+      "current": 23.78,
+      "change": 25.4,
+      "priority": "已持仓",
+      "held": true
+    },
+    {
+      "code": "sh.601121",
+      "name": "宝地矿业",
+      "owner": "新疆国资委",
+      "industry": "铁矿",
+      "cycle_pct": 50,
+      "cycle_score": 50,
+      "current": 8.55,
+      "change": 8.79,
+      "priority": "已持仓",
+      "held": true
+    },
+    {
+      "code": "sz.000758",
+      "name": "中色股份",
+      "owner": "央企",
+      "industry": "有色",
+      "cycle_pct": 50,
+      "cycle_score": 50,
+      "current": 8.16,
+      "change": 8.68,
+      "priority": "已持仓",
+      "held": true
+    },
+    {
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "owner": "央企",
+      "industry": "铝",
+      "cycle_pct": 57.3,
+      "cycle_score": 42.7,
+      "current": 13.97,
+      "change": 14.29,
+      "priority": "🟡 可以买",
+      "held": false
+    },
+    {
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "owner": "央企",
+      "industry": "铝",
+      "cycle_pct": 57.3,
+      "cycle_score": 42.7,
+      "current": 32.46,
+      "change": 33.13,
+      "priority": "🟡 可以买",
+      "held": false
+    },
+    {
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "owner": "山东国资委",
+      "industry": "黄金",
+      "cycle_pct": 70,
+      "cycle_score": 30,
+      "current": 50.27,
+      "change": 50.99,
+      "priority": "🔴 谨慎",
+      "held": false
+    },
+    {
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "owner": "福建国资委",
+      "industry": "黄金",
+      "cycle_pct": 70,
+      "cycle_score": 30,
+      "current": 38.86,
+      "change": 40.35,
+      "priority": "🔴 谨慎",
+      "held": false
+    },
+    {
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "owner": "青海国资委",
+      "industry": "铜",
+      "cycle_pct": 87.8,
+      "cycle_score": 12.200000000000003,
+      "current": 33.24,
+      "change": 35.36,
+      "priority": "🔴 谨慎",
+      "held": false
+    },
+    {
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "owner": "江西国资委",
+      "industry": "铜",
+      "cycle_pct": 87.8,
+      "cycle_score": 12.200000000000003,
+      "current": 55.82,
+      "change": 58.46,
+      "priority": "🔴 谨慎",
+      "held": false
+    }
+  ],
+  "buy_suggestions": [
+    "sz.000831",
+    "sz.000960",
+    "sh.600497",
+    "sh.601600",
+    "sz.000807"
+  ]
+}

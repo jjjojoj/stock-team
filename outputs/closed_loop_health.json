@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-03-15T15:25:55.456497",
+  "health_score": 48.8,
+  "overall_status": "error",
+  "checks": {
+    "data_collection": {
+      "name": "数据收集",
+      "score": 30,
+      "status": "error",
+      "issues": [
+        "记忆文件未更新（最后更新: 2026-03-14 10:01:25）",
+        "知识库未更新（最后更新: 2026-03-12 23:56:54）",
+        "知识收集脚本未运行"
+      ],
+      "warnings": [
+        "日志文件较旧（最后更新: 2026-03-15 10:03:51）"
+      ]
+    },
+    "rule_generation": {
+      "name": "规则生成",
+      "score": 80,
+      "status": "good",
+      "issues": [],
+      "warnings": [
+        "19 条规则样本数不足"
+      ],
+      "total_rules": 19,
+      "categories": {
+        "direction_rules": 8,
+        "magnitude_rules": 4,
+        "timing_rules": 4,
+        "confidence_rules": 3
+      }
+    },
+    "rule_validation": {
+      "name": "规则验证",
+      "score": 70,
+      "status": "warning",
+      "issues": [
+        "规则验证脚本未运行"
+      ],
+      "warnings": [],
+      "status_counts": {
+        "pending": 0,
+        "validating": 0,
+        "verified": 0,
+        "rejected": 0
+      },
+      "validation_rate": 0
+    },
+    "learning_cycle": {
+      "name": "学习循环",
+      "score": 15,
+      "status": "error",
+      "issues": [
+        "复盘脚本未运行",
+        "教训应用脚本未运行",
+        "学习脚本未运行"
+      ],
+      "warnings": []
+    }
+  },
+  "issues": [
+    "记忆文件未更新（最后更新: 2026-03-14 10:01:25）",
+    "知识库未更新（最后更新: 2026-03-12 23:56:54）",
+    "知识收集脚本未运行",
+    "规则验证脚本未运行",
+    "复盘脚本未运行",
+    "教训应用脚本未运行",
+    "学习脚本未运行"
+  ],
+  "warnings": [
+    "日志文件较旧（最后更新: 2026-03-15 10:03:51）",
+    "19 条规则样本数不足"
+  ],
+  "recommendations": [
+    "存在多个问题，建议优先解决数据收集和学习循环问题"
+  ]
+}

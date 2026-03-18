@@ -1,0 +1,416 @@
+{
+  "fetch_time": "2026-03-02 23:51:11",
+  "total_count": 22,
+  "news": [
+    {
+      "title": "伊朗向以色列本土发动新一轮导弹袭击",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmye8002501.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "伊朗核设施区域传出巨大爆炸声",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmye7987387.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "美媒爆料：中情局追踪哈梅内伊几个月，临时改为白天空袭",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8087163.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "“斩首”哈梅内伊，内塔尼亚胡赌上身家性命？",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8092973.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "美防长：美军地面部队尚未在伊朗境内部署",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5204978.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "伊朗宣布：“摧毁”一艘悬挂美国国旗的油轮",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1225039.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "美将领：2月27日15时38分收到特朗普最终对伊军事行动指令",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1246233.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "伊朗最高领袖哈梅内伊的妻子因伤势过重去世",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsc4451764.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "以色列称对伊朗军事行动将至少持续一周",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8081274.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "以军称投下超2500枚炸弹 摧毁约600个伊朗目标",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1219371.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "英媒：斯塔默曾阻止美军使用迪戈加西亚基地对伊朗发动袭击，特朗普抱怨“非常失望”",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5178214.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "哈梅内伊遇害后，两兄弟成伊朗“顶梁柱”？",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5171692.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "伊朗古列斯坦王宫遭袭受损",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1230873.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "伊朗称已准备好长期战争",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5157959.shtml",
+      "source": "新浪国际",
+      "category": "war",
+      "impact": {
+        "positive_sectors": [
+          "军工",
+          "黄金",
+          "石油",
+          "战略金属",
+          "稀土"
+        ],
+        "negative_sectors": [
+          "航空",
+          "旅游",
+          "物流"
+        ],
+        "severity": "高",
+        "duration": "1-3个月"
+      }
+    },
+    {
+      "title": "现货白银快速跳水 跌幅扩大至近6%",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5207904.shtml",
+      "source": "新浪国际",
+      "category": "commodity",
+      "impact": {
+        "positive_sectors": [
+          "黄金",
+          "贵金属"
+        ],
+        "negative_sectors": [],
+        "severity": "中",
+        "duration": "短期"
+      }
+    },
+    {
+      "title": "受中东地缘风险升级影响 多家期货交易所发布风险提示",
+      "link": "https://news.sina.com.cn/o/2026-03-02/doc-inhprfsk5192323.shtml",
+      "source": "新浪国际",
+      "category": "commodity",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "中",
+        "duration": "短期"
+      }
+    },
+    {
+      "title": "天然气飙涨近50%！全球最大LNG生产商卡塔尔能源宣布遇袭停产",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8076844.shtml",
+      "source": "新浪国际",
+      "category": "commodity",
+      "impact": {
+        "positive_sectors": [
+          "石油",
+          "化工"
+        ],
+        "negative_sectors": [],
+        "severity": "中",
+        "duration": "短期"
+      }
+    },
+    {
+      "title": "苹果推出iPhone 17e，3月4日起接受预购",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsc4465732.shtml",
+      "source": "新浪国际",
+      "category": "tech",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "低",
+        "duration": "未知"
+      }
+    },
+    {
+      "title": "马克龙称法国将扩充核弹头库，将不再公布核武库数字",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5209876.shtml",
+      "source": "新浪国际",
+      "category": "other",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "低",
+        "duration": "未知"
+      }
+    },
+    {
+      "title": "迪拜两大机场将有限度恢复航班起降",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmyh5081986.shtml",
+      "source": "新浪国际",
+      "category": "other",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "低",
+        "duration": "未知"
+      }
+    },
+    {
+      "title": "美媒：五角大楼官员担忧对伊行动或致局势失控，美防空储备恐被耗尽",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1241453.shtml",
+      "source": "新浪国际",
+      "category": "other",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "低",
+        "duration": "未知"
+      }
+    },
+    {
+      "title": "30队赛程难度全解析：火箭&湖人迎利好！骑士最轻松！掘狼难哭了",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1217015.shtml",
+      "source": "新浪国际",
+      "category": "other",
+      "impact": {
+        "positive_sectors": [],
+        "negative_sectors": [],
+        "severity": "低",
+        "duration": "未知"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "date": "2026-03-10T11:30:34.776394",
+  "results": {
+    "verified": 2,
+    "correct": 2,
+    "wrong": 0,
+    "details": [
+      {
+        "stock": "云铝股份 (sz.000807)",
+        "direction": "neutral",
+        "created_price": 33.28,
+        "current_price": 32.7,
+        "change": -1.7427884615384563,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "云南铜业 (sz.000878)",
+        "direction": "neutral",
+        "created_price": 23.67,
+        "current_price": 23.24,
+        "change": -1.816645542881298,
+        "status": "✅ 正确"
+      }
+    ]
+  },
+  "lessons": [
+    {
+      "type": "success",
+      "content": "早盘2只预测正确",
+      "action": "保持当前分析逻辑"
+    }
+  ]
+}

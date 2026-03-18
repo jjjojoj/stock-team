@@ -1,0 +1,23 @@
+{
+  "code": "sh.688037",
+  "name": "芯源微",
+  "industry": "芯片",
+  "date": "2026-03-11",
+  "price": 178.85,
+  "change_pct": -3.00976138828634,
+  "pe": 15,
+  "pb": 1.5,
+  "market_cap": 150,
+  "dividend_yield": 2.0,
+  "roe": 10,
+  "gross_margin": 20,
+  "net_margin": 10,
+  "score": 55,
+  "reasons": [
+    "芯片行业",
+    "调整中（-3.0%）"
+  ],
+  "target_price": 214.62,
+  "stop_loss": 152.02,
+  "recommendation": "推荐"
+}

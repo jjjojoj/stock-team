@@ -1,0 +1,212 @@
+{
+  "total_predictions": 74,
+  "correct": 26,
+  "partial": 31,
+  "wrong": 17,
+  "by_rule": {
+    "positive_signals": {
+      "total": 15,
+      "correct": 4,
+      "partial": 3
+    },
+    "industry_cycle_high": {
+      "total": 9,
+      "correct": 2,
+      "partial": 7
+    },
+    "industry_cycle_low": {
+      "total": 5,
+      "correct": 0,
+      "partial": 1
+    },
+    "cycle_bottom_fishing": {
+      "total": 5,
+      "correct": 0,
+      "partial": 1
+    },
+    "industry_cycle_up": {
+      "total": 3,
+      "correct": 0,
+      "partial": 1
+    },
+    "positive_news": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "rsi_oversold": {
+      "total": 3,
+      "correct": 1,
+      "partial": 2
+    },
+    "break_ma20": {
+      "total": 22,
+      "correct": 10,
+      "partial": 11
+    },
+    "dir_fall_below_ma20": {
+      "total": 2,
+      "correct": 0,
+      "partial": 1
+    },
+    "dir_industry_cycle_high": {
+      "total": 22,
+      "correct": 9,
+      "partial": 7
+    },
+    "dir_rsi_oversold": {
+      "total": 2,
+      "correct": 0,
+      "partial": 1
+    }
+  },
+  "by_stock": {
+    "sh.600028": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "sh.600256": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "sz.000878": {
+      "total": 5,
+      "correct": 1,
+      "partial": 4
+    },
+    "sh.600459": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "sh.600111": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "sz.000758": {
+      "total": 1,
+      "correct": 0,
+      "partial": 1
+    },
+    "sh.601121": {
+      "total": 1,
+      "correct": 0,
+      "partial": 1
+    },
+    "sz.000792": {
+      "total": 6,
+      "correct": 0,
+      "partial": 2
+    },
+    "sh.601168": {
+      "total": 6,
+      "correct": 1,
+      "partial": 4
+    },
+    "sh.600362": {
+      "total": 5,
+      "correct": 2,
+      "partial": 3
+    },
+    "sh.601600": {
+      "total": 5,
+      "correct": 1,
+      "partial": 3
+    },
+    "sh.600547": {
+      "total": 5,
+      "correct": 3,
+      "partial": 2
+    },
+    "sh.601899": {
+      "total": 5,
+      "correct": 4,
+      "partial": 1
+    },
+    "sz.000807": {
+      "total": 5,
+      "correct": 1,
+      "partial": 2
+    },
+    "sh.688396": {
+      "total": 5,
+      "correct": 4,
+      "partial": 1
+    },
+    "sh.000807": {
+      "total": 1,
+      "correct": 1,
+      "partial": 0
+    },
+    "sz.000831": {
+      "total": 5,
+      "correct": 0,
+      "partial": 0
+    },
+    "sz.000960": {
+      "total": 5,
+      "correct": 2,
+      "partial": 3
+    },
+    "sh.600497": {
+      "total": 5,
+      "correct": 3,
+      "partial": 2
+    },
+    "sh.688037": {
+      "total": 5,
+      "correct": 3,
+      "partial": 2
+    }
+  },
+  "by_direction": {
+    "up": {
+      "total": 14,
+      "correct": 0
+    },
+    "down": {
+      "total": 1,
+      "correct": 0
+    },
+    "neutral": {
+      "total": 59,
+      "correct": 26
+    }
+  },
+  "by_date": {
+    "2026-03-12": {
+      "total": 21,
+      "correct": 4,
+      "partial": 8
+    },
+    "2026-03-13": {
+      "total": 13,
+      "correct": 5,
+      "partial": 7
+    },
+    "2026-03-15": {
+      "total": 1,
+      "correct": 0,
+      "partial": 0
+    },
+    "2026-03-16": {
+      "total": 13,
+      "correct": 4,
+      "partial": 7
+    },
+    "2026-03-17": {
+      "total": 13,
+      "correct": 2,
+      "partial": 8
+    },
+    "2026-03-18": {
+      "total": 13,
+      "correct": 11,
+      "partial": 1
+    }
+  },
+  "last_updated": "2026-03-18T15:30:03.273946"
+}

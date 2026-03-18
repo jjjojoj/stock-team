@@ -1,0 +1,40 @@
+{
+  "enabled": false,
+  "description": "事件驱动分析模块配置（默认禁用，不影响现有系统）",
+  
+  "news_labeling": {
+    "enabled": true,
+    "auto_label": true,
+    "batch_size": 10,
+    "model": "claude-sonnet-4-6"
+  },
+  
+  "kline_mapping": {
+    "enabled": true,
+    "auto_map": true,
+    "days_after_event": 5,
+    "min_impact_threshold": 10
+  },
+  
+  "range_analysis": {
+    "enabled": true,
+    "default_days_range": 30
+  },
+  
+  "prediction_integration": {
+    "enabled": false,
+    "update_threshold": 15,
+    "confidence_boost": 10
+  },
+  
+  "learning": {
+    "enabled": true,
+    "min_sample_size": 5,
+    "accuracy_threshold": 0.6
+  },
+  
+  "cost_control": {
+    "max_daily_api_calls": 100,
+    "api_cost_limit": 5.0
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "direction_rules": {
+    "dir_rsi_oversold": {
+      "condition": "RSI < 30",
+      "prediction": "未来5日上涨概率>60%",
+      "confidence_boost": 10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "dir_rsi_overbought": {
+      "condition": "RSI > 70",
+      "prediction": "未来5日下跌概率>60%",
+      "confidence_boost": -10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "dir_macd_golden": {
+      "condition": "MACD金叉 + 成交量放大>1.5倍",
+      "prediction": "未来3日上涨概率>65%",
+      "confidence_boost": 15,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "dir_macd_dead": {
+      "condition": "MACD死叉 + 成交量放大>1.5倍",
+      "prediction": "未来3日下跌概率>65%",
+      "confidence_boost": -15,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "dir_break_ma20": {
+      "condition": "突破20日均线 + 放量",
+      "prediction": "未来5日上涨概率>60%",
+      "confidence_boost": 12,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "dir_fall_below_ma20": {
+      "condition": "跌破20日均线 + 放量",
+      "prediction": "未来5日下跌概率>60%",
+      "confidence_boost": -12,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "lesson_20260309_812": {
+      "condition": "行业周期低位 + 企稳信号确认",
+      "prediction": "未来5日上涨概率>60%",
+      "confidence_boost": -10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "lesson",
+      "source_lesson": "收盘复盘 - 重大教训 ⚠️ CRITICAL",
+      "created_at": "2026-03-15T15:17:46.480683",
+      "metadata": {
+        "lesson_date": "2026-03-09",
+        "lesson_type": "failure"
+      }
+    },
+    "lesson_20260315_188": {
+      "condition": "突破关键技术位 + 成交量放大>1.5倍",
+      "prediction": "提高预测准确性",
+      "confidence_boost": 5,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "lesson",
+      "source_lesson": "有效规则",
+      "created_at": "2026-03-15T15:17:46.480787",
+      "metadata": {
+        "lesson_date": "2026-03-15",
+        "lesson_type": "review"
+      }
+    }
+  },
+  "magnitude_rules": {
+    "mag_breakout_strong": {
+      "condition": "突破20日高点 + 成交量放大>2倍",
+      "prediction": "上涨幅度5-10%",
+      "confidence_boost": 20,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "mag_support_hold": {
+      "condition": "回踩支撑位企稳 + 缩量",
+      "prediction": "反弹幅度3-5%",
+      "confidence_boost": 8,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "mag_resistance_fail": {
+      "condition": "冲击压力位失败 + 放量滞涨",
+      "prediction": "回调幅度3-5%",
+      "confidence_boost": -8,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "技术分析",
+      "created_at": "2026-03-13"
+    },
+    "lesson_20260307_919": {
+      "condition": "亏损达到8% 立即止损",
+      "prediction": "严格止损，控制单笔亏损<8%",
+      "confidence_boost": -10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "lesson",
+      "source_lesson": "周回测：盈亏比不足",
+      "created_at": "2026-03-15T15:17:46.480640",
+      "metadata": {
+        "lesson_date": "2026-03-07",
+        "lesson_type": "failure"
+      }
+    }
+  },
+  "timing_rules": {
+    "time_earning_before": {
+      "condition": "财报发布前3-5日",
+      "prediction": "波动加大，方向不确定",
+      "confidence_boost": -5,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "事件分析",
+      "created_at": "2026-03-13"
+    },
+    "time_earning_after": {
+      "condition": "财报发布后1-2日",
+      "prediction": "趋势延续",
+      "confidence_boost": 5,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "事件分析",
+      "created_at": "2026-03-13"
+    },
+    "time_monday_open": {
+      "condition": "周一开盘",
+      "prediction": "延续上周五趋势",
+      "confidence_boost": 3,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "周期分析",
+      "created_at": "2026-03-13"
+    },
+    "time_friday_close": {
+      "condition": "周五尾盘",
+      "prediction": "避险情绪，可能回落",
+      "confidence_boost": -3,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "周期分析",
+      "created_at": "2026-03-13"
+    }
+  },
+  "confidence_rules": {
+    "conf_high_volume": {
+      "condition": "成交量放大>2倍",
+      "prediction": "信号可信度高",
+      "confidence_boost": 10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "量价分析",
+      "created_at": "2026-03-13"
+    },
+    "conf_low_volume": {
+      "condition": "成交量萎缩<0.5倍",
+      "prediction": "信号可信度低",
+      "confidence_boost": -10,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "量价分析",
+      "created_at": "2026-03-13"
+    },
+    "conf_multi_signal": {
+      "condition": "多个技术信号共振",
+      "prediction": "置信度大幅提升",
+      "confidence_boost": 15,
+      "samples": 0,
+      "success_rate": 0.0,
+      "source": "综合分析",
+      "created_at": "2026-03-13"
+    }
+  }
+}

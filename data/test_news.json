@@ -1,0 +1,12 @@
+{
+  "news": [
+    {
+      "id": "test_news_001",
+      "source": "sina",
+      "title": "中东冲突升级，锂资源价格大涨",
+      "url": "https://finance.sina.com.cn/test.html",
+      "time": "1773710000",
+      "content": "受地缘政治冲突影响，锂、稀土等战略资源价格大幅上涨..."
+    }
+  ]
+}

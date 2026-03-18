@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/ai_predictor.py", line 17, in <module>
+    from prediction_system import PredictionSystem
+ModuleNotFoundError: No module named 'prediction_system'
+AI 预测生成器
+
+用法:
+  python3 ai_predictor.py generate      # 生成所有预测
+  python3 ai_predictor.py brief         # 生成每日简报
+  python3 ai_predictor.py single <code> # 生成单只股票预测
+AI 预测生成器
+
+用法:
+  python3 ai_predictor.py generate      # 生成所有预测
+  python3 ai_predictor.py brief         # 生成每日简报
+  python3 ai_predictor.py single <code> # 生成单只股票预测
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/ai_predictor.py", line 30, in <module>
+    from news_fetcher import NewsFetcher
+ModuleNotFoundError: No module named 'news_fetcher'

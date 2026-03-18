@@ -1,0 +1,2889 @@
+{
+  "active": {},
+  "history": [
+    {
+      "id": "sh.600111_20260303_1217",
+      "created_at": "2026-03-03T12:17:48.991045",
+      "code": "sh.600111",
+      "name": "北方稀土",
+      "direction": "up",
+      "target_price": 63.85,
+      "current_price": 57.52,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:15.327503",
+        "final_price": 53.97,
+        "price_change_pct": -6.17,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600459_20260303_1217",
+      "created_at": "2026-03-03T12:17:51.313743",
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "direction": "up",
+      "target_price": 27.46,
+      "current_price": 24.74,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:15.542143",
+        "final_price": 23.0,
+        "price_change_pct": -7.03,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601121_20260303_1217",
+      "created_at": "2026-03-03T12:17:53.616533",
+      "code": "sh.601121",
+      "name": "宝地矿业",
+      "direction": "up",
+      "target_price": 9.78,
+      "current_price": 8.81,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:15.696172",
+        "final_price": 8.28,
+        "price_change_pct": -6.02,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000758_20260303_1217",
+      "created_at": "2026-03-03T12:17:57.256917",
+      "code": "sz.000758",
+      "name": "中色股份",
+      "direction": "neutral",
+      "target_price": 8.6,
+      "current_price": 8.43,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:15.857002",
+        "final_price": 7.84,
+        "price_change_pct": -7.0,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260303_1217",
+      "created_at": "2026-03-03T12:17:59.737585",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 40.9,
+      "current_price": 36.85,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.058273",
+        "final_price": 38.53,
+        "price_change_pct": 4.56,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260303_1218",
+      "created_at": "2026-03-03T12:18:02.350754",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 41.76,
+      "current_price": 34.8,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.206195",
+        "final_price": 31.63,
+        "price_change_pct": -9.11,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260303_1218",
+      "created_at": "2026-03-03T12:18:04.846723",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 68.9,
+      "current_price": 57.42,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.369685",
+        "final_price": 52.44,
+        "price_change_pct": -8.67,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260303_1218",
+      "created_at": "2026-03-03T12:18:07.306406",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 17.12,
+      "current_price": 14.27,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.588600",
+        "final_price": 13.7,
+        "price_change_pct": -3.99,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.000807_20260303_1218",
+      "created_at": "2026-03-03T12:18:09.629875",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 39.94,
+      "current_price": 33.28,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.740037",
+        "final_price": 32.76,
+        "price_change_pct": -1.56,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260303_1218",
+      "created_at": "2026-03-03T12:18:12.142967",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 62.92,
+      "current_price": 52.43,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:16.900914",
+        "final_price": 47.42,
+        "price_change_pct": -9.56,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260303_1218",
+      "created_at": "2026-03-03T12:18:14.583497",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 47.47,
+      "current_price": 39.56,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-10T15:30:17.103815",
+        "final_price": 37.13,
+        "price_change_pct": -6.14,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260304_0932",
+      "created_at": "2026-03-04T09:32:13.343044",
+      "code": "sz.000831",
+      "name": "五矿稀土",
+      "direction": "up",
+      "target_price": 60.78,
+      "current_price": 57.89,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-11T11:32:22.370621",
+        "final_price": 55.07,
+        "price_change_pct": -4.87,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260304_0932",
+      "created_at": "2026-03-04T09:32:15.436546",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 43.69,
+      "current_price": 42.83,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-11T11:32:22.525016",
+        "final_price": 39.38,
+        "price_change_pct": -8.06,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260304_0932",
+      "created_at": "2026-03-04T09:32:17.527268",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 10.51,
+      "current_price": 10.3,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-11T11:32:22.672152",
+        "final_price": 9.99,
+        "price_change_pct": -3.01,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600028_20260306_0931",
+      "created_at": "2026-03-06T09:31:08.232072",
+      "code": "sh.600028",
+      "name": "中国石化",
+      "direction": "neutral",
+      "target_price": 7.11,
+      "current_price": 6.97,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:48.454390",
+        "final_price": 6.53,
+        "price_change_pct": -6.31,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600256_20260306_0931",
+      "created_at": "2026-03-06T09:31:12.025400",
+      "code": "sh.600256",
+      "name": "广汇能源",
+      "direction": "neutral",
+      "target_price": 6.81,
+      "current_price": 6.68,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:48.610477",
+        "final_price": 7.61,
+        "price_change_pct": 13.92,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000878_20260310_0930",
+      "created_at": "2026-03-10T09:30:10.017595",
+      "code": "sz.000878",
+      "name": "云南铜业",
+      "direction": "neutral",
+      "target_price": 24.14,
+      "current_price": 23.67,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:48.773832",
+        "final_price": 22.67,
+        "price_change_pct": -4.22,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600459_20260311_0930",
+      "created_at": "2026-03-11T09:30:23.326932",
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "direction": "up",
+      "target_price": 24.24,
+      "current_price": 23.09,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:48.922302",
+        "final_price": 21.91,
+        "price_change_pct": -5.11,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600111_20260311_0930",
+      "created_at": "2026-03-11T09:30:39.314496",
+      "code": "sh.600111",
+      "name": "北方稀土",
+      "direction": "up",
+      "target_price": 55.96,
+      "current_price": 53.3,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.071170",
+        "final_price": 51.06,
+        "price_change_pct": -4.2,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000758_20260311_0930",
+      "created_at": "2026-03-11T09:30:55.223378",
+      "code": "sz.000758",
+      "name": "中色股份",
+      "direction": "neutral",
+      "target_price": 8.01,
+      "current_price": 7.85,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.222357",
+        "final_price": 7.65,
+        "price_change_pct": -2.55,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601121_20260311_0931",
+      "created_at": "2026-03-11T09:31:11.430797",
+      "code": "sh.601121",
+      "name": "宝地矿业",
+      "direction": "up",
+      "target_price": 8.7,
+      "current_price": 8.29,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.371699",
+        "final_price": 8.37,
+        "price_change_pct": 0.97,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260311_0931",
+      "created_at": "2026-03-11T09:31:27.391160",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 40.16,
+      "current_price": 38.25,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.524482",
+        "final_price": 38.07,
+        "price_change_pct": -0.47,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260311_0931",
+      "created_at": "2026-03-11T09:31:43.315700",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 32.53,
+      "current_price": 31.89,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.676929",
+        "final_price": 30.42,
+        "price_change_pct": -4.61,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260311_0931",
+      "created_at": "2026-03-11T09:31:59.169923",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 54.14,
+      "current_price": 53.08,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.837805",
+        "final_price": 51.13,
+        "price_change_pct": -3.67,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260311_0932",
+      "created_at": "2026-03-11T09:32:36.793572",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 14.05,
+      "current_price": 13.77,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:49.992300",
+        "final_price": 14.52,
+        "price_change_pct": 5.45,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260311_0932",
+      "created_at": "2026-03-11T09:32:52.816386",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 48.88,
+      "current_price": 47.92,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:50.138038",
+        "final_price": 46.77,
+        "price_change_pct": -2.4,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260311_0933",
+      "created_at": "2026-03-11T09:33:08.782033",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 38.27,
+      "current_price": 37.52,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:50.301778",
+        "final_price": 36.43,
+        "price_change_pct": -2.91,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000807_20260311_0933",
+      "created_at": "2026-03-11T09:33:24.741269",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 33.65,
+      "current_price": 32.99,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:50.453547",
+        "final_price": 35.04,
+        "price_change_pct": 6.21,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688396_20260311_0933",
+      "created_at": "2026-03-11T09:33:40.773170",
+      "code": "sh.688396",
+      "name": "华润微",
+      "direction": "neutral",
+      "target_price": 52.88,
+      "current_price": 51.84,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:50.607153",
+        "final_price": 50.83,
+        "price_change_pct": -1.95,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260312_0930",
+      "created_at": "2026-03-12T09:30:18.814503",
+      "code": "sz.000831",
+      "name": "五矿稀土",
+      "direction": "up",
+      "target_price": 57.44,
+      "current_price": 54.7,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:50.933749",
+        "final_price": 53.12,
+        "price_change_pct": -2.89,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260312_0930",
+      "created_at": "2026-03-12T09:30:21.870515",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 39.6,
+      "current_price": 38.82,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:51.078388",
+        "final_price": 37.86,
+        "price_change_pct": -2.47,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260312_0930",
+      "created_at": "2026-03-12T09:30:25.092657",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 10.1,
+      "current_price": 9.9,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:51.251600",
+        "final_price": 9.82,
+        "price_change_pct": -0.81,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688037_20260312_0930",
+      "created_at": "2026-03-12T09:30:28.367993",
+      "code": "sh.688037",
+      "name": "芯源微",
+      "direction": "neutral",
+      "target_price": 181.14,
+      "current_price": 177.59,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T11:36:51.405303",
+        "final_price": 174.34,
+        "price_change_pct": -1.83,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260312_2323",
+      "created_at": "2026-03-04T23:25:45.153705",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 40.17,
+      "current_price": 38.26,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "industry_cycle_up",
+        "positive_news"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-12T23:26:01.174075",
+        "final_price": 38.26,
+        "price_change_pct": 0.0,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260313_0931",
+      "created_at": "2026-03-13T09:31:57.971395",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 41.33,
+      "current_price": 39.36,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "industry_cycle_up"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:00.668344",
+        "final_price": 39.6,
+        "price_change_pct": 0.61,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260313_0932",
+      "created_at": "2026-03-13T09:32:01.910422",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 31.27,
+      "current_price": 30.66,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:00.821018",
+        "final_price": 30.02,
+        "price_change_pct": -2.09,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260313_0932",
+      "created_at": "2026-03-13T09:32:05.402814",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 52.82,
+      "current_price": 51.78,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:00.986547",
+        "final_price": 50.74,
+        "price_change_pct": -2.01,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260313_0932",
+      "created_at": "2026-03-13T09:32:08.511555",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 15.03,
+      "current_price": 14.74,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [
+        "rsi_oversold"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.141222",
+        "final_price": 14.08,
+        "price_change_pct": -4.48,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260313_0932",
+      "created_at": "2026-03-13T09:32:11.693098",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 47.84,
+      "current_price": 46.9,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.291530",
+        "final_price": 46.51,
+        "price_change_pct": -0.83,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260313_0932",
+      "created_at": "2026-03-13T09:32:14.872949",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 37.17,
+      "current_price": 36.44,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.439639",
+        "final_price": 35.77,
+        "price_change_pct": -1.84,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260313_0932",
+      "created_at": "2026-03-13T09:32:18.123480",
+      "code": "sz.000831",
+      "name": "五矿稀土",
+      "direction": "up",
+      "target_price": 56.74,
+      "current_price": 54.04,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "industry_cycle_up"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.595972",
+        "final_price": 53.02,
+        "price_change_pct": -1.89,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260313_0932",
+      "created_at": "2026-03-13T09:32:21.220457",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 39.02,
+      "current_price": 38.25,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.741623",
+        "final_price": 36.89,
+        "price_change_pct": -3.56,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260313_0932",
+      "created_at": "2026-03-13T09:32:24.377605",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 10.15,
+      "current_price": 9.95,
+      "confidence": 68,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [
+        "rsi_oversold"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:01.904071",
+        "final_price": 9.88,
+        "price_change_pct": -0.7,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000878_20260313_0932",
+      "created_at": "2026-03-13T09:32:27.657234",
+      "code": "sz.000878",
+      "name": "云南铜业",
+      "direction": "neutral",
+      "target_price": 23.46,
+      "current_price": 23.0,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "rsi_oversold"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:02.056383",
+        "final_price": 22.45,
+        "price_change_pct": -2.39,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000807_20260313_0932",
+      "created_at": "2026-03-13T09:32:30.755908",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 36.57,
+      "current_price": 35.85,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:02.203380",
+        "final_price": 34.75,
+        "price_change_pct": -3.07,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688396_20260313_0932",
+      "created_at": "2026-03-13T09:32:33.926327",
+      "code": "sh.688396",
+      "name": "华润微",
+      "direction": "neutral",
+      "target_price": 51.6,
+      "current_price": 50.59,
+      "confidence": 58,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:02.364354",
+        "final_price": 49.8,
+        "price_change_pct": -1.56,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688037_20260313_0932",
+      "created_at": "2026-03-13T09:32:37.007560",
+      "code": "sh.688037",
+      "name": "芯源微",
+      "direction": "neutral",
+      "target_price": 177.42,
+      "current_price": 173.94,
+      "confidence": 48,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 65,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-13T15:30:02.513906",
+        "final_price": 172.5,
+        "price_change_pct": -0.83,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260315_1601",
+      "created_at": "2026-03-15T16:01:19.587543",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "down",
+      "target_price": 29.12,
+      "current_price": 30.02,
+      "confidence": 33,
+      "timeframe": "1周",
+      "reasons": [
+        "技术面偏弱（评分40）",
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 0,
+        "negative": 3,
+        "tech_score": 40,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_fall_below_ma20",
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-15T17:36:13.809866",
+        "final_price": 30.02,
+        "price_change_pct": 0.0,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260316_0930",
+      "created_at": "2026-03-16T09:30:10.909381",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 41.49,
+      "current_price": 39.51,
+      "confidence": 65,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:01.264271",
+        "final_price": 37.33,
+        "price_change_pct": -5.52,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260316_0930",
+      "created_at": "2026-03-16T09:30:16.377472",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 30.09,
+      "current_price": 29.5,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_fall_below_ma20",
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:01.427630",
+        "final_price": 28.53,
+        "price_change_pct": -3.29,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260316_0930",
+      "created_at": "2026-03-16T09:30:21.053719",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 50.95,
+      "current_price": 49.95,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:01.620620",
+        "final_price": 49.25,
+        "price_change_pct": -1.4,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260316_0930",
+      "created_at": "2026-03-16T09:30:26.021002",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 14.51,
+      "current_price": 14.23,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:01.768153",
+        "final_price": 13.54,
+        "price_change_pct": -4.85,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260316_0930",
+      "created_at": "2026-03-16T09:30:30.425266",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 46.52,
+      "current_price": 45.61,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:01.926189",
+        "final_price": 44.09,
+        "price_change_pct": -3.33,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260316_0930",
+      "created_at": "2026-03-16T09:30:34.477409",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 35.78,
+      "current_price": 35.08,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:02.145939",
+        "final_price": 34.75,
+        "price_change_pct": -0.94,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260316_0930",
+      "created_at": "2026-03-16T09:30:38.694189",
+      "code": "sz.000831",
+      "name": "五矿稀土",
+      "direction": "up",
+      "target_price": 55.76,
+      "current_price": 53.1,
+      "confidence": 65,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:02.309261",
+        "final_price": 51.73,
+        "price_change_pct": -2.58,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260316_0930",
+      "created_at": "2026-03-16T09:30:44.124561",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 36.98,
+      "current_price": 36.25,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:02.472343",
+        "final_price": 35.55,
+        "price_change_pct": -1.93,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260316_0930",
+      "created_at": "2026-03-16T09:30:48.283078",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 9.92,
+      "current_price": 9.73,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:02.670188",
+        "final_price": 9.38,
+        "price_change_pct": -3.6,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000878_20260316_0930",
+      "created_at": "2026-03-16T09:30:52.450544",
+      "code": "sz.000878",
+      "name": "云南铜业",
+      "direction": "neutral",
+      "target_price": 22.34,
+      "current_price": 21.9,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:02.841586",
+        "final_price": 21.3,
+        "price_change_pct": -2.74,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000807_20260316_0930",
+      "created_at": "2026-03-16T09:30:56.426536",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 35.99,
+      "current_price": 35.28,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:03.009363",
+        "final_price": 33.85,
+        "price_change_pct": -4.05,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688396_20260316_0931",
+      "created_at": "2026-03-16T09:31:00.513463",
+      "code": "sh.688396",
+      "name": "华润微",
+      "direction": "neutral",
+      "target_price": 50.7,
+      "current_price": 49.71,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:03.195552",
+        "final_price": 49.99,
+        "price_change_pct": 0.56,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688037_20260316_0931",
+      "created_at": "2026-03-16T09:31:04.729819",
+      "code": "sh.688037",
+      "name": "芯源微",
+      "direction": "neutral",
+      "target_price": 171.87,
+      "current_price": 168.5,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-16T15:30:03.351381",
+        "final_price": 174.5,
+        "price_change_pct": 3.56,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260317_0930",
+      "created_at": "2026-03-17T09:30:12.365386",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 39.32,
+      "current_price": 37.45,
+      "confidence": 65,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:00.817335",
+        "final_price": 36.15,
+        "price_change_pct": -3.47,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260317_0930",
+      "created_at": "2026-03-17T09:30:18.017929",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 29.29,
+      "current_price": 28.72,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_rsi_oversold",
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.043876",
+        "final_price": 28.01,
+        "price_change_pct": -2.47,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260317_0930",
+      "created_at": "2026-03-17T09:30:23.664786",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 51.0,
+      "current_price": 50.0,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.193993",
+        "final_price": 48.52,
+        "price_change_pct": -2.96,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260317_0930",
+      "created_at": "2026-03-17T09:30:29.478166",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 13.93,
+      "current_price": 13.66,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.359686",
+        "final_price": 13.02,
+        "price_change_pct": -4.69,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260317_0930",
+      "created_at": "2026-03-17T09:30:35.139942",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 44.98,
+      "current_price": 44.1,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.573213",
+        "final_price": 44.5,
+        "price_change_pct": 0.91,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260317_0930",
+      "created_at": "2026-03-17T09:30:40.987104",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 35.73,
+      "current_price": 35.03,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.727069",
+        "final_price": 34.9,
+        "price_change_pct": -0.37,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260317_0930",
+      "created_at": "2026-03-17T09:30:46.917034",
+      "code": "sz.000831",
+      "name": "中国稀土",
+      "direction": "up",
+      "target_price": 56.91,
+      "current_price": 51.74,
+      "confidence": 75,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_rsi_oversold",
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:01.879324",
+        "final_price": 50.39,
+        "price_change_pct": -2.61,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260317_0930",
+      "created_at": "2026-03-17T09:30:52.538876",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 36.66,
+      "current_price": 35.94,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.094804",
+        "final_price": 35.15,
+        "price_change_pct": -2.2,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260317_0930",
+      "created_at": "2026-03-17T09:30:58.829560",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 9.65,
+      "current_price": 9.46,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.242901",
+        "final_price": 9.06,
+        "price_change_pct": -4.23,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000878_20260317_0931",
+      "created_at": "2026-03-17T09:31:04.606402",
+      "code": "sz.000878",
+      "name": "云南铜业",
+      "direction": "neutral",
+      "target_price": 21.93,
+      "current_price": 21.5,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.403688",
+        "final_price": 20.82,
+        "price_change_pct": -3.16,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000807_20260317_0931",
+      "created_at": "2026-03-17T09:31:10.377186",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 35.11,
+      "current_price": 34.42,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.619975",
+        "final_price": 31.91,
+        "price_change_pct": -7.29,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688396_20260317_0931",
+      "created_at": "2026-03-17T09:31:16.708761",
+      "code": "sh.688396",
+      "name": "华润微",
+      "direction": "neutral",
+      "target_price": 50.9,
+      "current_price": 49.9,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.770622",
+        "final_price": 48.8,
+        "price_change_pct": -2.2,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688037_20260317_0931",
+      "created_at": "2026-03-17T09:31:22.403674",
+      "code": "sh.688037",
+      "name": "芯源微",
+      "direction": "neutral",
+      "target_price": 177.49,
+      "current_price": 174.01,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-17T15:30:02.921735",
+        "final_price": 170.14,
+        "price_change_pct": -2.22,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000792_20260318_0932",
+      "created_at": "2026-03-18T09:32:20.756677",
+      "code": "sz.000792",
+      "name": "盐湖股份",
+      "direction": "up",
+      "target_price": 37.31,
+      "current_price": 35.53,
+      "confidence": 65,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:01.167411",
+        "final_price": 35.6,
+        "price_change_pct": 0.2,
+        "correct": false,
+        "partial": true
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601168_20260318_0932",
+      "created_at": "2026-03-18T09:32:27.704787",
+      "code": "sh.601168",
+      "name": "西部矿业",
+      "direction": "neutral",
+      "target_price": 28.25,
+      "current_price": 27.7,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:01.322655",
+        "final_price": 27.54,
+        "price_change_pct": -0.58,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600362_20260318_0932",
+      "created_at": "2026-03-18T09:32:32.806437",
+      "code": "sh.600362",
+      "name": "江西铜业",
+      "direction": "neutral",
+      "target_price": 49.16,
+      "current_price": 48.2,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:01.549260",
+        "final_price": 48.26,
+        "price_change_pct": 0.12,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601600_20260318_0932",
+      "created_at": "2026-03-18T09:32:38.070081",
+      "code": "sh.601600",
+      "name": "中国铝业",
+      "direction": "neutral",
+      "target_price": 13.06,
+      "current_price": 12.8,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:01.703932",
+        "final_price": 12.64,
+        "price_change_pct": -1.25,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600547_20260318_0932",
+      "created_at": "2026-03-18T09:32:43.201122",
+      "code": "sh.600547",
+      "name": "山东黄金",
+      "direction": "neutral",
+      "target_price": 44.82,
+      "current_price": 43.94,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:01.848141",
+        "final_price": 43.73,
+        "price_change_pct": -0.48,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.601899_20260318_0932",
+      "created_at": "2026-03-18T09:32:48.377090",
+      "code": "sh.601899",
+      "name": "紫金矿业",
+      "direction": "neutral",
+      "target_price": 35.4,
+      "current_price": 34.71,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.073574",
+        "final_price": 34.92,
+        "price_change_pct": 0.61,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000831_20260318_0932",
+      "created_at": "2026-03-18T09:32:53.673299",
+      "code": "sz.000831",
+      "name": "中国稀土",
+      "direction": "up",
+      "target_price": 52.9,
+      "current_price": 50.38,
+      "confidence": 65,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期低位"
+      ],
+      "risks": [],
+      "signals": {
+        "positive": 3,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "low"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.226951",
+        "final_price": 50.37,
+        "price_change_pct": -0.02,
+        "correct": false,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000960_20260318_0932",
+      "created_at": "2026-03-18T09:32:59.267635",
+      "code": "sz.000960",
+      "name": "锡业股份",
+      "direction": "neutral",
+      "target_price": 35.7,
+      "current_price": 35.0,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.389441",
+        "final_price": 35.03,
+        "price_change_pct": 0.09,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.600497_20260318_0933",
+      "created_at": "2026-03-18T09:33:04.466248",
+      "code": "sh.600497",
+      "name": "驰宏锌锗",
+      "direction": "neutral",
+      "target_price": 9.22,
+      "current_price": 9.04,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.596376",
+        "final_price": 8.92,
+        "price_change_pct": -1.33,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000878_20260318_0933",
+      "created_at": "2026-03-18T09:33:09.647948",
+      "code": "sz.000878",
+      "name": "云南铜业",
+      "direction": "neutral",
+      "target_price": 21.24,
+      "current_price": 20.82,
+      "confidence": 45,
+      "timeframe": "1周",
+      "reasons": [
+        "行业处于周期高位"
+      ],
+      "risks": [
+        "行业估值偏高，注意回调风险"
+      ],
+      "signals": {
+        "positive": 1,
+        "negative": 2,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "high"
+      },
+      "rules_used": [
+        "dir_industry_cycle_high"
+      ],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.763154",
+        "final_price": 20.48,
+        "price_change_pct": -1.63,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sz.000807_20260318_0933",
+      "created_at": "2026-03-18T09:33:14.665152",
+      "code": "sz.000807",
+      "name": "云铝股份",
+      "direction": "neutral",
+      "target_price": 32.05,
+      "current_price": 31.42,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:02.914601",
+        "final_price": 30.94,
+        "price_change_pct": -1.53,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688396_20260318_0933",
+      "created_at": "2026-03-18T09:33:52.951515",
+      "code": "sh.688396",
+      "name": "华润微",
+      "direction": "neutral",
+      "target_price": 49.99,
+      "current_price": 49.01,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:03.122616",
+        "final_price": 49.1,
+        "price_change_pct": 0.18,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    },
+    {
+      "id": "sh.688037_20260318_0933",
+      "created_at": "2026-03-18T09:33:58.044890",
+      "code": "sh.688037",
+      "name": "芯源微",
+      "direction": "neutral",
+      "target_price": 175.2,
+      "current_price": 171.76,
+      "confidence": 55,
+      "timeframe": "1周",
+      "reasons": [],
+      "risks": [],
+      "signals": {
+        "positive": 1,
+        "negative": 0,
+        "tech_score": 50,
+        "news_sentiment": "neutral",
+        "industry_cycle": "medium"
+      },
+      "rules_used": [],
+      "status": "verified",
+      "updates": [],
+      "result": {
+        "verified_at": "2026-03-18T15:30:03.273076",
+        "final_price": 170.92,
+        "price_change_pct": -0.49,
+        "correct": true,
+        "partial": false
+      },
+      "analysis": null
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/joe/.openclaw/workspace/china-stock-team/scripts/ai_predictor.py", line 17, in <module>
+    from prediction_system import PredictionSystem
+ModuleNotFoundError: No module named 'prediction_system'
+
+==================================================
+时间: 2026-03-13T09:00:32.146647
+命令: /Users/joe/.openclaw/workspace/china-stock-team/venv/bin/python3 /Users/joe/.openclaw/workspace/china-stock-team/scripts/ai_predictor.py
+==================================================
+

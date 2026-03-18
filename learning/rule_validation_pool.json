@@ -1,0 +1,1291 @@
+{
+  "rule_book_001_1": {
+    "source": "book_001.point_001",
+    "source_book": "股票作手回忆录",
+    "rule": "价格总是沿最小阻力线运动",
+    "testable_form": "突破 20 日高点后，价格继续上涨概率>55%",
+    "category": "趋势",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-09T20:00:15.369205"
+    },
+    "status": "validating",
+    "confidence": 0.078,
+    "created_at": "2026-03-09T20:00:15.369206",
+    "updated_at": "2026-03-15T23:40:43.006935"
+  },
+  "rule_book_001_2": {
+    "source": "book_001.point_002",
+    "source_book": "股票作手回忆录",
+    "rule": "关键点突破后加仓",
+    "testable_form": "突破关键点后加仓，盈亏比>1.5",
+    "category": "仓位管理",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-09T20:00:15.369209"
+    },
+    "status": "validating",
+    "confidence": 0.279,
+    "created_at": "2026-03-09T20:00:15.369210",
+    "updated_at": "2026-03-15T23:40:43.007366"
+  },
+  "rule_book_002_1": {
+    "source": "book_002.point_001",
+    "source_book": "聪明的投资者",
+    "rule": "安全边际原则",
+    "testable_form": "PB<1 的股票长期收益>市场平均",
+    "category": "估值",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-10T20:01:16.495028"
+    },
+    "status": "validating",
+    "confidence": 0.279,
+    "created_at": "2026-03-10T20:01:16.495030",
+    "updated_at": "2026-03-15T23:40:43.007777"
+  },
+  "rule_book_002_2": {
+    "source": "book_002.point_002",
+    "source_book": "聪明的投资者",
+    "rule": "市场先生理论",
+    "testable_form": "逆向投资策略在波动市场中收益更高",
+    "category": "心态",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0006752510618524693,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-10T20:01:16.495033"
+    },
+    "status": "validating",
+    "confidence": 0.279,
+    "created_at": "2026-03-10T20:01:16.495034",
+    "updated_at": "2026-03-15T23:40:43.008185"
+  },
+  "rule_book_003_1": {
+    "source": "book_003.point_001",
+    "source_book": "笑傲股市",
+    "rule": "CAN SLIM 选股法",
+    "testable_form": "符合 CAN SLIM 标准的股票年化收益>20%",
+    "category": "选股",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-11T20:00:20.640389"
+    },
+    "status": "validating",
+    "confidence": 0.279,
+    "created_at": "2026-03-11T20:00:20.640391",
+    "updated_at": "2026-03-15T23:40:43.008582"
+  },
+  "rule_book_003_2": {
+    "source": "book_003.point_002",
+    "source_book": "笑傲股市",
+    "rule": "杯柄形态突破",
+    "testable_form": "杯柄形态突破后 5 日上涨概率>60%",
+    "category": "技术形态",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-11T20:00:20.640395"
+    },
+    "status": "validating",
+    "confidence": 0.078,
+    "created_at": "2026-03-11T20:00:20.640397",
+    "updated_at": "2026-03-15T23:40:43.008976"
+  },
+  "exp_avoid_稀土_20260312": {
+    "rule": "避开稀土行业陷阱",
+    "category": "风控",
+    "source_book": "实战教训",
+    "testable_form": "避免稀土行业，平均亏损7.3%",
+    "live_test": {
+      "samples": 2,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:34:32.180225",
+    "experience_based": true,
+    "is_negative": true,
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0006752510618524693,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.282,
+    "updated_at": "2026-03-15T23:40:43.009380"
+  },
+  "rule_20260312_235654_7": {
+    "rule": "突破均线+成交量放大 → 趋势确立",
+    "testable_form": "突破MA20且volume>2倍均值，5日内上涨概率>55%",
+    "category": "趋势",
+    "source": "模拟数据-趋势交易",
+    "source_type": "post",
+    "source_id": "kb_20260312_235649_0",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.064993",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.078,
+    "updated_at": "2026-03-15T23:40:43.009784"
+  },
+  "rule_20260312_235654_8": {
+    "rule": "止损策略",
+    "testable_form": "设置止损后，最大回撤<未设置止损的50%",
+    "category": "风控",
+    "source": "模拟数据-趋势交易",
+    "source_type": "post",
+    "source_id": "kb_20260312_235649_0",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065204",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0006752510618524693,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.279,
+    "updated_at": "2026-03-15T23:40:43.010182"
+  },
+  "rule_20260312_235654_9": {
+    "rule": "移动止损策略",
+    "testable_form": "盈利10%后移动止损到成本，保护利润成功率>70%",
+    "category": "风控",
+    "source": "模拟数据-趋势交易",
+    "source_type": "post",
+    "source_id": "kb_20260312_235649_0",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065280",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0006752510618524693,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.279,
+    "updated_at": "2026-03-15T23:40:43.010582"
+  },
+  "rule_20260312_235654_10": {
+    "rule": "行业轮动策略",
+    "testable_form": "强势行业股票收益>弱势行业股票收益",
+    "category": "行业",
+    "source": "模拟数据-趋势交易",
+    "source_type": "post",
+    "source_id": "kb_20260312_235649_0",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065329",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.078,
+    "updated_at": "2026-03-15T23:40:43.010989"
+  },
+  "rule_20260312_235654_11": {
+    "rule": "趋势结束信号",
+    "testable_form": "连续3天收盘<MA10，未来5日下跌概率>60%",
+    "category": "趋势",
+    "source": "模拟数据-趋势交易",
+    "source_type": "post",
+    "source_id": "kb_20260312_235649_0",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065374",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 2,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.003,
+    "updated_at": "2026-03-15T23:40:43.011431"
+  },
+  "rule_20260312_235654_12": {
+    "rule": "低PB策略",
+    "testable_form": "PB<1.5的股票长期收益>市场平均",
+    "category": "估值",
+    "source": "模拟数据-价值投资",
+    "source_type": "article",
+    "source_id": "kb_20260312_235649_1",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065595",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.279,
+    "updated_at": "2026-03-15T23:40:43.011825"
+  },
+  "rule_20260312_235654_13": {
+    "rule": "高ROE策略",
+    "testable_form": "ROE>15%的股票年化收益>10%",
+    "category": "基本面",
+    "source": "模拟数据-价值投资",
+    "source_type": "article",
+    "source_id": "kb_20260312_235649_1",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065599",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.078,
+    "updated_at": "2026-03-15T23:40:43.012223"
+  },
+  "rule_20260312_235654_14": {
+    "rule": "护城河策略",
+    "testable_form": "市场份额>30%的股票长期收益>行业平均",
+    "category": "基本面",
+    "source": "模拟数据-价值投资",
+    "source_type": "article",
+    "source_id": "kb_20260312_235649_1",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065613",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.078,
+    "updated_at": "2026-03-15T23:40:43.012621"
+  },
+  "rule_20260312_235654_15": {
+    "rule": "恐慌指数反向指标",
+    "testable_form": "VIX>30时买入，5日收益>3%的概率>60%",
+    "category": "情绪",
+    "source": "模拟数据-情绪指标",
+    "source_type": "idea",
+    "source_id": "kb_20260312_235649_2",
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0
+    },
+    "status": "validating",
+    "created_at": "2026-03-12T23:56:54.065642",
+    "auto_generated": true,
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "confidence": 0.078,
+    "updated_at": "2026-03-15T23:40:43.013022"
+  },
+  "tier1_20260315_092732": {
+    "rule_id": "tier1_20260315_092732",
+    "rule": "证券时报：券商行业迎来政策利好，两融标的扩容",
+    "testable_form": "券商两融扩容政策发布后，券商板块上涨概率>55%",
+    "category": "政策",
+    "source": "securitiestimes_news",
+    "source_tier": "tier1",
+    "source_url": "https://www.stcn.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "news",
+      "policy",
+      "brokerage"
+    ],
+    "created_at": "2026-03-15T09:27:32.012873",
+    "updated_at": "2026-03-15T23:40:43.013419",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:27:32.012875",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier2_20260315_092732": {
+    "rule_id": "tier2_20260315_092732",
+    "rule": "第一财经：央行将继续实施稳健的货币政策",
+    "testable_form": "货币政策表态对市场情绪有显著影响",
+    "category": "宏观",
+    "source": "yicai_tv",
+    "source_tier": "tier2",
+    "source_url": "https://www.yicai.com/tv/xxx",
+    "status": "validating",
+    "confidence": 0.279,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "official_channel",
+      "macro",
+      "monetary_policy"
+    ],
+    "created_at": "2026-03-15T09:27:32.017154",
+    "updated_at": "2026-03-15T23:40:43.013824",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:27:32.017157",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier3_20260315_092732": {
+    "rule_id": "tier3_20260315_092732",
+    "rule": "雪球热帖：新能源汽车销量数据亮眼，锂电板块有望走强",
+    "testable_form": "销量数据利好发布后5日内，锂电板块上涨概率>70%",
+    "category": "行业趋势",
+    "source": "xueqiu_hot_post",
+    "source_tier": "tier3",
+    "source_url": "https://xueqiu.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "forum",
+      "industry_trend",
+      "xueqiu"
+    ],
+    "created_at": "2026-03-15T09:27:32.021916",
+    "updated_at": "2026-03-15T23:40:43.014221",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:27:32.021919",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier1_20260315_092812_569886": {
+    "rule_id": "tier1_20260315_092812_569886",
+    "rule": "券商研报：盐湖股份Q1业绩超预期，锂价回升",
+    "testable_form": "业绩超预期公告后3日内，股价上涨概率>55%",
+    "category": "财报",
+    "source": "eastmoney_research",
+    "source_tier": "tier1",
+    "source_url": "https://reportapi.eastmoney.com/detail/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "research",
+      "earnings",
+      "lithium"
+    ],
+    "created_at": "2026-03-15T09:28:12.569898",
+    "updated_at": "2026-03-15T23:40:43.014625",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.569902",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier1_20260315_092812_570687": {
+    "rule_id": "tier1_20260315_092812_570687",
+    "rule": "券商研报：稀土行业供需缺口扩大，价格有望上涨",
+    "testable_form": "稀土供需缺口扩大消息发布后5日内，稀土板块上涨概率>60%",
+    "category": "行业",
+    "source": "eastmoney_research",
+    "source_tier": "tier1",
+    "source_url": "https://reportapi.eastmoney.com/detail/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "research",
+      "industry",
+      "rare_earth"
+    ],
+    "created_at": "2026-03-15T09:28:12.570699",
+    "updated_at": "2026-03-15T23:40:43.015026",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.570703",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier1_20260315_092812_571471": {
+    "rule_id": "tier1_20260315_092812_571471",
+    "rule": "券商研报：新能源汽车销量持续增长，利好锂电产业链",
+    "testable_form": "新能源车销量数据发布后，锂电龙头股票上涨概率>55%",
+    "category": "行业",
+    "source": "eastmoney_research",
+    "source_tier": "tier1",
+    "source_url": "https://reportapi.eastmoney.com/detail/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "research",
+      "industry",
+      "ev"
+    ],
+    "created_at": "2026-03-15T09:28:12.571480",
+    "updated_at": "2026-03-15T23:40:43.015436",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.571482",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier1_20260315_092812_572223": {
+    "rule_id": "tier1_20260315_092812_572223",
+    "rule": "财新网报道：央行降准0.5个百分点，释放流动性",
+    "testable_form": "降准消息发布后5日内，大盘上涨概率>55%",
+    "category": "宏观",
+    "source": "caixin_news",
+    "source_tier": "tier1",
+    "source_url": "https://www.caixin.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "news",
+      "macro",
+      "monetary_policy"
+    ],
+    "created_at": "2026-03-15T09:28:12.572230",
+    "updated_at": "2026-03-15T23:40:43.015809",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.572233",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier1_20260315_092812_572987": {
+    "rule_id": "tier1_20260315_092812_572987",
+    "rule": "第一财经：证监会鼓励长期资金入市，提高市场稳定性",
+    "testable_form": "长期资金入市政策发布后，大盘波动率下降",
+    "category": "政策",
+    "source": "yicai_news",
+    "source_tier": "tier1",
+    "source_url": "https://www.yicai.com/xxx",
+    "status": "validating",
+    "confidence": 0.279,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "news",
+      "policy",
+      "market_stability"
+    ],
+    "created_at": "2026-03-15T09:28:12.572993",
+    "updated_at": "2026-03-15T23:40:43.016189",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.572995",
+      "required_samples": 3,
+      "required_success_rate": 0.5
+    }
+  },
+  "tier2_20260315_092812_573919": {
+    "rule_id": "tier2_20260315_092812_573919",
+    "rule": "年报显示盐湖股份Q1净利润同比增长150%，业绩超预期",
+    "testable_form": "财报超预期公告后3日内，股价上涨概率>60%",
+    "category": "财报",
+    "source": "cninfo_annual_report",
+    "source_tier": "tier2",
+    "source_url": "https://www.cninfo.com.cn/new/disclosure/detail?xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "annual_report",
+      "earnings",
+      "salt_lake"
+    ],
+    "created_at": "2026-03-15T09:28:12.573924",
+    "updated_at": "2026-03-15T23:40:43.016568",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.573927",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_574711": {
+    "rule_id": "tier2_20260315_092812_574711",
+    "rule": "年报显示稀土永磁行业需求旺盛，龙头公司订单饱满",
+    "testable_form": "行业需求旺盛消息发布后5日内，龙头股票上涨概率>60%",
+    "category": "行业",
+    "source": "cninfo_annual_report",
+    "source_tier": "tier2",
+    "source_url": "https://www.cninfo.com.cn/new/disclosure/detail?xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "annual_report",
+      "industry",
+      "rare_earth"
+    ],
+    "created_at": "2026-03-15T09:28:12.574716",
+    "updated_at": "2026-03-15T23:40:43.016948",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.574719",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_575522": {
+    "rule_id": "tier2_20260315_092812_575522",
+    "rule": "年报指引显示锂电产业链未来三年复合增长率超30%",
+    "testable_form": "高增长行业龙头股票长期收益>行业平均",
+    "category": "行业",
+    "source": "cninfo_annual_report",
+    "source_tier": "tier2",
+    "source_url": "https://www.cninfo.com.cn/new/disclosure/detail?xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "annual_report",
+      "industry",
+      "lithium"
+    ],
+    "created_at": "2026-03-15T09:28:12.575527",
+    "updated_at": "2026-03-15T23:40:43.017319",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.575530",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_576347": {
+    "rule_id": "tier2_20260315_092812_576347",
+    "rule": "基金经理观点：当前锂电板块估值处于历史低位，具备配置价值",
+    "testable_form": "低估值板块在政策支持下上涨概率>60%",
+    "category": "估值",
+    "source": "xueqiu_fund_manager",
+    "source_tier": "tier2",
+    "source_url": "https://xueqiu.com/xxx",
+    "status": "validating",
+    "confidence": 0.279,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "fund_manager",
+      "valuation",
+      "lithium"
+    ],
+    "created_at": "2026-03-15T09:28:12.576352",
+    "updated_at": "2026-03-15T23:40:43.017692",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.576355",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_577210": {
+    "rule_id": "tier2_20260315_092812_577210",
+    "rule": "基金经理观点：稀土行业供需格局改善，龙头企业受益",
+    "testable_form": "供需格局改善行业龙头超额收益>10%",
+    "category": "行业",
+    "source": "xueqiu_fund_manager",
+    "source_tier": "tier2",
+    "source_url": "https://xueqiu.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "fund_manager",
+      "industry",
+      "rare_earth"
+    ],
+    "created_at": "2026-03-15T09:28:12.577215",
+    "updated_at": "2026-03-15T23:40:43.018063",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.577219",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_578074": {
+    "rule_id": "tier2_20260315_092812_578074",
+    "rule": "基金经理观点：新能源汽车渗透率提升，利好锂电产业链",
+    "testable_form": "渗透率提升产业链相关股票跑赢大盘概率>60%",
+    "category": "行业",
+    "source": "xueqiu_fund_manager",
+    "source_tier": "tier2",
+    "source_url": "https://xueqiu.com/xxx",
+    "status": "validating",
+    "confidence": 0.279,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "fund_manager",
+      "industry",
+      "ev"
+    ],
+    "created_at": "2026-03-15T09:28:12.578078",
+    "updated_at": "2026-03-15T23:40:43.018443",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.578081",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier2_20260315_092812_578981": {
+    "rule_id": "tier2_20260315_092812_578981",
+    "rule": "CCTV财经：国家加大对新能源汽车产业的支持力度",
+    "testable_form": "产业政策利好发布后，相关板块上涨概率>60%",
+    "category": "政策",
+    "source": "cctv_finance",
+    "source_tier": "tier2",
+    "source_url": "https://tv.cctv.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "official_channel",
+      "policy",
+      "ev"
+    ],
+    "created_at": "2026-03-15T09:28:12.578985",
+    "updated_at": "2026-03-15T23:40:43.018812",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.578988",
+      "required_samples": 5,
+      "required_success_rate": 0.6
+    }
+  },
+  "tier3_20260315_092812_580119": {
+    "rule_id": "tier3_20260315_092812_580119",
+    "rule": "抖音博主@财经大V：盐湖提锂技术新突破，盐湖股份即将起飞",
+    "testable_form": "技术突破新闻发布后3日内，相关股票上涨概率>70%",
+    "category": "技术突破",
+    "source": "douyin@财经大V",
+    "source_tier": "tier3",
+    "source_url": "https://douyin.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "kbit_technology",
+      "douyin"
+    ],
+    "created_at": "2026-03-15T09:28:12.580123",
+    "updated_at": "2026-03-15T23:40:43.019191",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.580127",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_581062": {
+    "rule_id": "tier3_20260315_092812_581062",
+    "rule": "抖音博主@股海沉浮：稀土价格见底，是买入良机",
+    "testable_form": "价格见底信号后5日内，稀土板块上涨概率>70%",
+    "category": "价格底部",
+    "source": "douyin@股海沉浮",
+    "source_tier": "tier3",
+    "source_url": "https://douyin.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "price_bottom",
+      "douyin"
+    ],
+    "created_at": "2026-03-15T09:28:12.581066",
+    "updated_at": "2026-03-15T23:40:43.019569",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.581069",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_582029": {
+    "rule_id": "tier3_20260315_092812_582029",
+    "rule": "抖音博主@价值投资：新能源汽车渗透率已超30%，利好锂电产业链",
+    "testable_form": "渗透率提升产业链相关股票跑赢大盘概率>70%",
+    "category": "行业趋势",
+    "source": "douyin@价值投资",
+    "source_tier": "tier3",
+    "source_url": "https://douyin.com/xxx",
+    "status": "validating",
+    "confidence": 0.279,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "industry_trend",
+      "douyin"
+    ],
+    "created_at": "2026-03-15T09:28:12.582032",
+    "updated_at": "2026-03-15T23:40:43.019939",
+    "backtest": {
+      "samples": 96,
+      "success_rate": 0.3958333333333333,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.582036",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_583060": {
+    "rule_id": "tier3_20260315_092812_583060",
+    "rule": "微博大V@股神笔记：盐湖股份主力资金持续流入，即将拉升",
+    "testable_form": "主力资金流入信号后5日内，股价上涨概率>70%",
+    "category": "资金流向",
+    "source": "weibo@股神笔记",
+    "source_tier": "tier3",
+    "source_url": "https://weibo.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "fund_flow",
+      "weibo"
+    ],
+    "created_at": "2026-03-15T09:28:12.583063",
+    "updated_at": "2026-03-15T23:40:43.020286",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.583067",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_584061": {
+    "rule_id": "tier3_20260315_092812_584061",
+    "rule": "微博大V@行业研究：稀土行业供需紧张，价格有望继续上涨",
+    "testable_form": "供需紧张消息发布后5日内，稀土板块上涨概率>70%",
+    "category": "行业趋势",
+    "source": "weibo@行业研究",
+    "source_tier": "tier3",
+    "source_url": "https://weibo.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "industry_trend",
+      "weibo"
+    ],
+    "created_at": "2026-03-15T09:28:12.584065",
+    "updated_at": "2026-03-15T23:40:43.020634",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.584068",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_585129": {
+    "rule_id": "tier3_20260315_092812_585129",
+    "rule": "微博大V@新能源观察：新能源汽车销量创新高，锂电产业链受益",
+    "testable_form": "销量新高消息发布后5日内，锂电板块上涨概率>70%",
+    "category": "行业趋势",
+    "source": "weibo@新能源观察",
+    "source_tier": "tier3",
+    "source_url": "https://weibo.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "social_media",
+      "industry_trend",
+      "weibo"
+    ],
+    "created_at": "2026-03-15T09:28:12.585133",
+    "updated_at": "2026-03-15T23:40:43.020981",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.585136",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_586192": {
+    "rule_id": "tier3_20260315_092812_586192",
+    "rule": "雪球热帖：盐湖股份主力资金净流入5亿，看好后市",
+    "testable_form": "大额资金流入信号后5日内，股价上涨概率>70%",
+    "category": "资金流向",
+    "source": "xueqiu_hot_post",
+    "source_tier": "tier3",
+    "source_url": "https://xueqiu.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "forum",
+      "fund_flow",
+      "xueqiu"
+    ],
+    "created_at": "2026-03-15T09:28:12.586195",
+    "updated_at": "2026-03-15T23:40:43.021329",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.586198",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "tier3_20260315_092812_587275": {
+    "rule_id": "tier3_20260315_092812_587275",
+    "rule": "东方财富股吧热帖：稀土价格暴涨，相关股票集体涨停",
+    "testable_form": "价格暴涨消息发布后3日内，相关股票上涨概率>70%",
+    "category": "价格波动",
+    "source": "eastmoney_guba",
+    "source_tier": "tier3",
+    "source_url": "https://guba.eastmoney.com/xxx",
+    "status": "validating",
+    "confidence": 0.078,
+    "confidence_threshold": 0.7,
+    "tags": [
+      "bronze",
+      "forum",
+      "price_surge",
+      "eastmoney"
+    ],
+    "created_at": "2026-03-15T09:28:12.587278",
+    "updated_at": "2026-03-15T23:40:43.021680",
+    "backtest": {
+      "samples": 26,
+      "success_rate": 0.11538461538461539,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T09:28:12.587282",
+      "required_samples": 10,
+      "required_success_rate": 0.7
+    }
+  },
+  "dir_fall_below_ma20": {
+    "rule_id": "dir_fall_below_ma20",
+    "rule": "跌破20日均线 + 放量",
+    "testable_form": "未来5日下跌概率>60%",
+    "category": "技术分析",
+    "status": "validating",
+    "confidence": 0.005,
+    "created_at": "2026-03-15T17:36:13.810803",
+    "backtest": {
+      "samples": 2,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 3,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T17:36:13.810806",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-16T15:30:01.428637"
+  },
+  "positive_news": {
+    "rule_id": "positive_news",
+    "rule": "规则 positive_news",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "validating",
+    "confidence": 0.5,
+    "created_at": "2026-03-15T23:53:19.934629",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 1,
+      "success_rate": 0.0,
+      "started_at": "2026-03-15T23:53:19.934631",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-15T23:53:19.934633"
+  },
+  "rsi_oversold": {
+    "rule_id": "rsi_oversold",
+    "rule": "规则 rsi_oversold",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "validating",
+    "confidence": 0.5,
+    "created_at": "2026-03-15T23:53:19.934648",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 3,
+      "success_rate": 0.3333333333333333,
+      "started_at": "2026-03-15T23:53:19.934649",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-15T23:53:19.934673"
+  },
+  "dir_rsi_oversold": {
+    "rule_id": "dir_rsi_oversold",
+    "rule": "RSI < 30",
+    "testable_form": "未来5日上涨概率>60%",
+    "category": "技术分析",
+    "status": "validating",
+    "confidence": 0.5,
+    "created_at": "2026-03-17T15:30:01.044346",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 2,
+      "success_rate": 0.0,
+      "started_at": "2026-03-17T15:30:01.044349",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-17T15:30:01.880096"
+  },
+  "dir_industry_cycle_high": {
+    "rule_id": "dir_industry_cycle_high",
+    "rule": "规则 dir_industry_cycle_high",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "validating",
+    "confidence": 0.5,
+    "created_at": "2026-03-18T15:30:01.168458",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 7,
+      "success_rate": 0.7142857142857143,
+      "started_at": "2026-03-18T15:30:01.168462",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-18T15:30:02.763814"
+  },
+  "break_ma20": {
+    "rule_id": "break_ma20",
+    "rule": "规则 break_ma20",
+    "testable_form": "待定义",
+    "category": "自动生成",
+    "status": "validating",
+    "confidence": 0.5,
+    "created_at": "2026-03-18T15:30:01.704824",
+    "backtest": {
+      "samples": 0,
+      "success_rate": 0.0,
+      "avg_profit": 0.0,
+      "avg_loss": 0.0,
+      "profit_factor": 0.0
+    },
+    "live_test": {
+      "samples": 6,
+      "success_rate": 1.0,
+      "started_at": "2026-03-18T15:30:01.704830",
+      "required_samples": 10,
+      "required_success_rate": 0.6
+    },
+    "updated_at": "2026-03-18T15:30:03.273991"
+  }
+}

@@ -1,0 +1,145 @@
+<!-- Cron Tasks Table Template -->
+<div id="cronTasksContainer" class="content-section">
+    <div class="section-header">
+        <h2>OpenClaw Cron 任务监控</h2>
+        <div class="stats-summary">
+            <span class="stat-item"><strong id="totalCount">0</strong> 个任务</span>
+            <span class="stat-item success"><strong id="successCount">0</strong> 成功</span>
+            <span class="stat-item error"><strong id="errorCount">0</strong> 失败</span>
+            <span class="stat-item">最后更新: <span id="lastUpdated">-</span></span>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>任务名称</th>
+                    <th>调度表达式</th>
+                    <th>状态</th>
+                    <th>上次运行</th>
+                    <th>下次运行</th>
+                    <th>Agent ID</th>
+                    <th>模型</th>
+                </tr>
+            </thead>
+            <tbody id="cronTasksTableBody">
+                <!-- Data will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.stats-summary {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-item.success { color: var(--success); }
+.stat-item.error { color: var(--error); }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover {
+    background: var(--bg-card);
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-ok { background: rgba(0, 204, 102, 0.2); color: var(--success); }
+.status-error { background: rgba(255, 51, 51, 0.2); color: var(--error); }
+.status-idle { background: rgba(255, 204, 0, 0.2); color: var(--warning); }
+.status-running { background: rgba(0, 102, 255, 0.2); color: var(--accent); }
+.status-unknown { background: rgba(160, 160, 160, 0.2); color: var(--text-secondary); }
+
+.table-container {
+    overflow-x: auto;
+}
+</style>
+
+<script>
+function loadCronTasks() {
+    fetch('/api/openclaw_cron')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading cron tasks:', data.error);
+                return;
+            }
+            
+            // Update stats
+            document.getElementById('totalCount').textContent = data.total_count;
+            document.getElementById('successCount').textContent = data.success_count;
+            document.getElementById('errorCount').textContent = data.error_count;
+            document.getElementById('lastUpdated').textContent = data.last_updated;
+            
+            // Clear existing table
+            const tbody = document.getElementById('cronTasksTableBody');
+            tbody.innerHTML = '';
+            
+            // Populate table
+            data.cron_tasks.forEach(task => {
+                const row = document.createElement('tr');
+                
+                // Status badge
+                const statusBadge = document.createElement('span');
+                statusBadge.className = `status-badge status-${task.status}`;
+                statusBadge.textContent = task.status;
+                
+                row.innerHTML = `
+                    <td>${task.name}</td>
+                    <td><code>${task.schedule}</code></td>
+                    <td>${statusBadge.outerHTML}</td>
+                    <td>${task.last_run}</td>
+                    <td>${task.next_run}</td>
+                    <td>${task.agent_id}</td>
+                    <td>${task.model}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Failed to load cron tasks:', error);
+        });
+}
+
+// Load initially and refresh every 30 seconds
+loadCronTasks();
+setInterval(loadCronTasks, 30000);
+</script>

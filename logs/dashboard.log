@@ -1,0 +1,512 @@
+/Users/joe/.openclaw/workspace/china-stock-team/web/dashboard_claude.py:3401: SyntaxWarning: "\d" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\d"? A raw string is also an option.
+  const match = t.schedule.match(/(\d{1,2}):(\d{2})/);
+2026-03-15 15:46:40,467 - __main__ - INFO - Database validated successfully
+2026-03-15 15:46:40,467 - __main__ - INFO - Dashboard server started at http://127.0.0.1:8082
+2026-03-15 15:46:40,467 - __main__ - INFO - Press Ctrl+C to stop
+2026-03-15 15:46:45,469 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 15:46:51,008 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:46:51,009 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:46:51,011 - __main__ - INFO - Database validated successfully
+2026-03-15 15:46:51,011 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:50:33,396 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 15:51:03,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:51:03,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:51:03,458 - __main__ - INFO - Database validated successfully
+2026-03-15 15:51:03,458 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:51:03,509 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:51:03,514 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:51:33,456 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:51:33,458 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:51:33,460 - __main__ - INFO - Database validated successfully
+2026-03-15 15:51:33,460 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:51:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:51:33,487 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:51:33,490 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:52:03,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:52:03,456 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:52:03,458 - __main__ - INFO - Database validated successfully
+2026-03-15 15:52:03,458 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:52:03,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:52:03,484 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:52:33,457 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:52:33,459 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:52:33,460 - __main__ - INFO - Database validated successfully
+2026-03-15 15:52:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:52:33,463 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:52:33,482 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:52:33,485 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:53:03,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:53:03,456 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:53:03,458 - __main__ - INFO - Database validated successfully
+2026-03-15 15:53:03,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:53:03,478 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:53:03,482 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:53:33,456 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:53:33,460 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:53:33,461 - __main__ - INFO - Database validated successfully
+2026-03-15 15:53:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:53:33,479 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:53:33,483 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:53:33,488 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:54:03,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:54:03,456 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:54:03,458 - __main__ - INFO - Database validated successfully
+2026-03-15 15:54:03,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:54:03,479 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:54:03,482 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:54:33,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:54:33,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:54:33,459 - __main__ - INFO - Database validated successfully
+2026-03-15 15:54:33,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:54:33,462 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:54:33,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:54:33,484 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:55:03,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:55:03,458 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:55:03,460 - __main__ - INFO - Database validated successfully
+2026-03-15 15:55:03,460 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:55:03,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:55:03,483 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:55:33,459 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:55:33,460 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:55:33,461 - __main__ - INFO - Database validated successfully
+2026-03-15 15:55:33,462 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:55:33,463 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:55:33,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:55:33,484 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:56:03,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:56:03,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:56:03,459 - __main__ - INFO - Database validated successfully
+2026-03-15 15:56:03,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:56:03,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:56:03,483 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:56:33,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:56:33,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:56:33,459 - __main__ - INFO - Database validated successfully
+2026-03-15 15:56:33,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:56:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:56:33,479 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:56:33,488 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:57:03,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:57:03,455 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:57:03,456 - __main__ - INFO - Database validated successfully
+2026-03-15 15:57:03,457 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:57:03,477 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:57:03,480 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:57:33,456 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:57:33,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:57:33,459 - __main__ - INFO - Database validated successfully
+2026-03-15 15:57:33,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:57:33,460 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:57:33,479 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:57:33,482 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:58:03,457 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:58:03,459 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:58:03,462 - __main__ - INFO - Database validated successfully
+2026-03-15 15:58:03,462 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:58:03,482 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:58:03,486 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:58:33,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:58:33,455 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:58:33,456 - __main__ - INFO - Database validated successfully
+2026-03-15 15:58:33,457 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:58:33,460 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:58:33,478 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:58:33,482 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:59:03,453 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:59:03,454 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:59:03,455 - __main__ - INFO - Database validated successfully
+2026-03-15 15:59:03,455 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:59:03,473 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:59:03,476 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 15:59:33,455 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 15:59:33,458 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 15:59:33,460 - __main__ - INFO - Database validated successfully
+2026-03-15 15:59:33,460 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 15:59:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 15:59:33,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 15:59:33,484 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:00:03,456 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:00:03,458 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:00:03,460 - __main__ - INFO - Database validated successfully
+2026-03-15 16:00:03,461 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:00:03,480 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:00:03,484 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:00:33,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:00:33,455 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:00:33,456 - __main__ - INFO - Database validated successfully
+2026-03-15 16:00:33,456 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:00:33,458 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:00:33,474 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:00:33,477 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:01:03,453 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:01:03,455 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:01:03,456 - __main__ - INFO - Database validated successfully
+2026-03-15 16:01:03,456 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:01:03,475 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:01:03,478 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:01:33,454 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:01:33,457 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:01:33,459 - __main__ - INFO - Database validated successfully
+2026-03-15 16:01:33,459 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:01:33,461 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:01:33,481 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:01:33,487 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:02:03,456 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:02:03,459 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:02:03,461 - __main__ - INFO - Database validated successfully
+2026-03-15 16:02:03,462 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:02:03,478 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:02:03,481 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:02:18,619 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:02:18,620 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:02:18,621 - __main__ - INFO - Database validated successfully
+2026-03-15 16:02:18,621 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:02:32,893 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 16:02:38,182 - __main__ - INFO - 127.0.0.1 - "GET /api/agents HTTP/1.1" 200 -
+2026-03-15 16:02:38,902 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:02:39,362 - __main__ - INFO - 127.0.0.1 - "GET /api/validation-pool HTTP/1.1" 200 -
+2026-03-15 16:02:40,203 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:02:40,584 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:02:40,915 - __main__ - INFO - 127.0.0.1 - "GET /api/agents HTTP/1.1" 200 -
+2026-03-15 16:02:41,241 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:02:41,244 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:02:41,246 - __main__ - INFO - Database validated successfully
+2026-03-15 16:02:41,247 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:02:41,267 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:02:41,271 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:03:03,389 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:03:03,391 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:03:03,394 - __main__ - INFO - Database validated successfully
+2026-03-15 16:03:03,394 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:03:03,437 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:03:03,440 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:03:06,577 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 16:03:22,075 - __main__ - INFO - 127.0.0.1 - "GET /api/agents HTTP/1.1" 200 -
+2026-03-15 16:03:22,486 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:03:22,488 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:03:22,489 - __main__ - INFO - Database validated successfully
+2026-03-15 16:03:22,489 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:03:22,522 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:03:22,526 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:03:25,763 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 16:03:34,501 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:03:35,189 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:03:35,190 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:03:35,192 - __main__ - INFO - Database validated successfully
+2026-03-15 16:03:35,192 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:03:35,221 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:03:35,223 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:03:36,893 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:03:36,894 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:03:36,896 - __main__ - INFO - Database validated successfully
+2026-03-15 16:03:36,896 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:03:36,912 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:03:36,914 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:03:55,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:03:55,788 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:03:55,790 - __main__ - INFO - Database validated successfully
+2026-03-15 16:03:55,790 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:03:55,810 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:03:55,814 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:04:25,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:04:25,790 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:04:25,792 - __main__ - INFO - Database validated successfully
+2026-03-15 16:04:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:04:25,794 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:04:25,811 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:04:25,814 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:04:55,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:04:55,787 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:04:55,789 - __main__ - INFO - Database validated successfully
+2026-03-15 16:04:55,789 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:04:55,808 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:04:55,811 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:05:25,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:05:25,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:05:25,791 - __main__ - INFO - Database validated successfully
+2026-03-15 16:05:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:05:25,794 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:05:25,811 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:05:25,814 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:05:55,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:05:55,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:05:55,790 - __main__ - INFO - Database validated successfully
+2026-03-15 16:05:55,791 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:05:55,808 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:05:55,811 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:06:25,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:06:25,790 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:06:25,792 - __main__ - INFO - Database validated successfully
+2026-03-15 16:06:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:06:25,794 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:06:25,812 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:06:25,816 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:06:55,784 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:06:55,787 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:06:55,788 - __main__ - INFO - Database validated successfully
+2026-03-15 16:06:55,788 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:06:55,806 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:06:55,809 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:07:25,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:07:25,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:07:25,790 - __main__ - INFO - Database validated successfully
+2026-03-15 16:07:25,791 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:07:25,793 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:07:25,810 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:07:25,814 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:07:55,785 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:07:55,786 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:07:55,788 - __main__ - INFO - Database validated successfully
+2026-03-15 16:07:55,788 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:07:55,808 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:07:55,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:08:25,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:08:25,788 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:08:25,789 - __main__ - INFO - Database validated successfully
+2026-03-15 16:08:25,790 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:08:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:08:25,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:08:25,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:08:55,789 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:08:55,792 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:08:55,794 - __main__ - INFO - Database validated successfully
+2026-03-15 16:08:55,795 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:08:55,814 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:08:55,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:09:25,784 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:09:25,786 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:09:25,788 - __main__ - INFO - Database validated successfully
+2026-03-15 16:09:25,788 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:09:25,790 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:09:25,803 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:09:25,810 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:09:55,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:09:55,791 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:09:55,794 - __main__ - INFO - Database validated successfully
+2026-03-15 16:09:55,794 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:09:55,817 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:09:55,820 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:10:25,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:10:25,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:10:25,791 - __main__ - INFO - Database validated successfully
+2026-03-15 16:10:25,791 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:10:25,793 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:10:25,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:10:25,813 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:10:55,785 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:10:55,787 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:10:55,789 - __main__ - INFO - Database validated successfully
+2026-03-15 16:10:55,789 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:10:55,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:10:55,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:11:25,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:11:25,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:11:25,792 - __main__ - INFO - Database validated successfully
+2026-03-15 16:11:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:11:25,794 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:11:25,813 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:11:25,816 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:11:55,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:11:55,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:11:55,792 - __main__ - INFO - Database validated successfully
+2026-03-15 16:11:55,793 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:11:55,814 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:11:55,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:12:25,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:12:25,788 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:12:25,789 - __main__ - INFO - Database validated successfully
+2026-03-15 16:12:25,789 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:12:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:12:25,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:12:25,813 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:12:55,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:12:55,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:12:55,791 - __main__ - INFO - Database validated successfully
+2026-03-15 16:12:55,792 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:12:55,812 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:12:55,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:13:25,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:13:25,788 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:13:25,789 - __main__ - INFO - Database validated successfully
+2026-03-15 16:13:25,790 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:13:25,792 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:13:25,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:13:25,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:13:55,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:13:55,790 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:13:55,792 - __main__ - INFO - Database validated successfully
+2026-03-15 16:13:55,793 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:13:55,814 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:13:55,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:14:25,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:14:25,789 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:14:25,790 - __main__ - INFO - Database validated successfully
+2026-03-15 16:14:25,791 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:14:25,793 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:14:25,809 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:14:25,813 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:14:55,787 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:14:55,790 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:14:55,793 - __main__ - INFO - Database validated successfully
+2026-03-15 16:14:55,793 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:14:55,814 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:14:55,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:15:25,788 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:15:25,791 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:15:25,794 - __main__ - INFO - Database validated successfully
+2026-03-15 16:15:25,794 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:15:25,796 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:15:25,815 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:15:25,818 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:15:55,786 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:15:55,787 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:15:55,788 - __main__ - INFO - Database validated successfully
+2026-03-15 16:15:55,789 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:15:55,808 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:15:55,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:16:25,781 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:16:25,784 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:16:25,786 - __main__ - INFO - Database validated successfully
+2026-03-15 16:16:25,786 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:16:25,788 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:16:25,802 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:16:25,812 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:16:55,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:16:55,780 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:16:55,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:16:55,782 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:16:55,802 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:16:55,805 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:17:25,780 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:17:25,782 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:17:25,784 - __main__ - INFO - Database validated successfully
+2026-03-15 16:17:25,785 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:17:25,787 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:17:25,804 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:17:25,808 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:17:55,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:17:55,781 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:17:55,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:17:55,783 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:17:55,801 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:17:55,805 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:18:25,780 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:18:25,781 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:18:25,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:18:25,783 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:18:25,786 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:18:25,803 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:18:25,806 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:18:55,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:18:55,780 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:18:55,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:18:55,782 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:18:55,801 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:18:55,804 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:19:25,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:19:25,780 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:19:25,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:19:25,782 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:19:25,785 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:19:25,802 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:19:25,805 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:19:55,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:19:55,780 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:19:55,782 - __main__ - INFO - Database validated successfully
+2026-03-15 16:19:55,782 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:19:55,804 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:19:55,810 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:20:25,781 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:20:25,783 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:20:25,785 - __main__ - INFO - Database validated successfully
+2026-03-15 16:20:25,785 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:20:25,786 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:20:25,799 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:20:25,802 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:20:55,783 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:20:55,788 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:20:55,791 - __main__ - INFO - Database validated successfully
+2026-03-15 16:20:55,793 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:20:55,864 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:20:55,868 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:21:25,780 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:21:25,782 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:21:25,784 - __main__ - INFO - Database validated successfully
+2026-03-15 16:21:25,784 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:21:25,786 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:21:25,805 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:21:25,808 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:21:55,777 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:21:55,779 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:21:55,781 - __main__ - INFO - Database validated successfully
+2026-03-15 16:21:55,781 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:21:55,802 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:21:55,810 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:22:25,777 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:22:25,778 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:22:25,780 - __main__ - INFO - Database validated successfully
+2026-03-15 16:22:25,780 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:22:25,782 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:22:25,796 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:22:25,800 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:22:55,779 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:22:55,780 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:22:55,781 - __main__ - INFO - Database validated successfully
+2026-03-15 16:22:55,781 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:22:55,800 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:22:55,803 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:23:25,780 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:23:25,782 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:23:25,784 - __main__ - INFO - Database validated successfully
+2026-03-15 16:23:25,785 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:23:25,786 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:23:25,805 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:23:25,808 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:23:55,776 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:23:55,778 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:23:55,780 - __main__ - INFO - Database validated successfully
+2026-03-15 16:23:55,780 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:23:55,786 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:23:55,788 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:24:22,288 - __main__ - INFO - 127.0.0.1 - "GET / HTTP/1.1" 200 -
+2026-03-15 16:24:24,474 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:24:24,475 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:24:24,476 - __main__ - INFO - Database validated successfully
+2026-03-15 16:24:24,476 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:24:24,493 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:24:24,495 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:24:52,315 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:24:52,317 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:24:52,320 - __main__ - INFO - Database validated successfully
+2026-03-15 16:24:52,320 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:24:52,453 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:24:52,456 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:25:22,313 - __main__ - INFO - Account data: 2026-03-10 - Total: 162248.0
+2026-03-15 16:25:22,315 - __main__ - INFO - Retrieved 1 positions
+2026-03-15 16:25:22,316 - __main__ - INFO - Database validated successfully
+2026-03-15 16:25:22,316 - __main__ - INFO - 127.0.0.1 - "GET /api/overview HTTP/1.1" 200 -
+2026-03-15 16:25:22,318 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:25:22,337 - __main__ - INFO - 127.0.0.1 - "GET /api/loop-status HTTP/1.1" 200 -
+2026-03-15 16:25:22,341 - __main__ - INFO - 127.0.0.1 - "GET /api/accuracy-trend HTTP/1.1" 200 -
+2026-03-15 16:25:41,097 - __main__ - INFO - 127.0.0.1 - "GET /api/agents HTTP/1.1" 200 -
+2026-03-15 16:25:41,836 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:25:52,312 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:26:22,311 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:26:22,312 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:26:52,313 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:27:22,314 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:27:22,316 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:27:52,313 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:28:22,311 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:28:22,311 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:28:52,313 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:29:22,314 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:29:22,317 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:29:52,313 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:30:22,313 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:30:22,316 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:30:52,312 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:31:22,314 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -
+2026-03-15 16:31:22,320 - __main__ - INFO - 127.0.0.1 - "GET /api/api/realtime-prices HTTP/1.1" 404 -
+2026-03-15 16:31:52,312 - __main__ - INFO - 127.0.0.1 - "GET /api/cron HTTP/1.1" 200 -

@@ -1,0 +1,12 @@
+2026-03-06 17:01:59,811 - __main__ - ERROR - 获取指数数据失败：value - None
+2026-03-06 17:02:00,038 - __main__ - ERROR - 获取指数数据失败：growth - None
+2026-03-06 17:02:00,337 - __main__ - ERROR - 获取指数数据失败：large - None
+2026-03-06 17:02:00,572 - __main__ - ERROR - 获取指数数据失败：small - None
+2026-03-06 17:02:00,860 - __main__ - ERROR - 获取指数数据失败：cyclical - None
+2026-03-06 17:02:01,070 - __main__ - ERROR - 获取指数数据失败：defensive - None
+2026-03-06 17:02:54,387 - __main__ - ERROR - 获取指数数据失败：value - None
+2026-03-06 17:02:54,617 - __main__ - ERROR - 获取指数数据失败：growth - None
+2026-03-06 17:02:54,861 - __main__ - ERROR - 获取指数数据失败：large - None
+2026-03-06 17:02:55,072 - __main__ - ERROR - 获取指数数据失败：small - None
+2026-03-06 17:02:55,294 - __main__ - ERROR - 获取指数数据失败：cyclical - None
+2026-03-06 17:02:55,546 - __main__ - ERROR - 获取指数数据失败：defensive - None

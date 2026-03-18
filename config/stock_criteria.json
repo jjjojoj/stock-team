@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-03-09T12:00:00",
+  "description": "选股标准（动态进化）",
+  
+  "hard_filters": {
+    "description": "硬筛选（必须全部满足）",
+    "controller": ["央企", "省国资委", "市国资委", "区国资委"],
+    "market_cap_max": 200,
+    "pb_max": 2.5,
+    "exclude_st": true,
+    "main_business_pct": 70
+  },
+  
+  "soft_filters": {
+    "description": "软筛选（打分项）",
+    "roe_min": 10,
+    "dividend_yield_min": 2,
+    "industry_cycle": "low"
+  },
+  
+  "scoring": {
+    "description": "评分权重",
+    "pb_weight": 0.25,
+    "roe_weight": 0.25,
+    "market_cap_weight": 0.20,
+    "dividend_weight": 0.15,
+    "industry_weight": 0.15
+  },
+  
+  "evolution": {
+    "description": "进化记录",
+    "last_review": "2026-03-12T15:32:00",
+    "accuracy_stats": {
+      "total": 35,
+      "correct": 8,
+      "partial": 9,
+      "fail": 18,
+      "accuracy_rate": "48.6%"
+    },
+    "by_direction": {
+      "up": {"total": 10, "correct": 0, "partial": 2, "hit_rate": "20.0%"},
+      "neutral": {"total": 25, "correct": 8, "partial": 7, "hit_rate": "60.0%"}
+    },
+    "by_cycle": {
+      "low": {"total": 10, "correct": 0, "avg_change": "-3.12%"},
+      "medium": {"total": 16, "correct": 8, "avg_change": "-0.88%"},
+      "high": {"total": 9, "correct": 0, "avg_change": "-5.70%"}
+    },
+    "critical_lessons": [
+      "行业周期低位≠见底反弹：8次失败，需企稳信号确认",
+      "neutral预测参考价值低：10次失败，需更果断判断",
+      "技术分数无区分度：全为65，需引入RSI/MACD/量价",
+      "高位风险警示有效但执行不足：平均跌-5.70%"
+    ],
+    "adjustments": [
+      "🚨 行业周期low需附加企稳信号确认（量价配合/主力资金流入）",
+      "🚨 行业周期high直接排除或评分降50%",
+      "🚨 市值容差±15%（200亿→170-230亿）",
+      "🚨 上涨预测需大盘配合（上证>0）",
+      "🚨 neutral预测波动范围收紧至<1%",
+      "⚠️ 引入技术指标多维度评分（RSI/MACD/成交量）",
+      "⚠️ 增加'观望'选项，减少neutral误判"
+    ]
+  }
+}

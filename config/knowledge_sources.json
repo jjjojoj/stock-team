@@ -1,0 +1,102 @@
+{
+  "tier1": {
+    "enabled": true,
+    "description": "黄金级 - 直接采纳（置信度 0.8，验证标准：3次 + 50%）",
+    "sources": [
+      {
+        "name": "券商研报",
+        "type": "api",
+        "url": "https://reportapi.eastmoney.com",
+        "frequency": "daily",
+        "enabled": true
+      },
+      {
+        "name": "权威媒体",
+        "type": "rss",
+        "feeds": ["财新网", "第一财经", "证券时报"],
+        "frequency": "daily",
+        "enabled": true
+      },
+      {
+        "name": "书籍",
+        "type": "static",
+        "frequency": "once",
+        "enabled": true
+      }
+    ]
+  },
+  "tier2": {
+    "enabled": true,
+    "description": "白银级 - 需要验证（置信度 0.6，验证标准：5次 + 60%）",
+    "sources": [
+      {
+        "name": "年报",
+        "type": "api",
+        "url": "https://www.cninfo.com.cn",
+        "frequency": "weekly",
+        "enabled": true
+      },
+      {
+        "name": "基金经理",
+        "type": "api",
+        "platforms": ["雪球", "且慢"],
+        "frequency": "weekly",
+        "enabled": true
+      },
+      {
+        "name": "官方频道",
+        "type": "api",
+        "platforms": ["CCTV财经", "第一财经电视"],
+        "frequency": "daily",
+        "enabled": true
+      }
+    ]
+  },
+  "tier3": {
+    "enabled": true,
+    "description": "青铜级 - 严格验证（置信度 0.3，验证标准：10次 + 70%）",
+    "sources": [
+      {
+        "name": "抖音财经",
+        "type": "crawler",
+        "keywords": ["盐湖提锂", "稀土", "锂电", "新能源汽车"],
+        "frequency": "daily",
+        "enabled": true
+      },
+      {
+        "name": "微博KOL",
+        "type": "api",
+        "keywords": ["盐湖股份", "锂电", "稀土", "新能源汽车"],
+        "frequency": "daily",
+        "min_followers": 100000,
+        "enabled": true
+      },
+      {
+        "name": "论坛热帖",
+        "type": "api",
+        "platforms": ["雪球", "东方财富股吧"],
+        "frequency": "daily",
+        "enabled": true
+      }
+    ]
+  },
+  "tier4": {
+    "enabled": true,
+    "description": "石头级 - 反向指标（不进入验证池，直接使用）",
+    "sources": [
+      {
+        "name": "散户情绪",
+        "type": "api",
+        "frequency": "realtime",
+        "enabled": true
+      },
+      {
+        "name": "市场热度",
+        "type": "api",
+        "metrics": ["百度指数", "新开户数", "融资余额"],
+        "frequency": "daily",
+        "enabled": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "date": "2026-03-12T11:31:09.327441",
+  "results": {
+    "verified": 18,
+    "correct": 5,
+    "wrong": 13,
+    "details": [
+      {
+        "stock": "云南铜业 (sz.000878)",
+        "direction": "neutral",
+        "created_price": 23.67,
+        "current_price": 22.67,
+        "change": -4.224757076468102,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "贵研铂业 (sh.600459)",
+        "direction": "up",
+        "created_price": 23.09,
+        "current_price": 21.91,
+        "change": -5.110437418796014,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "北方稀土 (sh.600111)",
+        "direction": "up",
+        "created_price": 53.3,
+        "current_price": 51.06,
+        "change": -4.2026266416510225,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "中色股份 (sz.000758)",
+        "direction": "neutral",
+        "created_price": 7.85,
+        "current_price": 7.65,
+        "change": -2.5477707006369337,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "宝地矿业 (sh.601121)",
+        "direction": "up",
+        "created_price": 8.29,
+        "current_price": 8.37,
+        "change": 0.9650180940892652,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "盐湖股份 (sz.000792)",
+        "direction": "up",
+        "created_price": 38.25,
+        "current_price": 38.07,
+        "change": -0.4705882352941169,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "西部矿业 (sh.601168)",
+        "direction": "neutral",
+        "created_price": 31.89,
+        "current_price": 30.42,
+        "change": -4.6095954844778895,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "江西铜业 (sh.600362)",
+        "direction": "neutral",
+        "created_price": 53.08,
+        "current_price": 51.13,
+        "change": -3.6737000753579427,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "中国铝业 (sh.601600)",
+        "direction": "neutral",
+        "created_price": 13.77,
+        "current_price": 14.52,
+        "change": 5.446623093681917,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "山东黄金 (sh.600547)",
+        "direction": "neutral",
+        "created_price": 47.92,
+        "current_price": 46.77,
+        "change": -2.3998330550918165,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "紫金矿业 (sh.601899)",
+        "direction": "neutral",
+        "created_price": 37.52,
+        "current_price": 36.43,
+        "change": -2.9051172707889212,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "云铝股份 (sz.000807)",
+        "direction": "neutral",
+        "created_price": 32.99,
+        "current_price": 35.04,
+        "change": 6.214004243710206,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "华润微 (sh.688396)",
+        "direction": "neutral",
+        "created_price": 51.84,
+        "current_price": 50.83,
+        "change": -1.9483024691358122,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "云铝股份 (sh.000807)",
+        "direction": "neutral",
+        "created_price": 17487.38,
+        "current_price": 17382.37,
+        "change": -0.6004901820627334,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "五矿稀土 (sz.000831)",
+        "direction": "up",
+        "created_price": 54.7,
+        "current_price": 53.12,
+        "change": -2.8884826325411432,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "锡业股份 (sz.000960)",
+        "direction": "neutral",
+        "created_price": 38.82,
+        "current_price": 37.86,
+        "change": -2.472952086553325,
+        "status": "❌ 错误"
+      },
+      {
+        "stock": "驰宏锌锗 (sh.600497)",
+        "direction": "neutral",
+        "created_price": 9.9,
+        "current_price": 9.82,
+        "change": -0.8080808080808087,
+        "status": "✅ 正确"
+      },
+      {
+        "stock": "芯源微 (sh.688037)",
+        "direction": "neutral",
+        "created_price": 177.59,
+        "current_price": 174.34,
+        "change": -1.8300579987611914,
+        "status": "✅ 正确"
+      }
+    ]
+  },
+  "lessons": [
+    {
+      "type": "success",
+      "content": "早盘5只预测正确",
+      "action": "保持当前分析逻辑"
+    }
+  ]
+}

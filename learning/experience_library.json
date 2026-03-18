@@ -1,0 +1,48 @@
+{
+  "success_patterns": [
+    {
+      "type": "success",
+      "stock": "sz.000792",
+      "name": "盐湖股份",
+      "profit_pct": 3.83,
+      "industry": "锂",
+      "pattern": "锂行业盈利3%",
+      "lesson": "青海国资委锂业 → 成功",
+      "date": "2026-03-12"
+    }
+  ],
+  "failure_patterns": [
+    {
+      "type": "failure",
+      "stock": "sz.000831",
+      "name": "中国稀土",
+      "profit_pct": -8.5,
+      "industry": "稀土",
+      "pattern": "稀土行业亏损8%",
+      "lesson": "央企整合预期 → 失败",
+      "date": "2026-03-10"
+    },
+    {
+      "type": "failure",
+      "stock": "sh.600111",
+      "name": "北方稀土",
+      "profit_pct": -6.2,
+      "industry": "稀土",
+      "pattern": "稀土行业亏损6%",
+      "lesson": "行业龙头 → 失败",
+      "date": "2026-03-08"
+    }
+  ],
+  "rule_performance": {
+    "industry_cycle_up": {
+      "total": 6,
+      "correct": 2,
+      "wrong": 4
+    },
+    "positive_news": {
+      "total": 4,
+      "correct": 1,
+      "wrong": 3
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "total_checks": 4,
+  "total_errors": 2,
+  "errors_by_field": {
+    "price": 2,
+    "change_pct": 2,
+    "volume": 2
+  },
+  "errors_by_stock": {
+    "sh.600459": 2
+  },
+  "last_check": "2026-03-06T09:13:16.255466"
+}

@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""
+Enhanced Cron Handler for OpenClaw Cron Tasks
+Integrates with existing dashboard_v3.py
+"""
+
+import json
+import subprocess
+import os
+from datetime import datetime, timezone
+import logging
+
+logger = logging.getLogger(__name__)
+
+def get_openclaw_cron_status():
+    """
+    Get real-time cron status from OpenClaw CLI
+    Returns structured data for frontend display
+    """
+    try:
+        # Execute openclaw cron list --json
+        result = subprocess.run(
+            ['openclaw', 'cron', 'list', '--json'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode != 0:
+            logger.error(f"OpenClaw cron list failed: {result.stderr}")
+            return []
+            
+        cron_data = json.loads(result.stdout)
+        jobs = cron_data.get('jobs', [])
+        
+        # Process each job into display format
+        processed_jobs = []
+        for job in jobs:
+            # Get state object for timestamps and status
+            state = job.get('state', {})
+            
+            # Convert timestamps to readable format
+            last_run = state.get('lastRunAtMs')
+            next_run = state.get('nextRunAtMs')
+            
+            last_run_str = format_timestamp(last_run) if last_run else "从未运行"
+            next_run_str = format_timestamp(next_run) if next_run else "未计划"
+            
+            # Determine status color from state
+            status = state.get('lastRunStatus') or state.get('lastStatus') or 'idle'
+            status_color = get_status_color(status)
+            
+            # Extract schedule info
+            schedule_info = job.get('schedule', {})
+            schedule_expr = schedule_info.get('expr', 'unknown')
+            
+            processed_job = {
+                'id': job.get('id'),
+                'name': job.get('name', 'Unknown'),
+                'schedule': schedule_expr,
+                'last_run': last_run_str,
+                'next_run': next_run_str,
+                'status': status,
+                'status_color': status_color,
+                'agent_id': job.get('agentId', 'main'),
+                'agentId': job.get('agentId', 'main'),  # Alias for HTML compatibility
+                'last_run_raw': last_run or 0,  # Raw timestamp for sorting
+                'next_run_raw': next_run or 0,  # Raw timestamp for sorting
+                'model': '-',
+                'target': job.get('sessionTarget', 'isolated')
+            }
+            processed_jobs.append(processed_job)
+            
+        return processed_jobs
+        
+    except Exception as e:
+        logger.error(f"Failed to get OpenClaw cron status: {e}")
+        return []
+
+def format_timestamp(timestamp_ms):
+    """Convert millisecond timestamp to readable string"""
+    if not timestamp_ms:
+        return "N/A"
+    
+    # Convert to datetime (assuming timestamp is in milliseconds)
+    dt = datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
+    # Convert to local time (Asia/Shanghai)
+    local_dt = dt.astimezone()
+    return local_dt.strftime('%Y-%m-%d %H:%M')
+
+def get_status_color(status):
+    """Map status to color class"""
+    status_colors = {
+        'ok': 'success',
+        'error': 'error',
+        'idle': 'warning',
+        'running': 'accent'
+    }
+    return status_colors.get(status, 'text-secondary')
+
+def handle_api_openclaw_cron():
+    """API endpoint handler for OpenClaw cron data"""
+    try:
+        cron_data = get_openclaw_cron_status()
+        return {
+            "cron_tasks": cron_data,
+            "total_count": len(cron_data),
+            "success_count": sum(1 for task in cron_data if task['status'] == 'ok'),
+            "error_count": sum(1 for task in cron_data if task['status'] == 'error'),
+            "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+    except Exception as e:
+        logger.error(f"API error: {e}")
+        return {"error": str(e)}
+
+if __name__ == "__main__":
+    # Test function
+    cron_status = get_openclaw_cron_status()
+    print(json.dumps(cron_status, indent=2, ensure_ascii=False))

@@ -1,0 +1,126 @@
+2026-03-06 01:26:26,998 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 01:26:26,999 - __main__ - WARNING - 个股暴涨：贵研铂业 (sh.600459) +8.5%
+2026-03-06 01:26:26,999 - __main__ - WARNING - 个股暴跌：中色股份 (sz.000758) -8.2%
+2026-03-06 09:13:00,189 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:13:00,189 - __main__ - WARNING - 个股暴涨：贵研铂业 (sh.600459) +8.5%
+2026-03-06 09:13:00,189 - __main__ - WARNING - 个股暴跌：中色股份 (sz.000758) -8.2%
+2026-03-06 09:32:17,030 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:32:17,031 - __main__ - WARNING - 个股暴涨：贵研铂业 (sh.600459) +8.5%
+2026-03-06 09:32:17,031 - __main__ - WARNING - 个股暴跌：中色股份 (sz.000758) -8.2%
+2026-03-06 09:35:12,425 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:40:11,182 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:45:03,465 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:50:16,089 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 09:55:05,832 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:02:18,896 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:05:05,200 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:10:11,604 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:15:03,617 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:20:14,616 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:25:08,671 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:30:11,829 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:35:08,925 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:40:21,339 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:45:03,669 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:50:19,563 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 10:55:05,060 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:00:21,946 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:05:04,157 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:10:13,416 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:15:08,182 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:20:19,425 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:25:05,229 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:31:15,622 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:35:07,028 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:40:11,149 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:45:03,480 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:50:17,285 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 11:55:05,895 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:00:15,298 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:05:02,910 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:10:09,460 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:15:03,449 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:20:13,064 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:25:05,263 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:30:11,369 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:35:05,797 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:40:16,572 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:45:03,642 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:50:16,365 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 13:55:07,747 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:01:40,416 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:05:04,763 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:10:14,204 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:15:03,955 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:20:21,459 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:25:05,034 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:30:27,676 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:35:08,507 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:40:18,401 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:45:09,299 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:50:17,247 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 14:55:05,310 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:00:05,731 - circuit_breaker - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:00:35,384 - circuit_breaker - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:00:44,807 - api_health_monitor - WARNING - API 故障：akshare - HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=0&secid=0.000001&beg=20260301&end=20260306 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:01:53,970 - circuit_breaker - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:02:04,593 - market_style_monitor - ERROR - 获取指数数据失败：value - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000029&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:02:04,843 - market_style_monitor - ERROR - 获取指数数据失败：growth - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=0.399006&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:02:05,104 - market_style_monitor - ERROR - 获取指数数据失败：large - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000300&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:02:05,372 - market_style_monitor - ERROR - 获取指数数据失败：small - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000852&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:02:05,626 - market_style_monitor - ERROR - 获取指数数据失败：cyclical - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000037&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:02:05,903 - market_style_monitor - ERROR - 获取指数数据失败：defensive - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000021&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:03:51,623 - circuit_breaker - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:03:59,233 - market_style_monitor - ERROR - 获取指数数据失败：value - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000029&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:03:59,473 - market_style_monitor - ERROR - 获取指数数据失败：growth - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=0.399006&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:03:59,747 - market_style_monitor - ERROR - 获取指数数据失败：large - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000300&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:03:59,991 - market_style_monitor - ERROR - 获取指数数据失败：small - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000852&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:04:00,256 - market_style_monitor - ERROR - 获取指数数据失败：cyclical - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000037&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:04:00,506 - market_style_monitor - ERROR - 获取指数数据失败：defensive - HTTPSConnectionPool(host='push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/get?secid=1.000021&fields=f43%2Cf107%2Cf109 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-03-06 15:04:10,969 - a_share_risk_monitor - INFO - 检查政策风险 (2026-03-06)...
+2026-03-06 15:04:10,969 - a_share_risk_monitor - INFO - A 股风险检查完成：跌停0只，停牌0只
+2026-03-06 15:06:29,224 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:10:24,818 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:15:05,805 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:20:21,277 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:25:07,592 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:32:24,406 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:35:05,281 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:40:18,624 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:45:05,173 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:50:15,463 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-06 15:55:03,631 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:03:01,496 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:10:11,474 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:15:04,280 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:20:13,594 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:25:03,421 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:30:37,517 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:35:17,882 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:40:11,066 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:45:03,509 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:50:11,889 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 09:55:06,489 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 10:00:51,966 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 10:05:06,826 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 10:10:18,051 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 10:15:03,882 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-09 14:25:19,358 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-10 09:25:14,492 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-10 11:54:56,920 - adapters.manager - INFO - ✅ Baostock 适配器已初始化
+2026-03-10 11:54:57,252 - adapters.manager - INFO - ✅ AKShare 适配器已初始化
+2026-03-10 12:01:21,797 - adapters.manager - INFO - ✅ Baostock 适配器已初始化
+2026-03-10 12:01:22,076 - adapters.manager - INFO - ✅ AKShare 适配器已初始化
+2026-03-10 14:25:16,317 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-11 09:25:14,857 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-11 14:25:25,532 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-12 09:25:25,525 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-12 14:25:37,598 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-13 09:25:20,957 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-13 14:25:18,870 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-16 09:25:14,757 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-16 14:25:23,909 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-17 09:25:16,077 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-17 14:25:22,089 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-18 09:25:15,195 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0
+2026-03-18 14:25:15,958 - __main__ - INFO - 熔断检查完成：状态=normal, 触发规则=0

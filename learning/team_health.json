@@ -1,0 +1,112 @@
+{
+  "weekly_reports": [
+    {
+      "date": "2026-03-12",
+      "week": 11,
+      "metrics": {
+        "predictions": {
+          "total": 21,
+          "correct": 4,
+          "accuracy": 19.047619047619047
+        },
+        "rules": {
+          "total": 10,
+          "with_samples": 2,
+          "utilization": 20.0
+        },
+        "validation_pool": {
+          "total": 7,
+          "ready": 0
+        },
+        "experience": {
+          "success": 1,
+          "failure": 2
+        },
+        "account": {
+          "total_asset": 191728.0,
+          "cash": 162248.0,
+          "market_value": 29480.0,
+          "return_pct": -4.135999999999996
+        }
+      },
+      "issues": [
+        {
+          "type": "critical",
+          "area": "预测系统",
+          "issue": "准确率过低 (19.0%)",
+          "impact": "导致错误决策",
+          "suggestion": "检查规则库质量，增加有效规则"
+        },
+        {
+          "type": "warning",
+          "area": "规则库",
+          "issue": "规则利用率低 (20.0%)",
+          "impact": "大量规则未被使用",
+          "suggestion": "优化规则触发逻辑，确保规则被正确应用"
+        },
+        {
+          "type": "warning",
+          "area": "风险控制",
+          "issue": "单一持仓风险",
+          "impact": "集中度风险过高",
+          "suggestion": "考虑分散持仓到2-3只股票"
+        }
+      ],
+      "suggestions": [
+        {
+          "priority": "high",
+          "issue": "准确率过低 (19.0%)",
+          "suggestion": "检查规则库质量，增加有效规则",
+          "auto_fixable": false,
+          "needs_human": true
+        },
+        {
+          "priority": "medium",
+          "issue": "规则利用率低 (20.0%)",
+          "suggestion": "优化规则触发逻辑，确保规则被正确应用",
+          "auto_fixable": true,
+          "needs_human": false
+        },
+        {
+          "priority": "medium",
+          "issue": "单一持仓风险",
+          "suggestion": "考虑分散持仓到2-3只股票",
+          "auto_fixable": true,
+          "needs_human": false
+        }
+      ],
+      "external_learning": [
+        {
+          "source": "GitHub - 量化交易策略",
+          "insight": "动量因子在A股市场有效性下降",
+          "action": "考虑降低技术指标权重",
+          "date": "2026-03-12"
+        },
+        {
+          "source": "社区讨论",
+          "insight": "行业轮动策略近期表现优异",
+          "action": "增强行业周期规则",
+          "date": "2026-03-12"
+        },
+        {
+          "source": "学术论文",
+          "insight": "情绪因子在震荡市效果显著",
+          "action": "优化新闻情绪分析模块",
+          "date": "2026-03-12"
+        }
+      ],
+      "actions_taken": [
+        "降低未使用规则权重: rsi_oversold",
+        "降低未使用规则权重: macd_golden_cross",
+        "降低未使用规则权重: break_ma20",
+        "降低未使用规则权重: volume_surge",
+        "降低未使用规则权重: low_pe",
+        "降低未使用规则权重: high_roe",
+        "降低未使用规则权重: geopolitical_war",
+        "降低未使用规则权重: policy_support"
+      ]
+    }
+  ],
+  "issues": [],
+  "improvements": []
+}

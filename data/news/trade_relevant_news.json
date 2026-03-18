@@ -1,0 +1,199 @@
+{
+  "fetch_time": "2026-03-03 00:13:21",
+  "total_fetched": 22,
+  "total_relevant": 15,
+  "high_impact_count": 12,
+  "medium_impact_count": 0,
+  "low_impact_count": 3,
+  "news": [
+    {
+      "title": "空袭伊朗前精准押注！美国6个神秘账户狂赚百万",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmyh5106434.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "遭受惨烈袭击后，伊朗做了一件“史无前例”的事",
+      "link": "https://news.sina.com.cn/w/2026-03-03/doc-inhprmyc1159044.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "伊朗向以色列本土发动新一轮导弹袭击",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmye8002501.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "伊朗伊斯法罕核设施和空军基地附近传出巨大爆炸声",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprmye7987387.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "美防长：美军地面部队尚未在伊朗境内部署",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5204978.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "伊朗宣布：“摧毁”一艘悬挂美国国旗的油轮",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1225039.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "伊朗最高领袖哈梅内伊的妻子因伤势过重去世",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsc4451764.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "以色列称对伊朗军事行动将至少持续一周",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8081274.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "以军称投下超2500枚炸弹 摧毁约600个伊朗目标",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1219371.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "英媒：斯塔默曾阻止美军使用迪戈加西亚基地对伊朗发动袭击，特朗普抱怨“非常失望”",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5178214.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "哈梅内伊遇害后，两兄弟成伊朗“顶梁柱”？",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5171692.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "伊朗古列斯坦王宫遭袭受损",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsf1230873.shtml",
+      "source": "国际",
+      "categories": [
+        "贵研铂业"
+      ],
+      "stocks": [
+        "sh.600459"
+      ],
+      "impact_level": "high",
+      "is_relevant": true
+    },
+    {
+      "title": "现货白银快速跳水 跌幅扩大至近6%",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsk5207904.shtml",
+      "source": "国际",
+      "categories": [
+        "商品价格"
+      ],
+      "stocks": [],
+      "impact_level": "low",
+      "is_relevant": true
+    },
+    {
+      "title": "受中东地缘风险升级影响 多家期货交易所发布风险提示",
+      "link": "https://news.sina.com.cn/o/2026-03-02/doc-inhprfsk5192323.shtml",
+      "source": "国际",
+      "categories": [
+        "商品价格"
+      ],
+      "stocks": [],
+      "impact_level": "low",
+      "is_relevant": true
+    },
+    {
+      "title": "天然气飙涨近50%！全球最大LNG生产商卡塔尔能源宣布遇袭停产",
+      "link": "https://news.sina.com.cn/w/2026-03-02/doc-inhprfsh8076844.shtml",
+      "source": "国际",
+      "categories": [
+        "商品价格"
+      ],
+      "stocks": [],
+      "impact_level": "low",
+      "is_relevant": true
+    }
+  ]
+}

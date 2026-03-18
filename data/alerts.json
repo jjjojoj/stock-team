@@ -1,0 +1,97 @@
+[
+  {
+    "id": "sh.600111",
+    "level": "medium",
+    "title": "🟢 北方稀土: 今日大涨 +61.4%",
+    "summary": "成本 ¥57.52 | 现价 ¥57.52 | 目标 ¥69.02 | 止损 ¥52.92",
+    "impact_positive": [],
+    "impact_negative": [],
+    "suggestion": "关注是否到达目标价",
+    "time": "12:29",
+    "read": false
+  },
+  {
+    "id": "sh.600459",
+    "level": "medium",
+    "title": "🟢 贵研铂业: 今日大涨 +25.4%",
+    "summary": "成本 ¥24.74 | 现价 ¥24.74 | 目标 ¥29.69 | 止损 ¥22.76",
+    "impact_positive": [],
+    "impact_negative": [],
+    "suggestion": "关注是否到达目标价",
+    "time": "12:29",
+    "read": false
+  },
+  {
+    "id": "sh.601121",
+    "level": "medium",
+    "title": "🟢 宝地矿业: 今日大涨 +8.8%",
+    "summary": "成本 ¥8.81 | 现价 ¥8.81 | 目标 ¥10.57 | 止损 ¥8.11",
+    "impact_positive": [],
+    "impact_negative": [],
+    "suggestion": "关注是否到达目标价",
+    "time": "12:29",
+    "read": false
+  },
+  {
+    "id": "sz.000758",
+    "level": "medium",
+    "title": "🟢 中色股份: 今日大涨 +8.7%",
+    "summary": "成本 ¥8.43 | 现价 ¥8.43 | 目标 ¥10.12 | 止损 ¥7.76",
+    "impact_positive": [],
+    "impact_negative": [],
+    "suggestion": "关注是否到达目标价",
+    "time": "12:29",
+    "read": false
+  },
+  {
+    "id": "sz.000792",
+    "level": "medium",
+    "title": "🟢 盐湖股份: 今日大涨 +37.7%",
+    "summary": "成本 ¥36.85 | 现价 ¥36.85 | 目标 ¥44.22 | 止损 ¥33.9",
+    "impact_positive": [],
+    "impact_negative": [],
+    "suggestion": "关注是否到达目标价",
+    "time": "12:29",
+    "read": false
+  },
+  {
+    "id": "commodity_1",
+    "level": "low",
+    "title": "✅ 锂价处于历史低位（10.4%分位）",
+    "summary": "碳酸锂价格跌至98,000元/吨，处于近5年历史低位。盐湖股份可分批建仓。",
+    "impact_positive": [
+      "盐湖股份"
+    ],
+    "impact_negative": [],
+    "suggestion": "可分批建仓锂业股，等待周期反转",
+    "time": "09:00",
+    "read": false
+  },
+  {
+    "id": "commodity_2",
+    "level": "medium",
+    "title": "🟡 稀土价格处于中位（28.1%分位）",
+    "summary": "氧化镨钕价格425,000元/吨，价格适中。",
+    "impact_positive": [
+      "北方稀土"
+    ],
+    "impact_negative": [],
+    "suggestion": "正常配置，关注美伊冲突利好",
+    "time": "09:00",
+    "read": false
+  },
+  {
+    "id": "news_1",
+    "level": "medium",
+    "title": "📰 美伊冲突持续，战略金属受关注",
+    "summary": "中东局势紧张，稀土、铂族金属等战略资源价值凸显。",
+    "impact_positive": [
+      "北方稀土",
+      "贵研铂业"
+    ],
+    "impact_negative": [],
+    "suggestion": "关注战略金属板块",
+    "time": "09:00",
+    "read": false
+  }
+]

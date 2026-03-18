@@ -1,0 +1,870 @@
+[
+  {
+    "event_id": "war_middle_east_20260304_110634",
+    "event_name": "中东冲突",
+    "event_severity": "high",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 15000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 1500.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 1500.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 1500.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 1500.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 2250.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 2250.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 2250.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 2250.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110634"
+      }
+    ],
+    "total_buy_amount": 15000.0,
+    "created_at": "2026-03-04T11:06:34.446738",
+    "executed": false
+  },
+  {
+    "event_id": "war_middle_east_20260304_110739",
+    "event_name": "中东冲突",
+    "event_severity": "low",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 5000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 750.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 750.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 750.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 750.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_110739"
+      }
+    ],
+    "total_buy_amount": 5000.0,
+    "created_at": "2026-03-04T11:07:39.516366",
+    "executed": false
+  },
+  {
+    "event_id": "trade_war_20260304_110739",
+    "event_name": "贸易战",
+    "event_severity": "low",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 5000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600111",
+        "name": "北方稀土",
+        "sector": "稀土",
+        "amount": 1250.0,
+        "reason": "稀土龙头",
+        "event": "贸易战",
+        "event_id": "trade_war_20260304_110739"
+      },
+      {
+        "code": "sz.000831",
+        "name": "中国稀土",
+        "sector": "稀土",
+        "amount": 1250.0,
+        "reason": "中重稀土",
+        "event": "贸易战",
+        "event_id": "trade_war_20260304_110739"
+      },
+      {
+        "code": "sz.000876",
+        "name": "新希望",
+        "sector": "农业",
+        "amount": 1500.0,
+        "reason": "饲料龙头",
+        "event": "贸易战",
+        "event_id": "trade_war_20260304_110739"
+      },
+      {
+        "code": "sz.002049",
+        "name": "紫光国微",
+        "sector": "国产替代",
+        "amount": 1000.0,
+        "reason": "芯片",
+        "event": "贸易战",
+        "event_id": "trade_war_20260304_110739"
+      }
+    ],
+    "total_buy_amount": 5000.0,
+    "created_at": "2026-03-04T11:07:39.516950",
+    "executed": false
+  },
+  {
+    "event_id": "war_middle_east_20260304_112022",
+    "event_name": "中东冲突",
+    "event_severity": "medium",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 10000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112022"
+      }
+    ],
+    "total_buy_amount": 10000.0,
+    "created_at": "2026-03-04T11:20:22.546408",
+    "executed": true,
+    "execution_time": "2026-03-04T11:20:22.650944",
+    "execution_results": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "status": "simulated",
+        "shares": 100,
+        "price": 7.51,
+        "amount": 751.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥1308）"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3918）"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "status": "simulated",
+        "shares": 100,
+        "price": 6.77,
+        "amount": 677.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥4796）"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3800）"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥5725）"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3834）"
+      }
+    ],
+    "dry_run": true
+  },
+  {
+    "event_id": "war_middle_east_20260304_112211",
+    "event_name": "中东冲突",
+    "event_severity": "medium",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 10000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112211"
+      }
+    ],
+    "total_buy_amount": 10000.0,
+    "created_at": "2026-03-04T11:22:11.391651",
+    "executed": true,
+    "execution_time": "2026-03-04T11:22:11.486269",
+    "execution_results": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "status": "simulated",
+        "shares": 100,
+        "price": 7.51,
+        "amount": 751.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥1305）"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3949）"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "status": "simulated",
+        "shares": 100,
+        "price": 6.78,
+        "amount": 678.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥4797）"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3791）"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥5709）"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3823）"
+      }
+    ],
+    "dry_run": true
+  },
+  {
+    "event_id": "war_middle_east_20260304_112313",
+    "event_name": "中东冲突",
+    "event_severity": "medium",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 10000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 1000.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 1500.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 1500.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112313"
+      }
+    ],
+    "total_buy_amount": 10000.0,
+    "created_at": "2026-03-04T11:23:13.982973",
+    "executed": true,
+    "execution_time": "2026-03-04T11:23:14.069343",
+    "execution_results": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "status": "simulated",
+        "shares": 100,
+        "price": 7.5,
+        "amount": 750.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥1307）"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3932）"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "status": "simulated",
+        "shares": 100,
+        "price": 6.79,
+        "amount": 679.0,
+        "message": "模拟买入成功"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥4801）"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3793）"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥5690）"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3822）"
+      }
+    ],
+    "dry_run": true
+  },
+  {
+    "event_id": "war_middle_east_20260304_112334",
+    "event_name": "中东冲突",
+    "event_severity": "low",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 5000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "国内最大油气公司",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "天然气龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 500.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "sector": "黄金",
+        "amount": 750.0,
+        "reason": "黄金龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "sector": "黄金",
+        "amount": 750.0,
+        "reason": "有色+黄金",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "sector": "军工",
+        "amount": 750.0,
+        "reason": "航空发动机",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "sector": "军工",
+        "amount": 750.0,
+        "reason": "军舰制造",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112334"
+      }
+    ],
+    "total_buy_amount": 5000.0,
+    "created_at": "2026-03-04T11:23:34.920868",
+    "executed": true,
+    "execution_time": "2026-03-04T11:23:35.016348",
+    "execution_results": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥751）"
+      },
+      {
+        "code": "sh.601857",
+        "name": "中国石油",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥1306）"
+      },
+      {
+        "code": "sh.603393",
+        "name": "新天然气",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3930）"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥678）"
+      },
+      {
+        "code": "sh.600547",
+        "name": "山东黄金",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥4800）"
+      },
+      {
+        "code": "sh.601899",
+        "name": "紫金矿业",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3792）"
+      },
+      {
+        "code": "sh.600893",
+        "name": "航发动力",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥5688）"
+      },
+      {
+        "code": "sh.600150",
+        "name": "中国船舶",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3820）"
+      }
+    ],
+    "dry_run": false
+  },
+  {
+    "event_id": "war_middle_east_20260304_112421",
+    "event_name": "中东冲突",
+    "event_severity": "low",
+    "total_capital": 100000,
+    "available_cash": 100000,
+    "event_position": 10000.0,
+    "buy_orders": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "sector": "油气",
+        "amount": 2500.0,
+        "reason": "国内最大炼油企业",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112421"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "sector": "油气",
+        "amount": 2500.0,
+        "reason": "LNG进口",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112421"
+      },
+      {
+        "code": "sz.002155",
+        "name": "辰州矿业",
+        "sector": "黄金",
+        "amount": 3000.0,
+        "reason": "黄金+锑",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112421"
+      },
+      {
+        "code": "sz.000768",
+        "name": "中航飞机",
+        "sector": "军工",
+        "amount": 2000.0,
+        "reason": "军机龙头",
+        "event": "中东冲突",
+        "event_id": "war_middle_east_20260304_112421"
+      }
+    ],
+    "total_buy_amount": 10000.0,
+    "created_at": "2026-03-04T11:24:21.707989",
+    "executed": true,
+    "execution_time": "2026-03-04T11:24:21.783725",
+    "execution_results": [
+      {
+        "code": "sh.600028",
+        "name": "中国石化",
+        "status": "success",
+        "shares": 300,
+        "price": 7.5,
+        "amount": 2250.0,
+        "message": "买入成功"
+      },
+      {
+        "code": "sh.600256",
+        "name": "广汇能源",
+        "status": "success",
+        "shares": 300,
+        "price": 6.81,
+        "amount": 2042.9999999999998,
+        "message": "买入成功"
+      },
+      {
+        "code": "sz.002155",
+        "name": "辰州矿业",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥3923）"
+      },
+      {
+        "code": "sz.000768",
+        "name": "中航飞机",
+        "status": "skipped",
+        "error": "资金不足（需要 ¥2907）"
+      }
+    ],
+    "dry_run": false
+  }
+]

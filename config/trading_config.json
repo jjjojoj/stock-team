@@ -1,0 +1,36 @@
+{
+  "prediction": {
+    "accuracy_threshold": 0.75,
+    "min_confidence_to_trade": 0.70,
+    "neutral_tolerance": 0.02
+  },
+  "rule_promotion": {
+    "min_samples": 15,
+    "min_success_rate": 0.60,
+    "reject_samples": 8,
+    "reject_rate": 0.35,
+    "description": "规则必须经过至少15次实盘验证，胜率≥60%才晋升；8次验证后胜率<35%则废弃"
+  },
+  "trading": {
+    "check_interval_minutes": 30,
+    "trading_hours": {
+      "morning_open": "09:30",
+      "morning_close": "11:30",
+      "afternoon_open": "13:00",
+      "afternoon_close": "15:00"
+    },
+    "stop_loss_pct": 0.08,
+    "take_profit_pct": 0.20,
+    "trailing_stop_trigger": 0.10
+  },
+  "schedule": {
+    "morning_prediction": "09:00",
+    "noon_update": "13:00",
+    "afternoon_review": "15:30",
+    "rule_promotion": "16:00",
+    "book_learning": "20:00",
+    "weekly_summary": "SUNDAY_20:00"
+  },
+  "created_at": "2026-03-12T12:06:00+08:00",
+  "updated_by": "吴总确认"
+}

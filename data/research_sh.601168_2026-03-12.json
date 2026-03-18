@@ -1,0 +1,23 @@
+{
+  "code": "sh.601168",
+  "name": "西部矿业",
+  "industry": "铜",
+  "date": "2026-03-12",
+  "price": 30.96,
+  "change_pct": -0.6418485237483931,
+  "pe": 15,
+  "pb": 1.5,
+  "market_cap": 150,
+  "dividend_yield": 2.0,
+  "roe": 10,
+  "gross_margin": 20,
+  "net_margin": 10,
+  "score": 55,
+  "reasons": [
+    "铜行业",
+    "调整中（-0.6%）"
+  ],
+  "target_price": 37.15,
+  "stop_loss": 26.32,
+  "recommendation": "推荐"
+}

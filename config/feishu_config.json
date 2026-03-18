@@ -1,0 +1,11 @@
+{
+  "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/11736928-0e52-4e41-b5c6-2c050bff11e6",
+  "daily_report_enabled": true,
+  "trade_notification_enabled": true,
+  "alert_notification_enabled": true,
+  "quiet_hours": {
+    "start": "23:00",
+    "end": "07:00",
+    "enabled": true
+  }
+}

@@ -1,0 +1,215 @@
+[
+  {
+    "date": "2026-03-07T12:08:41.698185",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:09:03.372233",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:09:03.372472",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:09:03.372641",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:09:03.372804",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:09:03.372962",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "timestamp": "2026-03-07T12:09:03.373176",
+    "type": "auto_adjustment",
+    "adjustments": [
+      {
+        "rule": "央企",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:09:03.373169"
+      },
+      {
+        "rule": "市值<200 亿",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:09:03.373173"
+      },
+      {
+        "rule": "PB<2.5",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:09:03.373175"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-07T12:10:40.060721",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:10:40.061025",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:10:40.061260",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:10:40.061482",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "date": "2026-03-07T12:10:40.061738",
+    "trade": {
+      "code": "sh.600459",
+      "name": "贵研铂业",
+      "action": "buy",
+      "result": "+10%",
+      "rules_applied": [
+        "央企",
+        "市值<200 亿",
+        "PB<2.5"
+      ],
+      "success": true
+    }
+  },
+  {
+    "timestamp": "2026-03-07T12:10:40.062128",
+    "type": "auto_adjustment",
+    "adjustments": [
+      {
+        "rule": "央企",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:10:40.062119"
+      },
+      {
+        "rule": "市值<200 亿",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:10:40.062124"
+      },
+      {
+        "rule": "PB<2.5",
+        "action": "increase_weight",
+        "reason": "成功率高 (100.0%)",
+        "timestamp": "2026-03-07T12:10:40.062127"
+      }
+    ]
+  }
+]

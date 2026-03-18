@@ -1,0 +1,49 @@
+{
+  "iterations": [
+    {
+      "timestamp": "2026-03-10 12:23",
+      "type": "feature_add",
+      "description": "新增多数据源适配器、知识库系统、新闻搜索、选股v4、学习引擎v2、迭代记录器",
+      "before": "单一Baostock数据源、无新闻获取、纯文件学习、无迭代记录",
+      "after": "Baostock+AKShare自动切换、新浪/东方财富新闻、向量知识库、迭代记录系统",
+      "reason": "提高数据源稳定性、增强新闻获取能力、改进学习系统、记录迭代过程",
+      "result": "待观察"
+    },
+    {
+      "timestamp": "2026-03-10 12:36",
+      "type": "架构优化",
+      "description": "清理旧版本脚本、统一模块导入、更新auto_trader使用新模块、配置Cron任务、更新文档",
+      "before": "多版本共存(selector_v3/v4)、依赖混乱、无Cron任务、文档过时",
+      "after": "统一版本(selector.py)、统一导入(adapters/knowledge)、Cron配置完成、文档更新",
+      "reason": "解决版本混乱、模块未集成、无自动化问题",
+      "result": "待观察"
+    },
+    {
+      "timestamp": "2026-03-10 12:46",
+      "type": "Cron 配置更新",
+      "description": "根据工作流程图配置 22 个 Cron 任务，覆盖开盘前/盘中/盘后/每周/每月任务",
+      "before": "Cron 任务为空，无自动化执行",
+      "after": "配置 22 个 Cron 任务，包括：联网搜索、AI 预测、自动买入、涨跌停监控、持仓汇报、选股、新闻监控、学习复盘、回测等",
+      "reason": "用户提供了完整工作流程图，需要配置自动化任务",
+      "result": "待观察"
+    },
+    {
+      "timestamp": "2026-03-10 12:48",
+      "type": "错误纠正",
+      "description": "错误判断 Cron 任务为空，实际有 26 个 OpenClaw Cron 任务在运行",
+      "before": "误以为 Cron 任务为空，创建了冗余的 crontab.txt",
+      "after": "删除冗余配置，确认 26 个 OpenClaw Cron 任务正常运行",
+      "reason": "检查方法错误：只检查了系统 crontab，没有检查 OpenClaw Cron 系统",
+      "result": "已纠正"
+    },
+    {
+      "timestamp": "2026-03-10 12:55",
+      "type": "错误教训",
+      "description": "错误判断 Cron 任务为空，实际有 26 个 OpenClaw Cron 任务运行",
+      "before": "用 crontab -l 检查，说没有任务",
+      "after": "用 openclaw cron list 检查，确认 26 个任务正常运行",
+      "reason": "检查方法错误：OpenClaw Cron 和系统 Cron 是分开的，应该用 openclaw cron list",
+      "result": "已纠正"
+    }
+  ]
+}
