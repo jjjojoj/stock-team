@@ -1,7 +1,7 @@
-# AI 股票团队 - 统一标准文档 v3.0
+# AI 股票团队 - 统一标准文档 v3.1
 
-**版本**: v3.0  
-**更新时间**: 2026-03-14  
+**版本**: v3.1  
+**更新时间**: 2026-03-25  
 **状态**: ✅ 当前最新版本
 
 ---
@@ -15,17 +15,16 @@
 | **早盘预测** | 09:00 | `ai_predictor.py` | ✅ 启用 | 分析持仓和自选股，生成今日预测 |
 | **午盘更新** | 13:00 | `ai_predictor.py --update` | ✅ 启用 | 根据午盘走势调整预测 |
 | **盘后复盘** | 15:30 | `daily_review_closed_loop.py` | ✅ 启用 | 验证今日预测，记录对错 |
-| **规则晋升** | 16:00 | `rule_promotion.py` | ✅ 启用 | 检查验证池，晋升成熟规则 |
+| **规则验证/晋升** | 16:00 | `rule_validator.py validate` | ✅ 启用 | 统一验证规则库与验证池，自动晋升/淘汰 |
 | **深度学习** | 20:00 | `daily_book_learning.py` | ✅ 启用 | 从投资书籍中提取规则 |
 | **新闻监控** | 09:30, 11:00, 14:00 | `news_monitor.py check` | ⚠️ 禁用 | 监控重要新闻（待实现 check 命令）|
 | **每周总结** | 周日 20:00 | `weekly_summary.py` | ✅ 启用 | 总结本周表现 |
 
 **调度器状态**：
-- 配置文件：`scripts/scheduler.py`
-- 状态文件：`.scheduler.state`
-- PID 文件：`.scheduler.pid`
-- 启动命令：`python3 scripts/scheduler.py start`
-- 停止命令：`python3 scripts/scheduler.py stop`
+- 唯一控制面：`OpenClaw cron`
+- 查看状态：`python3 scripts/scheduler.py status`
+- 查看任务：`python3 scripts/scheduler.py list --json`
+- 立即执行：`python3 scripts/scheduler.py run <job_id>`
 
 ---
 
@@ -68,8 +67,8 @@
 | 文件名 | 用途 | 核心字段 | 更新频率 |
 |--------|------|----------|----------|
 | `accuracy_stats.json` | 预测准确率 | total_predictions, correct, partial, wrong, by_rule | 每日 |
-| `prediction_rules.json` | 规则库 | direction_rules, magnitude_rules, timing_rules, confidence_rules | 按需 |
-| `rule_validation_pool.json` | 验证池 | 规则对象（rule, testable_form, status, confidence） | 按需 |
+| `prediction_rules.json` | 规则库镜像 | SQLite `prediction_rules` 表的 JSON 兼容导出 | 按需 |
+| `rule_validation_pool.json` | 验证池镜像 | SQLite `rule_validation_pool` 表的 JSON 兼容导出 | 按需 |
 | `book_knowledge.json` | 书籍学习 | book_001/002/003（title, author, key_points） | 每日 |
 | `knowledge_base.json` | 知识库 | items（type, source, title, content） | 按需 |
 | `daily_learning_log.json` | 学习日志 | 日志数组（timestamp, type, content） | 每日 |
@@ -108,7 +107,7 @@
 | 文件名 | 用途 | 核心内容 |
 |--------|------|----------|
 | `positions.json` | 持仓配置 | 当前持仓 |
-| `watchlist.json` | 自选股 | 监控列表 |
+| `watchlist.json` | 自选股镜像 | SQLite `watchlist` 表的 JSON 兼容导出 |
 | `api_config.json` | API 配置 | 所有 API key |
 | `strategy.md` | 策略文档 | 投资策略 |
 

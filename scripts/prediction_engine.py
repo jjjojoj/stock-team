@@ -24,6 +24,8 @@ import urllib.request
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.storage import load_rules, load_watchlist, save_rules, save_watchlist
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 CONFIG_DIR = PROJECT_ROOT / "config"
@@ -141,17 +143,14 @@ class PredictionEngine:
     
     def _load_rules(self):
         """加载预测规则"""
-        if self.rules_file.exists():
-            with open(self.rules_file, 'r', encoding='utf-8') as f:
-                self.rules = json.load(f)
-        else:
+        self.rules = load_rules(PREDICTION_RULES)
+        if not self.rules:
             self.rules = PREDICTION_RULES
             self._save_rules()
-    
+
     def _save_rules(self):
         """保存规则"""
-        with open(self.rules_file, 'w', encoding='utf-8') as f:
-                json.dump(self.rules, f, ensure_ascii=False, indent=2)
+        save_rules(self.rules)
     
     def _load_accuracy(self):
         """加载准确率统计"""
@@ -410,19 +409,15 @@ class PredictionEngine:
             (添加的数量, 买入的数量)
         """
         # 读取现有观察池
-        watchlist = []
-        if self.watchlist_file.exists():
-            with open(self.watchlist_file, 'r', encoding='utf-8') as f:
-                watchlist = json.load(f)
-        
+        watchlist = load_watchlist({})
+
         added_count = 0
         bought_count = 1
-        existing_codes = set(s['code'] for s in watchlist)
-        
+        existing_codes = set(watchlist.keys())
+
         for pred in predictions:
             if pred['code'] not in existing_codes:
-                watchlist.append({
-                    "code": pred['code'],
+                watchlist[pred['code']] = {
                     "name": pred['name'],
                     "industry": pred['industry'],
                     "added_date": datetime.now().strftime("%Y-%m-%d"),
@@ -432,8 +427,9 @@ class PredictionEngine:
                     "confidence": pred['confidence'],
                     "matched_rules": pred['matched_rules'],
                     "prediction_id": f"{pred['code']}_{datetime.now().strftime('%Y%m%d_%H%M')}"
-                })
+                }
                 added_count += 1
+                existing_codes.add(pred['code'])
                 
                 # 高置信度自动买入
                 if pred['confidence'] >= 80:
@@ -471,8 +467,7 @@ class PredictionEngine:
                         print(f"   ❌ 买入出错: {e}")
         
         # 保存
-        with open(self.watchlist_file, 'w', encoding='utf-8') as f:
-            json.dump(watchlist, f, ensure_ascii=False, indent=2)
+        save_watchlist(watchlist)
         
         self._save_predictions(predictions)
         
@@ -692,18 +687,14 @@ def main():
                         'industry': pos.get('industry', '')
                     })
         
-        if watchlist_file.exists():
-            with open(watchlist_file, 'r', encoding='utf-8') as f:
-                watchlist = json.load(f)
-                if isinstance(watchlist, list):
-                    for stock in watchlist:
-                        if isinstance(stock, dict) and 'code' in stock:
-                            if stock['code'] not in [s['code'] for s in stock_pool]:
-                                stock_pool.append({
-                                    'code': stock['code'],
-                                    'name': stock['name'],
-                                    'industry': stock.get('industry', '')
-                                })
+        watchlist = load_watchlist({})
+        for code, stock in watchlist.items():
+            if code not in [s['code'] for s in stock_pool]:
+                stock_pool.append({
+                    'code': code,
+                    'name': stock.get('name', code),
+                    'industry': stock.get('industry', '')
+                })
         
         print(f"扫描股票池: {len(stock_pool)} 只股票")
         

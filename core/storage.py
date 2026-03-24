@@ -57,6 +57,585 @@ def get_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+def _load_json_blob(blob: Optional[str], default: Any) -> Any:
+    """Decode a JSON blob stored in SQLite."""
+    if not blob:
+        return default
+    try:
+        return json.loads(blob)
+    except json.JSONDecodeError:
+        return default
+
+
+def _get_table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
+    """Return the set of column names present in a table."""
+    rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    return {row["name"] for row in rows}
+
+
+def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
+    """Create/upgrade SQLite tables used as the project's source of truth."""
+    db_path = Path(db_path)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with get_db(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS watchlist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                symbol TEXT NOT NULL UNIQUE,
+                name TEXT,
+                industry TEXT,
+                reason TEXT,
+                target_price REAL,
+                alert_price_high REAL,
+                alert_price_low REAL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS prediction_rules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT NOT NULL,
+                rule_id TEXT NOT NULL,
+                condition TEXT,
+                prediction TEXT,
+                weight REAL,
+                confidence_boost REAL,
+                samples INTEGER DEFAULT 0,
+                success_rate REAL DEFAULT 0,
+                source TEXT,
+                status TEXT DEFAULT 'active',
+                data_json TEXT NOT NULL,
+                created_at TIMESTAMP,
+                updated_at TIMESTAMP,
+                UNIQUE(category, rule_id)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rule_validation_pool (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rule_id TEXT NOT NULL UNIQUE,
+                category TEXT,
+                rule_text TEXT,
+                testable_form TEXT,
+                source TEXT,
+                source_book TEXT,
+                status TEXT DEFAULT 'validating',
+                confidence REAL DEFAULT 0,
+                backtest_samples INTEGER DEFAULT 0,
+                backtest_success_rate REAL DEFAULT 0,
+                live_samples INTEGER DEFAULT 0,
+                live_success_rate REAL DEFAULT 0,
+                data_json TEXT NOT NULL,
+                created_at TIMESTAMP,
+                updated_at TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rejected_rules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rule_id TEXT NOT NULL UNIQUE,
+                category TEXT,
+                rule_text TEXT,
+                testable_form TEXT,
+                source TEXT,
+                source_book TEXT,
+                status TEXT DEFAULT 'rejected',
+                confidence REAL DEFAULT 0,
+                reject_reason TEXT,
+                data_json TEXT NOT NULL,
+                created_at TIMESTAMP,
+                updated_at TIMESTAMP,
+                rejected_at TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_prediction_rules_category
+            ON prediction_rules(category)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_prediction_rules_status
+            ON prediction_rules(status)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_rule_validation_pool_status
+            ON rule_validation_pool(status)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_rule_validation_pool_category
+            ON rule_validation_pool(category)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_rejected_rules_category
+            ON rejected_rules(category)
+            """
+        )
+
+        watchlist_columns = _get_table_columns(conn, "watchlist")
+        extra_watchlist_columns = {
+            "priority": "TEXT",
+            "stop_loss": "REAL",
+            "score": "REAL",
+            "status": "TEXT DEFAULT 'active'",
+            "updated_at": "TIMESTAMP",
+            "metadata": "TEXT",
+        }
+        for column_name, column_sql in extra_watchlist_columns.items():
+            if column_name not in watchlist_columns:
+                conn.execute(f"ALTER TABLE watchlist ADD COLUMN {column_name} {column_sql}")
+
+
+def sync_watchlist_to_db(
+    watchlist_data: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Mirror watchlist data into SQLite."""
+    ensure_storage_tables(db_path)
+    watchlist_data = watchlist_data or {}
+    now = datetime.now().isoformat()
+
+    with get_db(db_path) as conn:
+        current_symbols = set(watchlist_data.keys())
+        if current_symbols:
+            placeholders = ",".join("?" for _ in current_symbols)
+            conn.execute(
+                f"DELETE FROM watchlist WHERE symbol NOT IN ({placeholders})",
+                tuple(current_symbols),
+            )
+        else:
+            conn.execute("DELETE FROM watchlist")
+
+        for symbol, entry in watchlist_data.items():
+            entry = dict(entry or {})
+            added_at = entry.get("added_at") or entry.get("added_date") or now
+            metadata = json.dumps(entry, ensure_ascii=False)
+            conn.execute(
+                """
+                INSERT INTO watchlist (
+                    symbol, name, industry, reason, target_price,
+                    alert_price_high, alert_price_low, added_at,
+                    priority, stop_loss, score, status, updated_at, metadata
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(symbol) DO UPDATE SET
+                    name = excluded.name,
+                    industry = excluded.industry,
+                    reason = excluded.reason,
+                    target_price = excluded.target_price,
+                    alert_price_high = excluded.alert_price_high,
+                    alert_price_low = excluded.alert_price_low,
+                    added_at = excluded.added_at,
+                    priority = excluded.priority,
+                    stop_loss = excluded.stop_loss,
+                    score = excluded.score,
+                    status = excluded.status,
+                    updated_at = excluded.updated_at,
+                    metadata = excluded.metadata
+                """,
+                (
+                    symbol,
+                    entry.get("name", ""),
+                    entry.get("industry", ""),
+                    entry.get("reason") or entry.get("added_reason", ""),
+                    entry.get("target_price"),
+                    entry.get("alert_price_high"),
+                    entry.get("alert_price_low"),
+                    added_at,
+                    entry.get("priority"),
+                    entry.get("stop_loss"),
+                    entry.get("score"),
+                    entry.get("status", "active"),
+                    now,
+                    metadata,
+                ),
+            )
+
+
+def load_watchlist(
+    default: Optional[Dict[str, Dict[str, Any]]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Dict[str, Any]]:
+    """Load watchlist from SQLite, bootstrapping from JSON if necessary."""
+    ensure_storage_tables(db_path)
+
+    with get_db(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT symbol, name, industry, reason, target_price,
+                   alert_price_high, alert_price_low, added_at,
+                   priority, stop_loss, score, status, updated_at, metadata
+            FROM watchlist
+            ORDER BY COALESCE(updated_at, added_at) DESC, symbol
+            """
+        ).fetchall()
+
+    if rows:
+        watchlist: Dict[str, Dict[str, Any]] = {}
+        for row in rows:
+            entry = _load_json_blob(row["metadata"], {})
+            entry.setdefault("name", row["name"] or "")
+            entry.setdefault("industry", row["industry"] or "")
+            if row["reason"] and not entry.get("reason") and not entry.get("added_reason"):
+                entry["reason"] = row["reason"]
+            if row["target_price"] is not None and "target_price" not in entry:
+                entry["target_price"] = row["target_price"]
+            if row["alert_price_high"] is not None and "alert_price_high" not in entry:
+                entry["alert_price_high"] = row["alert_price_high"]
+            if row["alert_price_low"] is not None and "alert_price_low" not in entry:
+                entry["alert_price_low"] = row["alert_price_low"]
+            if row["stop_loss"] is not None and "stop_loss" not in entry:
+                entry["stop_loss"] = row["stop_loss"]
+            if row["score"] is not None and "score" not in entry:
+                entry["score"] = row["score"]
+            if row["priority"] and "priority" not in entry:
+                entry["priority"] = row["priority"]
+            if row["status"] and "status" not in entry:
+                entry["status"] = row["status"]
+            if row["added_at"] and not entry.get("added_at") and not entry.get("added_date"):
+                entry["added_date"] = str(row["added_at"])[:10]
+            watchlist[row["symbol"]] = entry
+        return watchlist
+
+    fallback = load_json(WATCHLIST_FILE, default or {})
+    if isinstance(fallback, dict) and fallback:
+        sync_watchlist_to_db(fallback, db_path=db_path)
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def save_watchlist(
+    watchlist_data: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Persist watchlist to SQLite and JSON mirror."""
+    sync_watchlist_to_db(watchlist_data, db_path=db_path)
+    save_json(WATCHLIST_FILE, watchlist_data)
+
+
+def sync_rules_to_db(rules_data: Dict[str, Dict[str, Dict[str, Any]]], db_path: Path = DB_PATH) -> None:
+    """Mirror prediction rule library into SQLite."""
+    ensure_storage_tables(db_path)
+    rules_data = rules_data or {}
+    now = datetime.now().isoformat()
+
+    with get_db(db_path) as conn:
+        current_keys = {
+            (category, rule_id)
+            for category, category_rules in rules_data.items()
+            for rule_id in category_rules.keys()
+        }
+
+        if current_keys:
+            placeholders = ",".join("(?, ?)" for _ in current_keys)
+            params: list[Any] = []
+            for category, rule_id in current_keys:
+                params.extend([category, rule_id])
+            conn.execute(
+                f"""
+                DELETE FROM prediction_rules
+                WHERE (category, rule_id) NOT IN ({placeholders})
+                """,
+                tuple(params),
+            )
+        else:
+            conn.execute("DELETE FROM prediction_rules")
+
+        for category, category_rules in rules_data.items():
+            for rule_id, rule in category_rules.items():
+                rule = dict(rule or {})
+                conn.execute(
+                    """
+                    INSERT INTO prediction_rules (
+                        category, rule_id, condition, prediction, weight,
+                        confidence_boost, samples, success_rate, source,
+                        status, data_json, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(category, rule_id) DO UPDATE SET
+                        condition = excluded.condition,
+                        prediction = excluded.prediction,
+                        weight = excluded.weight,
+                        confidence_boost = excluded.confidence_boost,
+                        samples = excluded.samples,
+                        success_rate = excluded.success_rate,
+                        source = excluded.source,
+                        status = excluded.status,
+                        data_json = excluded.data_json,
+                        created_at = excluded.created_at,
+                        updated_at = excluded.updated_at
+                    """,
+                    (
+                        category,
+                        rule_id,
+                        rule.get("condition"),
+                        rule.get("prediction"),
+                        rule.get("weight"),
+                        rule.get("confidence_boost"),
+                        rule.get("samples", 0),
+                        rule.get("success_rate", 0.0),
+                        rule.get("source"),
+                        rule.get("status", "active"),
+                        json.dumps(rule, ensure_ascii=False),
+                        rule.get("created_at"),
+                        rule.get("updated_at") or now,
+                    ),
+                )
+
+
+def load_rules(
+    default: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """Load prediction rules from SQLite, bootstrapping from JSON if necessary."""
+    ensure_storage_tables(db_path)
+
+    with get_db(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT category, rule_id, data_json
+            FROM prediction_rules
+            ORDER BY category, rule_id
+            """
+        ).fetchall()
+
+    if rows:
+        rules: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        for row in rows:
+            rules.setdefault(row["category"], {})[row["rule_id"]] = _load_json_blob(row["data_json"], {})
+        return rules
+
+    fallback = load_json(RULES_FILE, default or {})
+    if isinstance(fallback, dict) and fallback:
+        sync_rules_to_db(fallback, db_path=db_path)
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def save_rules(
+    rules_data: Dict[str, Dict[str, Dict[str, Any]]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Persist prediction rules to SQLite and JSON mirror."""
+    sync_rules_to_db(rules_data, db_path=db_path)
+    save_json(RULES_FILE, rules_data)
+
+
+def sync_validation_pool_to_db(
+    validation_pool: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Mirror rule validation pool into SQLite."""
+    ensure_storage_tables(db_path)
+    validation_pool = validation_pool or {}
+    now = datetime.now().isoformat()
+
+    with get_db(db_path) as conn:
+        current_ids = set(validation_pool.keys())
+        if current_ids:
+            placeholders = ",".join("?" for _ in current_ids)
+            conn.execute(
+                f"DELETE FROM rule_validation_pool WHERE rule_id NOT IN ({placeholders})",
+                tuple(current_ids),
+            )
+        else:
+            conn.execute("DELETE FROM rule_validation_pool")
+
+        for rule_id, rule in validation_pool.items():
+            rule = dict(rule or {})
+            backtest = rule.get("backtest") or {}
+            live_test = rule.get("live_test") or {}
+            conn.execute(
+                """
+                INSERT INTO rule_validation_pool (
+                    rule_id, category, rule_text, testable_form, source,
+                    source_book, status, confidence, backtest_samples,
+                    backtest_success_rate, live_samples, live_success_rate,
+                    data_json, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(rule_id) DO UPDATE SET
+                    category = excluded.category,
+                    rule_text = excluded.rule_text,
+                    testable_form = excluded.testable_form,
+                    source = excluded.source,
+                    source_book = excluded.source_book,
+                    status = excluded.status,
+                    confidence = excluded.confidence,
+                    backtest_samples = excluded.backtest_samples,
+                    backtest_success_rate = excluded.backtest_success_rate,
+                    live_samples = excluded.live_samples,
+                    live_success_rate = excluded.live_success_rate,
+                    data_json = excluded.data_json,
+                    created_at = excluded.created_at,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    rule_id,
+                    rule.get("category"),
+                    rule.get("rule"),
+                    rule.get("testable_form"),
+                    rule.get("source"),
+                    rule.get("source_book"),
+                    rule.get("status", "validating"),
+                    rule.get("confidence", 0.0),
+                    backtest.get("samples", 0),
+                    backtest.get("success_rate", 0.0),
+                    live_test.get("samples", 0),
+                    live_test.get("success_rate", 0.0),
+                    json.dumps(rule, ensure_ascii=False),
+                    rule.get("created_at"),
+                    rule.get("updated_at") or now,
+                ),
+            )
+
+
+def load_validation_pool(
+    default: Optional[Dict[str, Dict[str, Any]]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Dict[str, Any]]:
+    """Load validation pool from SQLite, bootstrapping from JSON if necessary."""
+    ensure_storage_tables(db_path)
+
+    with get_db(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT rule_id, data_json
+            FROM rule_validation_pool
+            ORDER BY COALESCE(updated_at, created_at) DESC, rule_id
+            """
+        ).fetchall()
+
+    if rows:
+        return {
+            row["rule_id"]: _load_json_blob(row["data_json"], {})
+            for row in rows
+        }
+
+    fallback = load_json(VALIDATION_POOL_FILE, default or {})
+    if isinstance(fallback, dict) and fallback:
+        sync_validation_pool_to_db(fallback, db_path=db_path)
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def save_validation_pool(
+    validation_pool: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Persist validation pool to SQLite and JSON mirror."""
+    sync_validation_pool_to_db(validation_pool, db_path=db_path)
+    save_json(VALIDATION_POOL_FILE, validation_pool)
+
+
+def sync_rejected_rules_to_db(
+    rejected_rules: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Mirror rejected rules into SQLite."""
+    ensure_storage_tables(db_path)
+    rejected_rules = rejected_rules or {}
+    now = datetime.now().isoformat()
+
+    with get_db(db_path) as conn:
+        current_ids = set(rejected_rules.keys())
+        if current_ids:
+            placeholders = ",".join("?" for _ in current_ids)
+            conn.execute(
+                f"DELETE FROM rejected_rules WHERE rule_id NOT IN ({placeholders})",
+                tuple(current_ids),
+            )
+        else:
+            conn.execute("DELETE FROM rejected_rules")
+
+        for rule_id, rule in rejected_rules.items():
+            rule = dict(rule or {})
+            conn.execute(
+                """
+                INSERT INTO rejected_rules (
+                    rule_id, category, rule_text, testable_form, source,
+                    source_book, status, confidence, reject_reason,
+                    data_json, created_at, updated_at, rejected_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(rule_id) DO UPDATE SET
+                    category = excluded.category,
+                    rule_text = excluded.rule_text,
+                    testable_form = excluded.testable_form,
+                    source = excluded.source,
+                    source_book = excluded.source_book,
+                    status = excluded.status,
+                    confidence = excluded.confidence,
+                    reject_reason = excluded.reject_reason,
+                    data_json = excluded.data_json,
+                    created_at = excluded.created_at,
+                    updated_at = excluded.updated_at,
+                    rejected_at = excluded.rejected_at
+                """,
+                (
+                    rule_id,
+                    rule.get("category"),
+                    rule.get("rule") or rule.get("condition"),
+                    rule.get("testable_form"),
+                    rule.get("source"),
+                    rule.get("source_book"),
+                    rule.get("status", "rejected"),
+                    rule.get("confidence", 0.0),
+                    rule.get("reject_reason") or rule.get("reason"),
+                    json.dumps(rule, ensure_ascii=False),
+                    rule.get("created_at"),
+                    rule.get("updated_at") or now,
+                    rule.get("rejected_at"),
+                ),
+            )
+
+
+def load_rejected_rules(
+    default: Optional[Dict[str, Dict[str, Any]]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Dict[str, Any]]:
+    """Load rejected rules from SQLite, bootstrapping from JSON if necessary."""
+    ensure_storage_tables(db_path)
+
+    with get_db(db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT rule_id, data_json
+            FROM rejected_rules
+            ORDER BY COALESCE(rejected_at, updated_at, created_at) DESC, rule_id
+            """
+        ).fetchall()
+
+    if rows:
+        return {
+            row["rule_id"]: _load_json_blob(row["data_json"], {})
+            for row in rows
+        }
+
+    fallback = load_json(REJECTED_RULES_FILE, default or {})
+    if isinstance(fallback, dict) and fallback:
+        sync_rejected_rules_to_db(fallback, db_path=db_path)
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def save_rejected_rules(
+    rejected_rules: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> None:
+    """Persist rejected rules to SQLite and JSON mirror."""
+    sync_rejected_rules_to_db(rejected_rules, db_path=db_path)
+    save_json(REJECTED_RULES_FILE, rejected_rules)
+
+
 def sync_predictions_to_db(predictions_data: Dict[str, Any], db_path: Path = DB_PATH) -> None:
     """Mirror normalized predictions into the dashboard database."""
     normalized = normalize_prediction_collection(predictions_data)

@@ -30,7 +30,7 @@
 | 文件 | 路径 | 用途 | 说明 |
 |------|------|------|------|
 | **positions.json** | `config/positions.json` | 初始持仓配置 | 买入时手动更新 |
-| **watchlist.json** | `config/watchlist.json` | 自选股配置 | 手动维护 |
+| **watchlist.json** | `config/watchlist.json` | 自选股 JSON 镜像（主数据在 SQLite `watchlist`） | 兼容导出 |
 
 ### 历史记录（只写）
 
@@ -98,9 +98,9 @@
 ```
 GET /api/overview      # 概览数据（从 stock_team.db 读取）
 GET /api/agents        # Agent 数据（硬编码）
-GET /api/cron          # Cron 任务（从 .scheduler.state 读取）
-GET /api/rules         # 规则库（从 learning/prediction_rules.json 读取）
-GET /api/validation-pool # 验证池（从 learning/rule_validation_pool.json 读取）
+GET /api/cron          # Cron 任务（从 OpenClaw cron 实时读取）
+GET /api/rules         # 规则库（从 SQLite `prediction_rules` / JSON 镜像读取）
+GET /api/validation-pool # 验证池（从 SQLite `rule_validation_pool` / JSON 镜像读取）
 GET /api/knowledge     # 知识库（从 learning/knowledge_base.json 读取）
 ```
 
@@ -149,7 +149,7 @@ sqlite3 database/stock_team.db "SELECT MAX(date) FROM account;"
 ```
 
 **解决**：
-- Scheduler 未运行 → 重启：`python3 scripts/scheduler.py restart`
+- Scheduler/Cron 异常 → 用 `python3 scripts/scheduler.py status` 或 `openclaw cron list --json` 排查
 - Cron 任务失败 → 检查日志：`logs/morning_prediction_*.log`
 
 ### Q3: 如何添加新持仓？

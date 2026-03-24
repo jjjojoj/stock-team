@@ -7,10 +7,37 @@ Integrates with existing dashboard_v3.py
 import json
 import subprocess
 import os
+import re
 from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def extract_script_key(job):
+    """Best-effort extraction of the underlying script name from a cron payload."""
+    payload = job.get('payload', {}) or {}
+    message = payload.get('message', '') or ''
+
+    match = re.search(r"scripts/([A-Za-z0-9_]+)\.py", message)
+    if match:
+        return match.group(1)
+
+    name = (job.get('name') or '').strip().lower()
+    fallback_map = {
+        '规则验证（每日）': 'rule_validator',
+        '每日炒股书籍学习': 'daily_book_learning',
+        '每日预测复盘': 'daily_review_closed_loop',
+        '收盘复盘 + 选股标准进化': 'market_review_v2',
+        '选股层 - 动态标准选股': 'selector',
+        '交易层 - 自动买入': 'auto_trader_v3',
+        '交易层 - 自动卖出': 'auto_trader_v3',
+    }
+    for display_name, script_key in fallback_map.items():
+        if job.get('name') == display_name:
+            return script_key
+
+    return re.sub(r'[^a-z0-9]+', '_', name).strip('_')
 
 def get_openclaw_cron_status():
     """
@@ -58,10 +85,12 @@ def get_openclaw_cron_status():
                 'id': job.get('id'),
                 'name': job.get('name', 'Unknown'),
                 'schedule': schedule_expr,
+                'enabled': job.get('enabled', True),
                 'last_run': last_run_str,
                 'next_run': next_run_str,
                 'status': status,
                 'status_color': status_color,
+                'script_key': extract_script_key(job),
                 'agent_id': job.get('agentId', 'main'),
                 'agentId': job.get('agentId', 'main'),  # Alias for HTML compatibility
                 'last_run_raw': last_run or 0,  # Raw timestamp for sorting

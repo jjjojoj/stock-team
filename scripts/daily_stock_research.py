@@ -26,6 +26,8 @@ LOG_DIR = PROJECT_ROOT / "logs"
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.storage import load_watchlist, save_watchlist
+
 def get_stock_data(code: str) -> dict:
     """获取股票实时数据（腾讯 API）"""
     try:
@@ -60,16 +62,13 @@ def get_stock_data(code: str) -> dict:
 def get_fundamental_data(code: str) -> dict:
     """获取基本面数据（简化版，从股票池配置读取）"""
     # 从 watchlist 或 stock_pool 读取预设数据
-    watchlist_file = CONFIG_DIR / "watchlist.json"
-    if watchlist_file.exists():
-        with open(watchlist_file, 'r', encoding='utf-8') as f:
-            watchlist = json.load(f)
-            if code in watchlist:
-                return {
-                    'roe': watchlist[code].get('roe', 10),
-                    'gross_margin': watchlist[code].get('gross_margin', 20),
-                    'net_margin': watchlist[code].get('net_margin', 10),
-                }
+    watchlist = load_watchlist({})
+    if code in watchlist:
+        return {
+            'roe': watchlist[code].get('roe', 10),
+            'gross_margin': watchlist[code].get('gross_margin', 20),
+            'net_margin': watchlist[code].get('net_margin', 10),
+        }
     return {'roe': 10, 'gross_margin': 20, 'net_margin': 10}  # 默认值
 
 
@@ -163,12 +162,7 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
 
 def add_to_watchlist(analysis: dict):
     """加入观察池"""
-    watchlist_file = CONFIG_DIR / "watchlist.json"
-    
-    watchlist = {}
-    if watchlist_file.exists():
-        with open(watchlist_file, 'r', encoding='utf-8') as f:
-            watchlist = json.load(f)
+    watchlist = load_watchlist({})
     
     # 添加股票
     watchlist[analysis['code']] = {
@@ -182,8 +176,7 @@ def add_to_watchlist(analysis: dict):
         'priority': 'high' if analysis['score'] >= 70 else 'medium',
     }
     
-    with open(watchlist_file, 'w', encoding='utf-8') as f:
-        json.dump(watchlist, f, ensure_ascii=False, indent=2)
+    save_watchlist(watchlist)
     
     print(f"\n✅ 已加入观察池：{analysis['name']} ({analysis['code']})")
 
@@ -247,7 +240,6 @@ def select_stock_to_research():
     """从股票池选择 1 只未研究的股票"""
     # 读取股票池
     pool_file = CONFIG_DIR / "stock_pool.md"
-    watchlist_file = CONFIG_DIR / "watchlist.json"
     positions_file = CONFIG_DIR / "positions.json"
     
     # 已持仓的股票
@@ -257,10 +249,7 @@ def select_stock_to_research():
             positions = set(json.load(f).keys())
     
     # 已在观察池的股票
-    watchlist = set()
-    if watchlist_file.exists():
-        with open(watchlist_file, 'r', encoding='utf-8') as f:
-            watchlist = set(json.load(f).keys())
+    watchlist = set(load_watchlist({}).keys())
     
     # 从 stock_pool.md 解析股票代码（简化版：硬编码重点股票）
     # 实际应该解析 markdown 表格

@@ -19,6 +19,10 @@ PROJECT_ROOT = Path(__file__).parent.parent
 CONFIG_DIR = PROJECT_ROOT / "config"
 DATA_DIR = PROJECT_ROOT / "data"
 
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.storage import load_watchlist, save_watchlist
+
 # 股票池配置
 MAX_POOL_SIZE = 20
 MIN_POOL_SIZE = 15  # 低于此数量时补充
@@ -142,7 +146,7 @@ def find_replacement_candidate() -> dict:
     """
     # 读取股票池配置
     pool_file = CONFIG_DIR / "stock_pool.md"
-    watchlist = load_json(CONFIG_DIR / "watchlist.json")
+    watchlist = load_watchlist({})
     positions = load_json(CONFIG_DIR / "positions.json")
     
     # 已存在的股票（观察池 + 持仓）
@@ -182,7 +186,7 @@ def manage_pool(action: str = "auto"):
     print("=" * 60)
     
     # 加载数据
-    watchlist = load_json(CONFIG_DIR / "watchlist.json")
+    watchlist = load_watchlist({})
     eliminated = load_json(CONFIG_DIR / "eliminated_pool.json")
     predictions = load_json(DATA_DIR / "predictions.json")
     
@@ -238,7 +242,7 @@ def manage_pool(action: str = "auto"):
             print(f"✅ 股票池数量正常（{len(watchlist)}只，范围{MIN_POOL_SIZE}-{MAX_POOL_SIZE}）")
     
     # 保存
-    save_json(CONFIG_DIR / "watchlist.json", watchlist)
+    save_watchlist(watchlist)
     save_json(CONFIG_DIR / "eliminated_pool.json", eliminated)
     
     print(f"\n✅ 股票池更新完成")

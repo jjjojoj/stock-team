@@ -30,7 +30,7 @@ except ImportError:
     PredictionSystem = prediction_module.PredictionSystem
 from news_fetcher import NewsFetcher
 from news_trigger import NewsMonitor
-from core.storage import POSITIONS_FILE, WATCHLIST_FILE
+from core.storage import POSITIONS_FILE, load_rules, load_watchlist
 
 # 尝试导入 akshare 用于计算真实技术指标
 try:
@@ -73,11 +73,7 @@ class AIPredictor:
 
     def _load_rules(self) -> Dict:
         """加载规则库【修复 P0-5】"""
-        RULES_FILE = PROJECT_ROOT / "learning" / "prediction_rules.json"
-        if RULES_FILE.exists():
-            with RULES_FILE.open('r', encoding='utf-8') as f:
-                return json.load(f)
-        return {}
+        return load_rules({})
     
     def _load_positions(self) -> Dict:
         if POSITIONS_FILE.exists():
@@ -86,9 +82,9 @@ class AIPredictor:
         return {}
     
     def _load_watchlist(self) -> Dict:
-        if WATCHLIST_FILE.exists():
-            with WATCHLIST_FILE.open('r', encoding='utf-8') as f:
-                return json.load(f)
+        watchlist = load_watchlist({})
+        if watchlist:
+            return watchlist
         # 默认自选股
         return {
             "sh.600111": {"name": "北方稀土", "industry": "稀土"},

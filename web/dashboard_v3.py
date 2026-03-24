@@ -184,86 +184,43 @@ def get_risk_level():
     return {"level": "low", "notes": "无近期风险记录"}
 
 def get_scheduled_scripts():
-    """获取今日待运行的脚本列表 - 基于 openclaw cron list 实际调度"""
-    today = datetime.now().strftime("%Y-%m-%d")
+    """获取今日待运行的脚本列表 - 直接基于 OpenClaw cron 实时数据。"""
+    cron_tasks = get_openclaw_cron_status()
     scheduled = []
 
-    # 获取当前星期几 (0=Monday, 6=Sunday)
-    from datetime import datetime as dt
-    current_weekday = dt.now().weekday()
-
-    # 周一到周五的定时任务（根据openclaw cron list实际调度时间）
-    if current_weekday < 5:  # 周一到周五
-        scheduled = [
-            # 09:00 - 开盘前
-            {"name": "市场风格监控", "key": "style_monitor", "freq": "每日", "next_run": f"{today} 09:00"},
-            {"name": "开盘前联网搜索", "key": "web_search", "freq": "每日", "next_run": f"{today} 09:00"},
-            {"name": "API 健康检查", "key": "api_health", "freq": "每日 3次 (09/11/15)", "next_run": f"{today} 09:00"},
-            {"name": "涨跌停实时监控", "key": "circuit_breaker", "freq": "每日 2次 (09/14)", "next_run": f"{today} 09:25"},
-            {"name": "熔断紧急减仓", "key": "circuit_breaker", "freq": "每日 2次 (09/14)", "next_run": f"{today} 09:25"},
-            {"name": "自动交易系统-买入", "key": "auto_trader", "freq": "每日", "next_run": f"{today} 09:30"},
-            {"name": "早上AI预测生成", "key": "ai_predictor", "freq": "每日", "next_run": f"{today} 09:30"},
-            {"name": "持仓汇报-早盘开盘", "key": "stock_research", "freq": "每日", "next_run": f"{today} 09:35"},
-            {"name": "每日深度研究 1 股", "key": "stock_research", "freq": "每日", "next_run": f"{today} 10:00"},
-            {"name": "新闻监控-预测更新", "key": "news_monitor", "freq": "每日 3次 (10/12/14)", "next_run": f"{today} 10:00"},
-            {"name": "午盘反思", "key": "midday_review", "freq": "每日", "next_run": f"{today} 11:30"},
-            {"name": "持仓汇报-午盘收盘", "key": "daily_perf", "freq": "每日", "next_run": f"{today} 11:30"},
-
-            # 13:00 - 下午开盘前
-            {"name": "自动交易系统-盘前", "key": "auto_trader", "freq": "每日", "next_run": f"{today} 13:00"},
-            {"name": "持仓汇报-午盘开盘", "key": "daily_perf", "freq": "每日", "next_run": f"{today} 14:00"},
-
-            # 15:00 - 盘后
-            {"name": "动态标准选股", "key": "selector", "freq": "每日", "next_run": f"{today} 15:00"},
-            {"name": "持仓汇报-收盘汇总", "key": "daily_perf", "freq": "每日", "next_run": f"{today} 15:05"},
-            {"name": "自动交易系统-卖出", "key": "auto_trader", "freq": "每日", "next_run": f"{today} 15:10"},
-            {"name": "收盘复盘 + 选股进化", "key": "rule_validator", "freq": "每日", "next_run": f"{today} 15:30"},
-            {"name": "每日预测复盘", "key": "ai_predictor", "freq": "每日", "next_run": f"{today} 15:30"},
-            {"name": "每日绩效汇报", "key": "daily_perf", "freq": "每日", "next_run": f"{today} 16:00"},
-            {"name": "规则验证（每日）", "key": "rule_validator", "freq": "每日", "next_run": f"{today} 16:00"},
-        ]
-
-    # 周六的定时任务（执行周任务）
-    elif current_weekday == 5:  # 周六
-        scheduled = [
-            {"name": "每周回测验证", "key": "backtester", "freq": "每周", "next_run": f"{today} 10:00"},
-            {"name": "新闻信息汇总", "key": "web_search", "freq": "每日", "next_run": f"{today} 09:30"},
-        ]
-
-    # 周日的定时任务（执行月任务/周任务）
-    else:  # 周日
-        scheduled = [
-            {"name": "每月过拟合测试", "key": "overfitting", "freq": "每月", "next_run": f"{today} 09:00"},
-        ]
-
-    # 每日任务（不限工作日，添加到列表末尾）
-    daily_tasks = [
-        {"name": "炒股书籍学习", "key": "book_learning", "freq": "每日", "next_run": f"{today} 20:00"},
-    ]
-    scheduled.extend(daily_tasks)
-
-    # 按时间排序
-    scheduled.sort(key=lambda x: x['next_run'])
+    for task in sorted(cron_tasks, key=lambda item: item.get("next_run_raw", 0) or 0):
+        scheduled.append(
+            {
+                "name": task.get("name", "Unknown"),
+                "key": task.get("script_key") or task.get("id"),
+                "freq": task.get("schedule", "unknown"),
+                "next_run": task.get("next_run", "未计划"),
+                "status": task.get("status", "idle"),
+                "enabled": task.get("enabled", True),
+            }
+        )
 
     return scheduled
 
 def get_cron_status():
-    cron_logs = query_sql("""
-        SELECT agent as script, MAX(created_at) as last_run, COUNT(*) as run_count
-        FROM agent_logs
-        WHERE created_at >= datetime('now', '-2 days')
-        GROUP BY agent
-    """)
     status = {}
     for script_info in CRON_SCRIPTS.values():
         for name, info in script_info.items():
             status[info["status_key"]] = {"running": False, "last_run": None, "status": "idle", "message": "待运行"}
-    for log in cron_logs:
-        script = log["script"].lower()
+
+    for task in get_openclaw_cron_status():
+        script_key = (task.get("script_key") or "").lower()
+        task_name = (task.get("name") or "").lower()
         for script_info in CRON_SCRIPTS.values():
             for name, info in script_info.items():
-                if info["status_key"] == script or name in script:
-                    status[info["status_key"]] = {"running": False, "last_run": log["last_run"], "status": "idle", "message": f"上次运行: {log['last_run'][-12:] if log['last_run'] else 'N/A'}"}
+                status_key = info["status_key"].lower()
+                if script_key in {name.lower(), status_key} or name.lower() in script_key or status_key in task_name:
+                    status[info["status_key"]] = {
+                        "running": task.get("status") == "running",
+                        "last_run": task.get("last_run"),
+                        "status": task.get("status", "idle"),
+                        "message": f"下次运行: {task.get('next_run', '未计划')}",
+                    }
     return status
 
 
@@ -313,8 +270,8 @@ def get_enhanced_cron_data():
 
         # 增强 cron_data 中的每个任务
         for task in cron_data:
-            task_id = task.get("id", "").lower()
-            stats = task_stats.get(task_id, {})
+            task_key = (task.get("script_key") or task.get("id", "")).lower()
+            stats = task_stats.get(task_key, {})
 
             # 添加运行统计
             task["run_count"] = stats.get("run_count", 0)

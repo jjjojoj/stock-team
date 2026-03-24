@@ -33,6 +33,10 @@ LEARNING_DIR = PROJECT_ROOT / "learning"
 CONFIG_DIR = PROJECT_ROOT / "config"
 DATA_DIR = PROJECT_ROOT / "data"
 
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.storage import load_validation_pool, save_validation_pool
+
 # 书籍清单
 BOOK_LIST = [
     {
@@ -139,11 +143,7 @@ class BookLearning:
             self.book_db = {}
         
         # 规则验证池
-        if self.validation_pool_file.exists():
-            with open(self.validation_pool_file, 'r', encoding='utf-8') as f:
-                self.validation_pool = json.load(f)
-        else:
-            self.validation_pool = {}
+        self.validation_pool = load_validation_pool({})
         
         # 学习进度
         if self.progress_file.exists():
@@ -161,8 +161,7 @@ class BookLearning:
         with open(self.book_db_file, 'w', encoding='utf-8') as f:
             json.dump(self.book_db, f, ensure_ascii=False, indent=2)
         
-        with open(self.validation_pool_file, 'w', encoding='utf-8') as f:
-            json.dump(self.validation_pool, f, ensure_ascii=False, indent=2)
+        save_validation_pool(self.validation_pool)
         
         with open(self.progress_file, 'w', encoding='utf-8') as f:
             json.dump(self.progress, f, ensure_ascii=False, indent=2)
@@ -321,7 +320,31 @@ class BookLearning:
 def main():
     """主函数"""
     learning = BookLearning()
-    learning.run()
+    result = learning.run()
+    
+    # 发送飞书通知
+    try:
+        sys.path.insert(0, os.path.dirname(__file__))
+        from feishu_notifier import send_feishu_message
+        from datetime import datetime as dt
+        
+        if result and result.get("points_learned", 0) > 0:
+            title = f"📚 每日学习汇报 - {dt.now().strftime('%Y-%m-%d')}"
+            book_id = result.get("book_id", "unknown")
+            book_info = next((b for b in BOOK_LIST if b["id"] == book_id), None)
+            book_title = book_info["title"] if book_info else book_id
+            
+            content = f"""今日学习：《{book_title}》
+✅ 知识点：{result['points_learned']}个
+🧪 新增验证规则：{result['rules_created']}个
+📊 验证池总计：{len(learning.validation_pool)}条
+
+已学书籍：{len(learning.progress['books_completed'])}/{len(BOOK_LIST)}"""
+            
+            send_feishu_message(title, content, level='info')
+            print("✅ 飞书通知已发送")
+    except Exception as e:
+        print(f"⚠️ 飞书通知发送失败: {e}")
 
 
 if __name__ == "__main__":

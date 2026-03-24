@@ -24,6 +24,10 @@ LEARNING_DIR = PROJECT_ROOT / "learning"
 DATA_DIR = PROJECT_ROOT / "data"
 CONFIG_DIR = PROJECT_ROOT / "config"
 
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.storage import load_rules, save_rules
+
 
 class RuleEvolution:
     """规则进化系统"""
@@ -41,11 +45,7 @@ class RuleEvolution:
     
     def _load_data(self):
         """加载规则和历史"""
-        if self.rules_file.exists():
-            with open(self.rules_file, 'r', encoding='utf-8') as f:
-                self.rules = json.load(f)
-        else:
-            self.rules = {}
+        self.rules = load_rules({})
         
         if self.history_file.exists():
             with open(self.history_file, 'r', encoding='utf-8') as f:
@@ -55,8 +55,7 @@ class RuleEvolution:
     
     def _save_data(self):
         """保存规则和历史"""
-        with open(self.rules_file, 'w', encoding='utf-8') as f:
-            json.dump(self.rules, f, ensure_ascii=False, indent=2)
+        save_rules(self.rules)
         
         with open(self.history_file, 'w', encoding='utf-8') as f:
             json.dump(self.history, f, ensure_ascii=False, indent=2)

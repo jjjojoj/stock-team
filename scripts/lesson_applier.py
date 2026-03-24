@@ -25,6 +25,10 @@ MEMORY_FILE = LEARNING_DIR / "memory.md"
 RULES_FILE = LEARNING_DIR / "prediction_rules.json"
 APPLY_LOG_FILE = LEARNING_DIR / "lesson_apply_log.json"
 
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.storage import load_rules, save_rules
+
 
 class LessonApplier:
     """教训应用器"""
@@ -45,9 +49,7 @@ class LessonApplier:
             self.lessons = self._parse_lessons(content)
 
         # 加载规则库
-        if RULES_FILE.exists():
-            with open(RULES_FILE, 'r', encoding='utf-8') as f:
-                self.rules = json.load(f)
+        self.rules = load_rules({})
 
         # 加载应用日志
         if APPLY_LOG_FILE.exists():
@@ -347,8 +349,7 @@ class LessonApplier:
     def _save_data(self):
         """保存数据"""
         # 保存规则库
-        with open(RULES_FILE, 'w', encoding='utf-8') as f:
-            json.dump(self.rules, f, ensure_ascii=False, indent=2)
+        save_rules(self.rules)
 
         # 保存应用日志
         with open(APPLY_LOG_FILE, 'w', encoding='utf-8') as f:
