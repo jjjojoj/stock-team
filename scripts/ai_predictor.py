@@ -5,17 +5,18 @@ AI 预测生成器
 """
 
 import sys
-import os
 import json
 import urllib.request
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, List, Optional
 
-PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 # 添加虚拟环境路径以导入 akshare
-VENV_PATH = os.path.expanduser("~/.openclaw/workspace/china-stock-team/venv/lib/python3.14/site-packages")
+VENV_PATH = str(PROJECT_ROOT / "venv" / "lib" / "python3.14" / "site-packages")
 sys.path.insert(0, VENV_PATH)
 
 try:
@@ -23,12 +24,13 @@ try:
 except ImportError:
     # 如果导入失败，尝试使用相对导入
     import importlib.util
-    spec = importlib.util.spec_from_file_location("prediction_system", os.path.join(PROJECT_ROOT, "scripts", "prediction_system.py"))
+    spec = importlib.util.spec_from_file_location("prediction_system", PROJECT_ROOT / "scripts" / "prediction_system.py")
     prediction_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(prediction_module)
     PredictionSystem = prediction_module.PredictionSystem
 from news_fetcher import NewsFetcher
 from news_trigger import NewsMonitor
+from core.storage import POSITIONS_FILE, WATCHLIST_FILE
 
 # 尝试导入 akshare 用于计算真实技术指标
 try:
@@ -38,9 +40,7 @@ except ImportError:
     HAS_AKSHARE = False
     print("⚠️ akshare 未安装，技术指标将使用简化计算")
 
-POSITIONS_FILE = os.path.join(PROJECT_ROOT, "config", "positions.json")
-WATCHLIST_FILE = os.path.join(PROJECT_ROOT, "config", "watchlist.json")
-COMMODITY_FILE = os.path.join(PROJECT_ROOT, "data", "commodity_prices.json")
+COMMODITY_FILE = PROJECT_ROOT / "data" / "commodity_prices.json"
 
 
 class AIPredictor:
@@ -73,21 +73,21 @@ class AIPredictor:
 
     def _load_rules(self) -> Dict:
         """加载规则库【修复 P0-5】"""
-        RULES_FILE = os.path.join(PROJECT_ROOT, "learning", "prediction_rules.json")
-        if os.path.exists(RULES_FILE):
-            with open(RULES_FILE, 'r', encoding='utf-8') as f:
+        RULES_FILE = PROJECT_ROOT / "learning" / "prediction_rules.json"
+        if RULES_FILE.exists():
+            with RULES_FILE.open('r', encoding='utf-8') as f:
                 return json.load(f)
         return {}
     
     def _load_positions(self) -> Dict:
-        if os.path.exists(POSITIONS_FILE):
-            with open(POSITIONS_FILE, 'r', encoding='utf-8') as f:
+        if POSITIONS_FILE.exists():
+            with POSITIONS_FILE.open('r', encoding='utf-8') as f:
                 return json.load(f)
         return {}
     
     def _load_watchlist(self) -> Dict:
-        if os.path.exists(WATCHLIST_FILE):
-            with open(WATCHLIST_FILE, 'r', encoding='utf-8') as f:
+        if WATCHLIST_FILE.exists():
+            with WATCHLIST_FILE.open('r', encoding='utf-8') as f:
                 return json.load(f)
         # 默认自选股
         return {
@@ -672,6 +672,17 @@ def main():
     
     if command == "generate":
         predictor.generate_all_predictions()
+        
+        # 发送飞书通知
+        try:
+            from feishu_notifier import send_feishu_message
+            from datetime import datetime
+            brief = predictor.generate_daily_brief()
+            title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
+            send_feishu_message(title, brief, level='info')
+            print("✅ 飞书通知已发送")
+        except Exception as e:
+            print(f"⚠️ 飞书通知发送失败: {e}")
     
     elif command == "brief":
         brief = predictor.generate_daily_brief()

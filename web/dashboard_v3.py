@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append("/Users/joe/.openclaw/workspace/china-stock-team/web")
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "web"))
 from enhanced_cron_handler import handle_api_openclaw_cron, get_openclaw_cron_status
 
 """
@@ -19,8 +23,9 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 import logging
 
+from core.storage import DB_PATH
+
 PORT = 8082
-DB_PATH = "/Users/joe/.openclaw/workspace/china-stock-team/database/stock_team.db"
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -114,13 +119,14 @@ def get_predictions_stats():
         SELECT
             COUNT(*) as total,
             SUM(CASE WHEN result = 'correct' THEN 1 ELSE 0 END) as correct,
-            SUM(CASE WHEN result = 'incorrect' THEN 1 ELSE 0 END) as incorrect,
-            SUM(CASE WHEN result = 'pending' THEN 1 ELSE 0 END) as pending,
-            ROUND(COALESCE(SUM(CASE WHEN result = 'correct' THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN result IN ('correct','incorrect') THEN 1 ELSE 0 END), 0), 0), 1) as accuracy
+            SUM(CASE WHEN result = 'partial' THEN 1 ELSE 0 END) as partial,
+            SUM(CASE WHEN result = 'wrong' THEN 1 ELSE 0 END) as incorrect,
+            SUM(CASE WHEN result IN ('pending', 'expired') OR result IS NULL THEN 1 ELSE 0 END) as pending,
+            ROUND(COALESCE(SUM(CASE WHEN result = 'correct' THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN result IN ('correct','partial','wrong') THEN 1 ELSE 0 END), 0), 0), 1) as accuracy
         FROM predictions
         WHERE created_at >= date('now', '-30 days')
     """)
-    return data or {"total": 0, "correct": 0, "incorrect": 0, "pending": 0, "accuracy": 0}
+    return data or {"total": 0, "correct": 0, "partial": 0, "incorrect": 0, "pending": 0, "accuracy": 0}
 
 def get_selector_results():
     return query_sql("""

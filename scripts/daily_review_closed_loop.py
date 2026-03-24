@@ -11,22 +11,27 @@
 """
 
 import sys
-import os
-import json
 import urllib.request
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from collections import defaultdict
 
-PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-PREDICTIONS_FILE = os.path.join(PROJECT_ROOT, "data", "predictions.json")
-ACCURACY_FILE = os.path.join(PROJECT_ROOT, "learning", "accuracy_stats.json")
-RULES_FILE = os.path.join(PROJECT_ROOT, "learning", "prediction_rules.json")
-VALIDATION_POOL_FILE = os.path.join(PROJECT_ROOT, "learning", "rule_validation_pool.json")
-MEMORY_FILE = os.path.join(PROJECT_ROOT, "learning", "memory.md")
-REVIEW_DIR = os.path.join(PROJECT_ROOT, "data", "reviews")
+from core.predictions import apply_prediction_verdict, is_prediction_due, normalize_prediction_collection
+from core.storage import (
+    ACCURACY_FILE,
+    PREDICTIONS_FILE,
+    REVIEW_DIR,
+    RULES_FILE,
+    TRADE_HISTORY_FILE,
+    VALIDATION_POOL_FILE,
+    load_json,
+    save_json,
+    sync_predictions_to_db,
+)
 
 
 class ClosedLoopReview:
@@ -34,23 +39,33 @@ class ClosedLoopReview:
     
     def __init__(self):
         self._ensure_dirs()
-        self.predictions = self._load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
+        self.predictions = normalize_prediction_collection(
+            self._load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
+        )
         self.accuracy = self._load_json(ACCURACY_FILE, self._init_accuracy())
         self.rules = self._load_json(RULES_FILE, {})
         self.validation_pool = self._load_json(VALIDATION_POOL_FILE, {})
+        self.trade_history = self._load_trade_history()
+        self.trade_history_dirty = False
         
     def _ensure_dirs(self):
-        os.makedirs(REVIEW_DIR, exist_ok=True)
+        REVIEW_DIR.mkdir(parents=True, exist_ok=True)
         
-    def _load_json(self, path: str, default):
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return default
+    def _load_json(self, path: Path, default):
+        return load_json(Path(path), default)
     
-    def _save_json(self, path: str, data):
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+    def _save_json(self, path: Path, data):
+        save_json(Path(path), data)
+
+    def _save_predictions(self):
+        """保存预测并同步到数据库。"""
+        self.predictions = normalize_prediction_collection(self.predictions)
+        self._save_json(PREDICTIONS_FILE, self.predictions)
+        sync_predictions_to_db(self.predictions)
+
+    def _save_trade_history(self):
+        """保存交易历史的预测关联信息。"""
+        self._save_json(TRADE_HISTORY_FILE, self.trade_history)
     
     def _init_accuracy(self) -> Dict:
         """初始化准确率统计结构"""
@@ -125,11 +140,7 @@ class ClosedLoopReview:
     
     def _load_trade_history(self) -> List[Dict]:
         """加载交易历史"""
-        trade_history_file = os.path.join(PROJECT_ROOT, "data", "trade_history.json")
-        if os.path.exists(trade_history_file):
-            with open(trade_history_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return []
+        return load_json(TRADE_HISTORY_FILE, [])
 
     def _link_prediction_to_trade(self, pred_id: str, pred: Dict, correct: bool, partial: bool) -> Optional[Dict]:
         """
@@ -138,34 +149,38 @@ class ClosedLoopReview:
         Returns:
             关联的交易记录，如果没有找到则返回 None
         """
-        trade_history = self._load_trade_history()
-
         # 查找与该预测相关的交易
         # 优先查找 prediction_id 匹配的
-        for trade in trade_history:
+        for trade in self.trade_history:
             if trade.get("prediction_id") == pred_id:
                 # 计算交易盈亏
                 trade["prediction_correct"] = correct
                 trade["prediction_partial"] = partial
+                self.trade_history_dirty = True
                 return trade
 
         # 如果没有找到，根据股票和时间匹配
         pred_created = datetime.fromisoformat(pred["created_at"])
         pred_code = pred["code"]
 
-        for trade in trade_history:
+        for trade in self.trade_history:
             # 匹配股票代码
             if trade.get("code") != pred_code:
                 continue
 
             # 匹配时间（交易时间在预测后24小时内）
-            trade_time = datetime.fromisoformat(trade["timestamp"])
+            trade_timestamp = trade.get("timestamp") or trade.get("executed_at")
+            if not trade_timestamp:
+                continue
+
+            trade_time = datetime.fromisoformat(trade_timestamp)
             if (trade_time - pred_created).total_seconds() <= 86400:  # 24小时内
                 # 避免重复关联
                 if "prediction_id" not in trade:
                     trade["prediction_id"] = pred_id
                     trade["prediction_correct"] = correct
                     trade["prediction_partial"] = partial
+                    self.trade_history_dirty = True
 
                 return trade
 
@@ -189,12 +204,10 @@ class ClosedLoopReview:
             "linked_trades": 0  # 统计关联的交易数
         }
 
-        # 需要验证的预测（创建超过1小时的）
+        # 需要验证的预测（达到设定周期的）
         to_verify = []
         for pred_id, pred in active.items():
-            created = datetime.fromisoformat(pred["created_at"])
-            age_hours = (datetime.now() - created).total_seconds() / 3600
-            if age_hours > 1:  # 超过1小时的预测才验证
+            if is_prediction_due(pred):
                 to_verify.append((pred_id, pred))
 
         print(f"📋 待验证预测: {len(to_verify)} 个")
@@ -208,41 +221,12 @@ class ClosedLoopReview:
                 results["pending"] += 1
                 continue
 
-            # 计算结果
+            pred = apply_prediction_verdict(pred, current_price)
             direction = pred["direction"]
-            start_price = pred["current_price"]
             target_price = pred["target_price"]
-            price_change = (current_price / start_price - 1) * 100
-
-            # 判断正确性
-            correct = False
-            partial = False
-
-            if direction == "up":
-                if current_price >= target_price:
-                    correct = True
-                elif price_change > 0:
-                    partial = True
-            elif direction == "down":
-                if current_price <= target_price:
-                    correct = True
-                elif price_change < 0:
-                    partial = True
-            else:  # neutral
-                if abs(price_change) < 2:  # ±2% 算中性正确
-                    correct = True
-                elif abs(price_change) < 5:
-                    partial = True
-
-            # 更新预测状态
-            pred["status"] = "verified"
-            pred["result"] = {
-                "verified_at": datetime.now().isoformat(),
-                "final_price": current_price,
-                "price_change_pct": round(price_change, 2),
-                "correct": correct,
-                "partial": partial
-            }
+            price_change = pred["result"]["price_change_pct"]
+            correct = pred["result"]["correct"]
+            partial = pred["result"]["partial"]
 
             # 【新增】关联预测到交易
             linked_trade = self._link_prediction_to_trade(pred_id, pred, correct, partial)
@@ -280,10 +264,12 @@ class ClosedLoopReview:
             self._update_validation_pool(pred, correct)
         
         # 保存所有更新
-        self._save_json(PREDICTIONS_FILE, self.predictions)
+        self._save_predictions()
         self._save_json(ACCURACY_FILE, self.accuracy)
         self._save_json(RULES_FILE, self.rules)
         self._save_json(VALIDATION_POOL_FILE, self.validation_pool)
+        if self.trade_history_dirty:
+            self._save_trade_history()
         
         # 生成复盘报告
         self._generate_report(results)
@@ -465,7 +451,7 @@ class ClosedLoopReview:
     def _generate_report(self, results: Dict):
         """生成复盘报告"""
         today = datetime.now().strftime("%Y-%m-%d")
-        report_path = os.path.join(REVIEW_DIR, f"review_{today}.md")
+        report_path = REVIEW_DIR / f"review_{today}.md"
         
         # 【修复】从 history 中提取今天的验证结果
         today_verified = []
@@ -531,7 +517,7 @@ class ClosedLoopReview:
 *生成时间: {datetime.now().isoformat()}*
 """
         
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with report_path.open('w', encoding='utf-8') as f:
             f.write(report)
         
         print(f"\n📝 复盘报告已保存: {report_path}")
@@ -539,7 +525,36 @@ class ClosedLoopReview:
 
 def main():
     reviewer = ClosedLoopReview()
-    reviewer.verify_all_predictions()
+    results = reviewer.verify_all_predictions()
+    
+    # 发送飞书通知
+    try:
+        from feishu_notifier import send_feishu_message
+        
+        today = datetime.now().strftime("%Y-%m-%d")
+        total = results.get("verified", 0)
+        correct = results.get("correct", 0)
+        partial = results.get("partial", 0)
+        wrong = results.get("wrong", 0)
+        
+        if total > 0:
+            correct_rate = correct / total * 100
+        else:
+            correct_rate = 0
+        
+        title = f"📊 每日复盘 - {today}"
+        content = f"""预测验证结果：
+✅ 正确: {correct} ({correct_rate:.1f}%)
+🔶 部分: {partial}
+❌ 错误: {wrong}
+总计验证: {total}
+
+累计准确率: {reviewer.accuracy['correct']/max(reviewer.accuracy['total_predictions'],1)*100:.1f}%"""
+        
+        send_feishu_message(title, content, level='info')
+        print("✅ 飞书通知已发送")
+    except Exception as e:
+        print(f"⚠️ 飞书通知发送失败: {e}")
 
 
 if __name__ == "__main__":

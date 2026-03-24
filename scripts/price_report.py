@@ -6,13 +6,24 @@
 
 import json
 import urllib.request
-import os
 from datetime import datetime
+from pathlib import Path
 
 # 配置
-PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
-POSITIONS_FILE = os.path.join(PROJECT_ROOT, "config", "positions.json")
-WEBHOOK_URL = "https://open.feishu.cn/open-apis/bot/v2/hook/11736928-0e52-4e41-b5c6-2c050bff11e6"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+POSITIONS_FILE = PROJECT_ROOT / "config" / "positions.json"
+FEISHU_CONFIG_FILE = PROJECT_ROOT / "config" / "feishu_config.json"
+
+def get_webhook_url():
+    """从配置文件读取 webhook 地址"""
+    try:
+        with FEISHU_CONFIG_FILE.open('r', encoding='utf-8') as f:
+            config = json.load(f)
+        return config.get('webhook') or config.get('webhook_url')
+    except:
+        return None
+
+WEBHOOK_URL = get_webhook_url()
 
 # 月度目标
 TARGET_PROFIT = 40000  # +20%
@@ -47,6 +58,11 @@ def get_realtime_prices(codes):
 
 def send_to_feishu(text):
     """发送到飞书群"""
+    webhook_url = WEBHOOK_URL or get_webhook_url()
+    if not webhook_url:
+        print("⚠️ 飞书 webhook 未配置")
+        return False
+    
     try:
         data = {
             "msg_type": "text",
@@ -54,7 +70,7 @@ def send_to_feishu(text):
         }
         
         req = urllib.request.Request(
-            WEBHOOK_URL,
+            webhook_url,
             data=json.dumps(data).encode('utf-8'),
             headers={'Content-Type': 'application/json'}
         )
@@ -69,13 +85,20 @@ def send_to_feishu(text):
 
 def generate_report():
     """生成汇报内容"""
-    with open(POSITIONS_FILE, 'r') as f:
+    with POSITIONS_FILE.open('r', encoding='utf-8') as f:
         positions = json.load(f)
-    
-    prices = get_realtime_prices(positions.keys())
     
     now = datetime.now()
     time_str = now.strftime("%m-%d %H:%M")
+    
+    # 空持仓检查
+    if not positions:
+        text = f"【持仓汇报】{time_str}\n\n⚠️ 暂无持仓配置\n请在 config/positions.json 中添加持仓信息"
+        success = send_to_feishu(text)
+        print(f"[{time_str}] {'✅ 发送成功(空持仓)' if success else '❌ 发送失败'}")
+        return success
+    
+    prices = get_realtime_prices(positions.keys())
     hour = now.hour
     
     # 判断时段
@@ -124,8 +147,12 @@ def generate_report():
     
     # 总盈亏
     total_profit = total_value - total_cost
-    total_pct = (total_value / total_cost - 1) * 100
-    progress_pct = (total_profit / TARGET_PROFIT) * 100
+    if total_cost > 0:
+        total_pct = (total_value / total_cost - 1) * 100
+        progress_pct = (total_profit / TARGET_PROFIT) * 100
+    else:
+        total_pct = 0
+        progress_pct = 0
     
     profit_sign = "+" if total_profit >= 0 else ""
     

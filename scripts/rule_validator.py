@@ -14,12 +14,17 @@
 """
 
 import json
-import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.predictions import normalize_prediction_collection, prediction_result_status
+from core.storage import load_json
+
 DATA_DIR = PROJECT_ROOT / "data"
 LEARNING_DIR = PROJECT_ROOT / "learning"
 CONFIG_DIR = PROJECT_ROOT / "config"
@@ -50,39 +55,21 @@ class RuleValidator:
     def _load_data(self):
         """加载数据"""
         # 规则库
-        if self.rules_file.exists():
-            with open(self.rules_file, 'r', encoding='utf-8') as f:
-                self.rules = json.load(f)
-        else:
-            self.rules = {}
+        self.rules = load_json(self.rules_file, {})
         
         # 预测历史
-        if self.predictions_file.exists():
-            with open(self.predictions_file, 'r', encoding='utf-8') as f:
-                self.predictions = json.load(f)
-        else:
-            self.predictions = {"active": {}, "history": []}
+        self.predictions = normalize_prediction_collection(
+            load_json(self.predictions_file, {"active": {}, "history": []})
+        )
         
         # 交易历史
-        if self.trades_file.exists():
-            with open(self.trades_file, 'r', encoding='utf-8') as f:
-                self.trades = json.load(f)
-        else:
-            self.trades = []
+        self.trades = load_json(self.trades_file, [])
         
         # 淘汰库
-        if self.rejected_file.exists():
-            with open(self.rejected_file, 'r', encoding='utf-8') as f:
-                self.rejected = json.load(f)
-        else:
-            self.rejected = {}
+        self.rejected = load_json(self.rejected_file, {})
         
         # 预测配置
-        if self.config_file.exists():
-            with open(self.config_file, 'r', encoding='utf-8') as f:
-                self.config = json.load(f)
-        else:
-            self.config = {}
+        self.config = load_json(self.config_file, {})
     
     def _save_data(self):
         """保存数据"""
@@ -175,22 +162,28 @@ class RuleValidator:
         
         # 1. 从预测历史中查找匹配的预测
         for pred in self.predictions.get("history", []):
-            if rule_name in pred.get("matched_rules", []):
+            rules_used = pred.get("rules_used") or pred.get("matched_rules", [])
+            result_status = prediction_result_status(pred)
+
+            if rule_name in rules_used and result_status != "pending":
                 results["total"] += 1
-                if pred.get("result") == "correct":
+                if result_status == "correct":
                     results["correct"] += 1
-                elif pred.get("result") == "partial":
+                elif result_status == "partial":
                     results["partial"] += 1
                 else:
                     results["wrong"] += 1
         
         # 2. 从活跃预测中查找（已验证的）
         for pred_id, pred in self.predictions.get("active", {}).items():
-            if pred.get("verified") and rule_name in pred.get("matched_rules", []):
+            rules_used = pred.get("rules_used") or pred.get("matched_rules", [])
+            result_status = prediction_result_status(pred)
+
+            if result_status != "pending" and rule_name in rules_used:
                 results["total"] += 1
-                if pred.get("result") == "correct":
+                if result_status == "correct":
                     results["correct"] += 1
-                elif pred.get("result") == "partial":
+                elif result_status == "partial":
                     results["partial"] += 1
                 else:
                     results["wrong"] += 1

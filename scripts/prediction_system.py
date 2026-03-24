@@ -8,16 +8,23 @@
 """
 
 import sys
-import os
-import json
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
-PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
-PREDICTIONS_FILE = os.path.join(PROJECT_ROOT, "data", "predictions.json")
-NEWS_DIGEST_FILE = os.path.join(PROJECT_ROOT, "data", "news_digest.json")
-LEARNING_DIR = os.path.join(PROJECT_ROOT, "learning")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.predictions import (
+    apply_prediction_verdict,
+    build_prediction_record,
+    is_prediction_due,
+    normalize_prediction_collection,
+)
+from core.storage import LEARNING_DIR, PREDICTIONS_FILE, load_json, save_json, sync_predictions_to_db
+
+NEWS_DIGEST_FILE = PROJECT_ROOT / "data" / "news_digest.json"
 
 
 class PredictionSystem:
@@ -28,20 +35,19 @@ class PredictionSystem:
         self.predictions = self._load_predictions()
     
     def _ensure_dirs(self):
-        os.makedirs(os.path.dirname(PREDICTIONS_FILE), exist_ok=True)
-        os.makedirs(LEARNING_DIR, exist_ok=True)
+        PREDICTIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        LEARNING_DIR.mkdir(parents=True, exist_ok=True)
     
     def _load_predictions(self) -> Dict:
         """加载预测记录"""
-        if os.path.exists(PREDICTIONS_FILE):
-            with open(PREDICTIONS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return {"active": {}, "history": []}
+        data = load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
+        return normalize_prediction_collection(data)
     
     def _save_predictions(self):
         """保存预测记录"""
-        with open(PREDICTIONS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(self.predictions, f, ensure_ascii=False, indent=2)
+        self.predictions = normalize_prediction_collection(self.predictions)
+        save_json(PREDICTIONS_FILE, self.predictions)
+        sync_predictions_to_db(self.predictions)
     
     def make_prediction(self, prediction: Dict) -> str:
         """
@@ -69,17 +75,14 @@ class PredictionSystem:
             prediction_id
         """
         prediction_id = f"{prediction['code']}_{datetime.now().strftime('%Y%m%d_%H%M')}"
-        
-        prediction_record = {
-            "id": prediction_id,
-            "created_at": datetime.now().isoformat(),
-            **prediction,
-            "status": "active",  # active/verified/expired
-            "updates": [],  # 后续更新记录
-            "result": None,  # 验证后填写
-            "analysis": None,  # 复盘分析
-        }
-        
+        prediction_record = build_prediction_record(
+            {
+                **prediction,
+                "source_agent": prediction.get("source_agent", "prediction_system"),
+            },
+            prediction_id=prediction_id,
+        )
+
         self.predictions["active"][prediction_id] = prediction_record
         self._save_predictions()
         
@@ -118,6 +121,7 @@ class PredictionSystem:
             **update,
         }
         pred["updates"].append(update_record)
+        pred["updated_at"] = update_record["time"]
         
         # 更新置信度
         if "confidence_change" in update:
@@ -145,12 +149,7 @@ class PredictionSystem:
         verified = []
         
         for pred_id, pred in list(self.predictions["active"].items()):
-            # 检查是否到期
-            created = datetime.fromisoformat(pred["created_at"])
-            timeframe_days = 7 if pred["timeframe"] == "1周" else 30
-            expiry = created + timedelta(days=timeframe_days)
-            
-            if datetime.now() < expiry:
+            if not is_prediction_due(pred):
                 continue  # 未到期，跳过
             
             # 获取当前价格
@@ -158,31 +157,11 @@ class PredictionSystem:
             if current_price is None:
                 continue
             
-            # 计算结果
-            price_change_pct = (current_price / pred["current_price"] - 1) * 100
-            
-            # 判断预测是否正确
-            if pred["direction"] == "up":
-                correct = current_price >= pred["target_price"]
-                partial = current_price > pred["current_price"] and not correct
-            elif pred["direction"] == "down":
-                correct = current_price <= pred["target_price"]
-                partial = current_price < pred["current_price"] and not correct
-            else:  # neutral
-                correct = abs(price_change_pct) < 5
-                partial = False
-            
-            # 记录结果
-            result = {
-                "verified_at": datetime.now().isoformat(),
-                "final_price": current_price,
-                "price_change_pct": round(price_change_pct, 2),
-                "correct": correct,
-                "partial": partial,
-            }
-            
-            pred["result"] = result
-            pred["status"] = "verified"
+            pred = apply_prediction_verdict(pred, current_price)
+            result = pred["result"]
+            price_change_pct = result["price_change_pct"]
+            correct = result["correct"]
+            partial = result["partial"]
             
             # 移动到历史
             self.predictions["history"].append(pred)
@@ -252,11 +231,11 @@ class PredictionSystem:
     
     def _extract_rules(self, analysis: Dict):
         """提取规则到学习引擎"""
-        rules_file = os.path.join(LEARNING_DIR, "extracted_rules.md")
+        rules_file = LEARNING_DIR / "extracted_rules.md"
         
         existing = ""
-        if os.path.exists(rules_file):
-            with open(rules_file, 'r', encoding='utf-8') as f:
+        if rules_file.exists():
+            with rules_file.open('r', encoding='utf-8') as f:
                 existing = f.read()
         
         new_rules = analysis.get("rule_suggestions", [])
@@ -269,7 +248,7 @@ class PredictionSystem:
         
         content += "\n---\n"
         
-        with open(rules_file, 'w', encoding='utf-8') as f:
+        with rules_file.open('w', encoding='utf-8') as f:
             f.write(content + existing)
         
         print(f"   规则已保存到: {rules_file}")
@@ -299,7 +278,8 @@ class PredictionSystem:
     
     def get_active_predictions(self) -> List[Dict]:
         """获取所有活跃预测"""
-        return list(self.predictions["active"].values())
+        active = normalize_prediction_collection(self.predictions)["active"]
+        return list(active.values())
     
     def get_prediction_stats(self) -> Dict:
         """获取预测统计"""
@@ -353,7 +333,7 @@ def main():
         print("  python3 prediction_system.py brief          # 每日简报")
         print("  python3 prediction_system.py verify         # 验证到期预测")
         print("  python3 prediction_system.py stats          # 统计数据")
-        print("  python3 prediction_system.py verify           # 测试创建预测")
+        print("  python3 prediction_system.py sample         # 创建测试预测")
         sys.exit(1)
     
     command = sys.argv[1]
@@ -375,7 +355,7 @@ def main():
         print(f"  错误: {stats['wrong']}")
         print(f"  准确率: {stats['accuracy']}%")
     
-    elif command == "verify":
+    elif command == "sample":
         # 测试创建预测
         prediction = {
             "code": "sh.600459",

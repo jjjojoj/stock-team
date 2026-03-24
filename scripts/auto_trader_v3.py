@@ -14,8 +14,6 @@
 """
 
 import sys
-import os
-import json
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -30,13 +28,25 @@ sys.path.insert(0, str(PROJECT_ROOT))
 VENV_PATH = PROJECT_ROOT / "venv" / "lib" / "python3.14" / "site-packages"
 sys.path.insert(0, str(VENV_PATH))
 
+from core.storage import (
+    DB_PATH,
+    LOG_DIR,
+    PORTFOLIO_FILE,
+    POSITIONS_FILE,
+    PREDICTIONS_FILE,
+    TRADE_HISTORY_FILE,
+    WATCHLIST_FILE,
+    load_json,
+    save_json,
+    sync_positions_and_account_to_db,
+)
+
 # 配置目录
 CONFIG_DIR = PROJECT_ROOT / "config"
 DATA_DIR = PROJECT_ROOT / "data"
-LOG_DIR = PROJECT_ROOT / "logs"
-DATABASE_FILE = PROJECT_ROOT / "database" / "stock_team.db"
+DATABASE_FILE = DB_PATH
 
-os.makedirs(LOG_DIR, exist_ok=True)
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # 日志配置
 logging.basicConfig(
@@ -130,64 +140,77 @@ class AutoTraderV3:
     def _load_data(self):
         """加载数据"""
         # 持仓
-        positions_file = CONFIG_DIR / "positions.json"
-        if positions_file.exists():
-            with open(positions_file, 'r', encoding='utf-8') as f:
-                self.positions = json.load(f)
+        self.positions = load_json(POSITIONS_FILE, {})
+        if self.positions:
             logger.info(f"加载持仓: {len(self.positions)} 只")
         
         # 预测
-        predictions_file = DATA_DIR / "predictions.json"
-        if predictions_file.exists():
-            with open(predictions_file, 'r', encoding='utf-8') as f:
-                self.predictions = json.load(f)
+        self.predictions = load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
+        if self.predictions:
             logger.info(f"加载预测: {len(self.predictions.get('active', {}))} 条")
         
         # 交易历史
-        trade_history_file = DATA_DIR / "trade_history.json"
-        if trade_history_file.exists():
-            with open(trade_history_file, 'r', encoding='utf-8') as f:
-                self.trade_history = json.load(f)
+        self.trade_history = load_json(TRADE_HISTORY_FILE, [])
 
         # 现金余额
-        portfolio_file = CONFIG_DIR / "portfolio.json"
-        if portfolio_file.exists():
-            with open(portfolio_file, 'r', encoding='utf-8') as f:
-                portfolio = json.load(f)
-                self.cash = portfolio.get("available_cash", 0)
+        portfolio = load_json(PORTFOLIO_FILE, {})
+        if portfolio:
+            self.cash = portfolio.get("available_cash", 0)
             logger.info(f"加载现金: ¥{self.cash:,.0f}")
     
     def _save_data(self):
         """保存数据"""
         # 保存持仓
-        positions_file = CONFIG_DIR / "positions.json"
-        with open(positions_file, 'w', encoding='utf-8') as f:
-            json.dump(self.positions, f, ensure_ascii=False, indent=2)
+        save_json(POSITIONS_FILE, self.positions)
 
         # 保存交易历史
-        trade_history_file = DATA_DIR / "trade_history.json"
-        with open(trade_history_file, 'w', encoding='utf-8') as f:
-            json.dump(self.trade_history, f, ensure_ascii=False, indent=2)
+        save_json(TRADE_HISTORY_FILE, self.trade_history)
 
         # 保存现金余额
-        portfolio_file = CONFIG_DIR / "portfolio.json"
-        if portfolio_file.exists():
-            with open(portfolio_file, 'r', encoding='utf-8') as f:
-                portfolio = json.load(f)
-        else:
-            portfolio = {"total_capital": 200000}
+        portfolio = load_json(PORTFOLIO_FILE, {"total_capital": 200000})
 
         portfolio["available_cash"] = self.cash
         # 计算总资产
         total_market_value = sum(
-            pos.get("shares", 0) * pos.get("cost_price", 0)
+            pos.get("shares", 0) * pos.get("current_price", pos.get("cost_price", 0))
             for pos in self.positions.values()
         )
+        total_asset = self.cash + total_market_value
+        total_capital = portfolio.get("total_capital", total_asset or 200000)
         portfolio["note"] = f"初始资金20万，当前现金{self.cash:.0f}，市值{total_market_value:.0f}"
+        portfolio["market_value"] = round(total_market_value, 2)
+        portfolio["total_asset"] = round(total_asset, 2)
+        portfolio["total_return"] = round(
+            ((total_asset - total_capital) / total_capital * 100) if total_capital else 0.0,
+            2,
+        )
 
-        with open(portfolio_file, 'w', encoding='utf-8') as f:
-            json.dump(portfolio, f, ensure_ascii=False, indent=2)
+        save_json(PORTFOLIO_FILE, portfolio)
         logger.info(f"现金已更新: ¥{self.cash:,.0f}")
+        
+        # 自动同步到数据库（Dashboard 数据源）
+        self._sync_to_db(portfolio)
+    
+    def _sync_to_db(self, portfolio: Optional[Dict] = None):
+        """同步持仓到数据库，供 Dashboard 使用"""
+        if not DATABASE_FILE.exists():
+            logger.warning("数据库不存在，跳过同步")
+            return
+        
+        try:
+            metrics = sync_positions_and_account_to_db(
+                self.positions,
+                self.cash,
+                portfolio or load_json(PORTFOLIO_FILE, {"total_capital": 200000}),
+                DATABASE_FILE,
+            )
+            logger.info(
+                "同步到数据库完成: %s 只持仓, 总资产 ¥%s",
+                len(self.positions),
+                f"{metrics['total_asset']:,.0f}",
+            )
+        except Exception as e:
+            logger.error(f"同步到数据库失败: {e}")
     
     def get_realtime_price(self, code: str) -> Optional[float]:
         """获取实时价格"""
@@ -472,11 +495,11 @@ class AutoTraderV3:
         ]
 
         daily_loss = sum(
-            t.get("sold_shares", 0) * t.get("price", 0) * max(t.get("pnl_pct", 0), 0)
+            t.get("sold_shares", 0) * t.get("price", 0) * min(t.get("pnl_pct", 0), 0)
             for t in today_trades
         )
 
-        if daily_loss < -self.RISK_CONFIG["max_daily_loss"] * total_capital:
+        if daily_loss <= -self.RISK_CONFIG["max_daily_loss"] * total_capital:
             loss_pct = daily_loss / total_capital * 100
             return False, f"已达到单日亏损限制 ({loss_pct:.1f}%)", "very_high"
 
@@ -502,16 +525,12 @@ class AutoTraderV3:
             }
 
         # 再查自选股
-        watchlist_file = CONFIG_DIR / "watchlist.json"
-        if watchlist_file.exists():
-            with open(watchlist_file, 'r', encoding='utf-8') as f:
-                watchlist = json.load(f)
-            # watchlist 是字典格式 {code: info}
-            if code in watchlist:
-                stock_info = watchlist[code]
-                return {
-                    "industry": stock_info.get("industry", "unknown"),
-                }
+        watchlist = load_json(WATCHLIST_FILE, {})
+        if code in watchlist:
+            stock_info = watchlist[code]
+            return {
+                "industry": stock_info.get("industry", "unknown"),
+            }
 
         return {"industry": "unknown"}
 
@@ -731,29 +750,26 @@ def main():
         logger.info("执行买入逻辑...")
         # 扫描观察池中的高置信度预测
         buy_signals = []
-        watchlist_file = CONFIG_DIR / "watchlist.json"
-        if watchlist_file.exists():
-            with open(watchlist_file, 'r', encoding='utf-8') as f:
-                watchlist = json.load(f)
+        watchlist = load_json(WATCHLIST_FILE, {})
 
-            for code, stock in watchlist.items():
-                # code 已经是股票代码，stock 是字典包含 name, industry 等信息
+        for code, stock in watchlist.items():
+            # code 已经是股票代码，stock 是字典包含 name, industry 等信息
 
-                # 查找该股票的预测
-                for pred_id, pred in trader.predictions.get("active", {}).items():
-                    if pred.get("code") == code:
-                        confidence = pred.get("confidence", 0)
-                        # 置信度 ≥ 80 且不在持仓中
-                        if confidence >= 80 and code not in trader.positions:
-                            price = trader.get_realtime_price(code)
-                            if price:
-                                buy_signals.append({
-                                    "code": code,
-                                    "name": stock.get("name", code),
-                                    "price": price,
-                                    "confidence": confidence,
-                                    "reasons": stock.get("reason", stock.get("added_reason", "")),
-                                })
+            # 查找该股票的预测
+            for pred_id, pred in trader.predictions.get("active", {}).items():
+                if pred.get("code") == code:
+                    confidence = pred.get("confidence", 0)
+                    # 置信度 ≥ 80 且不在持仓中
+                    if confidence >= 80 and code not in trader.positions:
+                        price = trader.get_realtime_price(code)
+                        if price:
+                            buy_signals.append({
+                                "code": code,
+                                "name": stock.get("name", code),
+                                "price": price,
+                                "confidence": confidence,
+                                "reasons": stock.get("reason", stock.get("added_reason", "")),
+                            })
 
         # 按置信度排序
         buy_signals.sort(key=lambda x: x["confidence"], reverse=True)
