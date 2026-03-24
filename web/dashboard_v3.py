@@ -18,6 +18,7 @@ import socketserver
 import json
 import sqlite3
 import os
+import re
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
@@ -244,8 +245,7 @@ def get_trades(limit=20):
 def get_predictions(limit=20):
     return query_sql("""
         SELECT p.* FROM predictions p
-        WHERE p.status = 'active'
-        ORDER BY p.confidence DESC, p.created_at DESC
+        ORDER BY p.created_at DESC, p.confidence DESC
         LIMIT ?
     """, (limit,))
 
@@ -267,7 +267,7 @@ def get_selector_results():
     return query_sql("""
         SELECT p.symbol, p.name, p.direction, p.confidence, p.reasons, p.created_at
         FROM predictions p
-        WHERE p.created_at >= date('now')
+        WHERE p.created_at >= date('now', '-7 days')
         ORDER BY p.confidence DESC
         LIMIT 10
     """)
@@ -301,11 +301,24 @@ def get_market_style():
         # Handle None values from empty table or NULL averages
         def safe_value(val, default=0.5):
             return val if val is not None else default
-        return {
+        style = {
             "value_growth": {"value": round(safe_value(value_ratio) * 100), "growth": round(safe_value(growth_ratio) * 100)},
             "large_small": {"large": round(safe_value(large_cap_ratio) * 100), "small": round(safe_value(small_cap_ratio) * 100)}
         }
-    return {"value_growth": {"value": 55, "growth": 45}, "large_small": {"large": 60, "small": 40}}
+    else:
+        style = {"value_growth": {"value": 55, "growth": 45}, "large_small": {"large": 60, "small": 40}}
+
+    # 当 market_cache 缺失时，使用观察池行业做一个轻量风格估算。
+    cyclical_industries = {"铜", "铝", "锂", "锡", "黄金", "稀土", "有色", "油气", "钢铁", "煤炭"}
+    watchlist = load_watchlist({})
+    total_watchlist = max(len(watchlist), 1)
+    cyclical_count = sum(
+        1 for info in watchlist.values()
+        if any(keyword in str(info.get("industry", "")) for keyword in cyclical_industries)
+    )
+    cycle_ratio = round(cyclical_count / total_watchlist * 100)
+    style["cycle_defense"] = {"cycle": cycle_ratio, "defense": 100 - cycle_ratio}
+    return style
 
 def get_risk_level():
     risk = query_one("""
@@ -317,6 +330,248 @@ def get_risk_level():
     if risk:
         return {"level": risk["risk_level"], "notes": risk["risk_notes"]}
     return {"level": "low", "notes": "无近期风险记录"}
+
+
+def _read_latest_files(pattern: str, limit: int = 5) -> List[Path]:
+    """Return most-recent files matching a glob pattern."""
+    files = list(PROJECT_ROOT.glob(pattern))
+    files.sort(key=lambda path: path.stat().st_mtime if path.exists() else 0, reverse=True)
+    return files[:limit]
+
+
+def _extract_markdown_metric(text: str, label: str) -> Optional[str]:
+    """Extract a markdown table metric by label."""
+    match = re.search(rf"\|\s*{re.escape(label)}\s*\|\s*([^\|]+)\|", text)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
+def _strip_markdown_emphasis(value: Optional[str]) -> str:
+    """Remove simple markdown emphasis markers from a metric value."""
+    if not value:
+        return "--"
+    return re.sub(r"[*_`]+", "", str(value)).strip() or "--"
+
+
+def get_research_snapshot() -> Dict[str, Any]:
+    """Return latest research reports and search headlines."""
+    reports = []
+    for path in _read_latest_files("data/research_*.json", limit=5):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            reports.append(
+                {
+                    "file": path.name,
+                    "code": data.get("code"),
+                    "name": data.get("name"),
+                    "industry": data.get("industry"),
+                    "date": data.get("date"),
+                    "score": data.get("score"),
+                    "recommendation": data.get("recommendation"),
+                    "target_price": data.get("target_price"),
+                    "price": data.get("price"),
+                    "reasons": data.get("reasons", []),
+                }
+            )
+        except Exception as exc:
+            logger.error(f"Failed to parse research report {path}: {exc}")
+
+    hot_items = []
+    summary_path = PROJECT_ROOT / "data" / "daily_search" / "laverify_summary.txt"
+    if summary_path.exists():
+        for line in summary_path.read_text(encoding="utf-8").splitlines():
+            cleaned = line.strip()
+            if cleaned.startswith("- "):
+                hot_items.append(cleaned[2:])
+            elif cleaned.startswith("• "):
+                hot_items.append(cleaned[2:])
+        hot_items = hot_items[:10]
+
+    return {"reports": reports, "hot_topics": hot_items}
+
+
+def get_api_health_snapshot() -> Dict[str, Any]:
+    """Load API health data from the existing status file."""
+    status = load_json(PROJECT_ROOT / "config" / "api_status.json", {})
+    services = []
+    for domain, checks in status.items():
+        if not isinstance(checks, dict):
+            continue
+        for channel, detail in checks.items():
+            if not isinstance(detail, dict):
+                continue
+            services.append(
+                {
+                    "domain": domain,
+                    "channel": channel,
+                    "healthy": bool(detail.get("healthy", False)),
+                    "response_time_ms": detail.get("response_time_ms"),
+                    "last_check": detail.get("last_check"),
+                    "last_error": detail.get("last_error"),
+                    "consecutive_failures": detail.get("consecutive_failures", 0),
+                }
+            )
+
+    healthy_count = sum(1 for item in services if item["healthy"])
+    return {
+        "services": services,
+        "healthy_count": healthy_count,
+        "total_count": len(services),
+    }
+
+
+def get_monitoring_snapshot() -> Dict[str, Any]:
+    """Aggregate risk, API health, and critical monitoring task states."""
+    health = get_api_health_snapshot()
+    cron_tasks = get_openclaw_cron_status()
+    market_api = next(
+        (item for item in health["services"] if item["domain"] == "market" and item["channel"] == "api"),
+        None,
+    )
+    search_api = next(
+        (item for item in health["services"] if item["domain"] == "search" and item["channel"] == "api"),
+        None,
+    )
+    circuit_breaker = next(
+        (task for task in cron_tasks if task.get("script_key") == "circuit_breaker"),
+        None,
+    )
+    return {
+        "risk": get_risk_level(),
+        "market_api": market_api,
+        "search_api": search_api,
+        "circuit_breaker": circuit_breaker,
+        "api_health": health,
+    }
+
+
+def get_trading_snapshot() -> Dict[str, Any]:
+    """Return current trading summary plus recent trades."""
+    account = get_account_latest() or {}
+    positions = get_positions()
+    trades = get_trades(20)
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_trades = [trade for trade in trades if str(trade.get("executed_at", "")).startswith(today)]
+    proposals = query_sql(
+        """
+        SELECT id, symbol, name, direction, status, created_at
+        FROM proposals
+        ORDER BY created_at DESC
+        LIMIT 5
+        """
+    )
+
+    return {
+        "account": account,
+        "positions": positions,
+        "today_trades": today_trades,
+        "recent_trades": trades,
+        "proposals": proposals,
+    }
+
+
+def get_backtest_results(limit: int = 10) -> List[Dict[str, Any]]:
+    """Parse existing markdown backtest reports into table rows."""
+    results = []
+    patterns = ["outputs/backverify_*.md", "outputs/weekly_backtest_*.md"]
+    files: List[Path] = []
+    for pattern in patterns:
+        files.extend(_read_latest_files(pattern, limit=limit))
+    files.sort(key=lambda path: path.stat().st_mtime if path.exists() else 0, reverse=True)
+
+    for path in files[:limit]:
+        try:
+            text = path.read_text(encoding="utf-8")
+            results.append(
+                {
+                    "id": path.stem,
+                    "strategy_name": "回测策略",
+                    "period": re.search(r"\*\*回测期间\*\*[:：]\s*([^\n]+)", text).group(1).strip() if re.search(r"\*\*回测期间\*\*[:：]\s*([^\n]+)", text) else "--",
+                    "return_pct": _extract_markdown_metric(text, "总收益率") or "--",
+                    "max_drawdown": _extract_markdown_metric(text, "最大回撤") or "--",
+                    "sharpe_ratio": _extract_markdown_metric(text, "夏普比率") or "--",
+                    "created_at": datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+        except Exception as exc:
+            logger.error(f"Failed to parse backtest report {path}: {exc}")
+
+    return results
+
+
+def get_reports_snapshot() -> Dict[str, Any]:
+    """Return daily and weekly report summary from existing outputs."""
+    account = get_account_latest() or {}
+    trades = get_trades(10)
+    latest_trade = trades[0] if trades else None
+
+    latest_weekly_path = next(iter(_read_latest_files("data/weekly_reports/*.md", limit=1)), None)
+    weekly = {
+        "period": "--",
+        "accuracy": "--",
+        "score": "--",
+        "summary": "暂无周报",
+    }
+    if latest_weekly_path:
+        text = latest_weekly_path.read_text(encoding="utf-8")
+        period_match = re.search(r"\*\*时间范围\*\*[:：]\s*([^\n]+)", text)
+        accuracy = _extract_markdown_metric(text, "**准确率**") or _extract_markdown_metric(text, "准确率")
+        score = _extract_markdown_metric(text, "**综合得分**") or _extract_markdown_metric(text, "综合得分")
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        weekly = {
+            "period": period_match.group(1).strip() if period_match else latest_weekly_path.stem,
+            "accuracy": _strip_markdown_emphasis(accuracy),
+            "score": _strip_markdown_emphasis(score),
+            "summary": lines[-1][:120] if lines else latest_weekly_path.name,
+        }
+
+    latest_review_path = next(iter(_read_latest_files("data/reviews/*.md", limit=1)), None)
+    review_excerpt = "暂无复盘"
+    if latest_review_path:
+        text = latest_review_path.read_text(encoding="utf-8")
+        for line in text.splitlines():
+            cleaned = line.strip()
+            if cleaned and not cleaned.startswith("#"):
+                review_excerpt = cleaned[:120]
+                break
+
+    return {
+        "daily": {
+            "date": account.get("date", "--"),
+            "total_asset": account.get("total_asset", 0.0),
+            "profit": account.get("daily_profit", account.get("total_profit", 0.0)),
+            "operation": (
+                f"{latest_trade.get('executed_at', '--')} {latest_trade.get('direction', '')} "
+                f"{latest_trade.get('name', latest_trade.get('symbol', ''))}"
+                if latest_trade
+                else "近期无交易"
+            ),
+            "review_excerpt": review_excerpt,
+        },
+        "weekly": weekly,
+    }
+
+
+def get_news_snapshot(limit: int = 20) -> Dict[str, Any]:
+    """Return the latest news stream and counters from the database."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    recent_news = query_sql(
+        """
+        SELECT title, sentiment, urgency, news_time, source, impact_score
+        FROM news_labels
+        ORDER BY COALESCE(news_time, labeled_at) DESC, id DESC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+    today_count = sum(1 for item in recent_news if str(item.get("news_time", "")).startswith(today))
+    urgent_count = sum(1 for item in recent_news if item.get("urgency") == "高")
+    return {
+        "today_count": today_count,
+        "urgent_count": urgent_count,
+        "news": recent_news,
+    }
 
 def get_scheduled_scripts():
     """获取今日待运行的脚本列表 - 直接基于 OpenClaw cron 实时数据。"""
@@ -406,6 +661,7 @@ def get_enhanced_cron_data():
         # 增强 cron_data 中的每个任务
         for task in cron_data:
             task_key = (task.get("script_key") or task.get("id", "")).lower()
+            task_id = task_key
             stats = task_stats.get(task_key, {})
 
             # 添加运行统计
@@ -734,11 +990,11 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 <div class="page-header"><h1 class="page-title">监控面板</h1><p class="page-subtitle">市场监控与风险预警</p></div>
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-label">A股风险等级</div><div class="stat-value"><span id="monitor-risk-level" class="risk-badge risk-low">🟢 低风险</span></div></div>
-                    <div class="stat-card"><div class="stat-label">上证指数</div><div class="stat-value" id="monitor-sz-index">--</div></div>
-                    <div class="stat-card"><div class="stat-label">深证成指</div><div class="stat-value" id="monitor-szse-index">--</div></div>
-                    <div class="stat-card"><div class="stat-label">熔断状态</div><div class="stat-value"><span class="risk-badge risk-low">🟢 正常</span></div></div>
+                    <div class="stat-card"><div class="stat-label">市场数据 API</div><div class="stat-value" id="monitor-market-api">--</div></div>
+                    <div class="stat-card"><div class="stat-label">搜索 API</div><div class="stat-value" id="monitor-search-api">--</div></div>
+                    <div class="stat-card"><div class="stat-label">熔断状态</div><div class="stat-value"><span id="monitor-circuit-status" class="risk-badge risk-low">🟢 正常</span></div></div>
                 </div>
-                <div class="card"><div class="card-title"><span>API 健康状态</span><span class="badge badge-success">所有正常</span></div><div class="card-content">API状态数据待集成</div></div>
+                <div class="card"><div class="card-title"><span>API 健康状态</span><span class="badge" id="monitor-api-badge">--</span></div><div class="card-content" id="monitor-api-health"><p class="empty-tip">API状态数据待加载</p></div></div>
             </div>
 
             <div class="page" id="page-cron">
@@ -858,9 +1114,9 @@ HTML_CONTENT = '''<!DOCTYPE html>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">今日操作</div><div class="status-meta" id="report-today-ops">--</div></div></div>
                 </div></div>
                 <div class="card"><div class="card-title"><span>周报</span><span class="badge badge-success" id="report-week-date">--</span></div><div class="card-content">
-                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">周度收益</div><div class="status-meta" id="report-week-profit">--</div></div></div>
-                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">同比</div><div class="status-meta" id="report-week-yoy">--</div></div></div>
-                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">累计收益</div><div class="status-meta" id="report-week-cumulative">--</div></div></div>
+                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">准确率</div><div class="status-meta" id="report-week-profit">--</div></div></div>
+                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">综合得分</div><div class="status-meta" id="report-week-yoy">--</div></div></div>
+                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">摘要</div><div class="status-meta" id="report-week-cumulative">--</div></div></div>
                 </div></div>
             </div>
 
@@ -942,8 +1198,11 @@ HTML_CONTENT = '''<!DOCTYPE html>
             document.getElementById('overview-total-asset').textContent = '¥' + (acc.total_asset || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
             const profit = acc.total_profit || 0;
             const profitEl = document.getElementById('overview-total-profit');
+            const profitBadgeEl = document.getElementById('overview-profit-badge');
             profitEl.textContent = (profit >= 0 ? '+' : '') + '¥' + profit.toLocaleString('zh-CN', {minimumFractionDigits:2});
             profitEl.className = 'stat-value ' + (profit >= 0 ? 'positive' : 'negative');
+            profitBadgeEl.textContent = profit >= 0 ? '盈利中' : '回撤中';
+            profitBadgeEl.className = 'badge ' + (profit >= 0 ? 'badge-success' : 'badge-error');
             const stats = data.predictions_stats || {};
             document.getElementById('overview-accuracy').textContent = (stats.accuracy || 0) + '%';
             document.getElementById('overview-accuracy-badge').textContent = (stats.accuracy || 0) >= 60 ? '✅ ' + (stats.accuracy || 0) + '%' : '⚠️ ' + (stats.accuracy || 0) + '%';
@@ -954,24 +1213,49 @@ HTML_CONTENT = '''<!DOCTYPE html>
             document.getElementById('market-style-growth').textContent = style.value_growth?.growth || 45;
             document.getElementById('market-style-large').textContent = style.large_small?.large || 60;
             document.getElementById('market-style-small').textContent = style.large_small?.small || 40;
+            document.getElementById('market-style-cycle').textContent = style.cycle_defense?.cycle || 45;
+            document.getElementById('market-style-defense').textContent = style.cycle_defense?.defense || 55;
 
             // 更新监控脚本统计
             const cronStatus = data.cron_status || {};
             const scheduled = data.scheduled_scripts || [];
             // 已运行：有last_run记录的脚本
-            const running = Object.entries(cronStatus).filter(([_, s]) => s.last_run).length;
-            document.getElementById('panel-scripts-running').textContent = running;
+            const executed = Object.entries(cronStatus).filter(([_, s]) => s.last_run).length;
+            const running = Object.entries(cronStatus).filter(([_, s]) => s.running).length;
+            document.getElementById('panel-scripts-running').textContent = executed;
             document.getElementById('panel-scripts-scheduled').textContent = scheduled.length;
+            document.getElementById('overview-scripts-status').textContent = running > 0 ? ('🟢 ' + running + ' / ' + scheduled.length) : ('🟡 0 / ' + scheduled.length);
         }
 
         async function loadMonitoringData() {
-            const data = await fetchAPI('/overview', {});
+            const data = await fetchAPI('/monitoring-summary', {});
             const risk = data.risk || {level: 'low', notes: '无风险记录'};
             const riskEl = document.getElementById('monitor-risk-level');
             riskEl.textContent = risk.level === 'low' ? '🟢 低风险' : (risk.level === 'medium' ? '🟡 中风险' : '🔴 高风险');
             riskEl.className = 'risk-badge ' + (risk.level === 'low' ? 'risk-low' : (risk.level === 'medium' ? 'risk-medium' : 'risk-high'));
-            document.getElementById('monitor-sz-index').textContent = '2950.12 (-0.5%)';
-            document.getElementById('monitor-szse-index').textContent = '8900.34 (+0.2%)';
+            const marketApi = data.market_api || {};
+            const searchApi = data.search_api || {};
+            const circuitBreaker = data.circuit_breaker || {};
+            document.getElementById('monitor-market-api').textContent = marketApi.healthy ? ('🟢 ' + Math.round(marketApi.response_time_ms || 0) + 'ms') : '🔴 异常';
+            document.getElementById('monitor-search-api').textContent = searchApi.healthy ? ('🟢 ' + Math.round(searchApi.response_time_ms || 0) + 'ms') : '🔴 异常';
+            const circuitEl = document.getElementById('monitor-circuit-status');
+            const circuitOk = circuitBreaker.status === 'ok' || circuitBreaker.status === 'idle' || circuitBreaker.status === 'waiting';
+            circuitEl.textContent = circuitOk ? '🟢 正常' : (circuitBreaker.status === 'running' ? '🔵 执行中' : '🔴 异常');
+            circuitEl.className = 'risk-badge ' + (circuitOk ? 'risk-low' : (circuitBreaker.status === 'running' ? 'risk-medium' : 'risk-high'));
+            const health = data.api_health || {};
+            const services = Array.isArray(health.services) ? health.services : [];
+            const badgeEl = document.getElementById('monitor-api-badge');
+            badgeEl.textContent = (health.healthy_count || 0) + ' / ' + (health.total_count || services.length || 0) + ' 正常';
+            badgeEl.className = 'badge ' + ((health.healthy_count || 0) === (health.total_count || services.length || 0) ? 'badge-success' : 'badge-warning');
+            const contentEl = document.getElementById('monitor-api-health');
+            contentEl.innerHTML = services.map(service => {
+                const healthy = !!service.healthy;
+                const statusClass = healthy ? 'running' : 'error';
+                const statusText = healthy ? '正常' : '异常';
+                const response = service.response_time_ms ? Math.round(service.response_time_ms) + 'ms' : '--';
+                const meta = service.last_error ? ('最近错误: ' + service.last_error) : ('最近检查: ' + (service.last_check || '--'));
+                return '<div class="status-row"><div class="status-dot ' + statusClass + '"></div><div class="status-info"><div class="status-name">' + service.domain + ' / ' + service.channel + ' <span class="badge ' + (healthy ? 'badge-success' : 'badge-error') + '">' + statusText + '</span></div><div class="status-meta">响应 ' + response + ' | 连续失败 ' + (service.consecutive_failures || 0) + ' | ' + meta + '</div></div></div>';
+            }).join('') + '<div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">风险备注</div><div class="status-meta">' + (risk.notes || '无补充说明') + '</div></div></div>' || '<p class="empty-tip">暂无 API 健康数据</p>';
         }
 
         async function loadCronData() {
@@ -1031,45 +1315,78 @@ HTML_CONTENT = '''<!DOCTYPE html>
 
 
         async function loadAiPredictionData() {
-            const data = await fetchAPI('/predictions', []);
+            const payload = await fetchAPI('/predictions', {});
+            const data = Array.isArray(payload.predictions) ? payload.predictions : [];
             const stats = await fetchAPI('/predictions-stats', {});
             const today = new Date().toISOString().slice(0, 10);
-            document.getElementById('pred-yesterday-count').textContent = data.filter(p => p.created_at?.startsWith(today)).length;
+            const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+            const settled = data.filter(p => ['correct', 'partial', 'wrong'].includes((p.result_status || p.result?.status || p.result || '').toString()));
+            const recentSettled = settled.slice(0, 10);
+            const recentCorrect = recentSettled.filter(p => (p.result_status || p.result?.status || p.result) === 'correct').length;
+            const recentWinrate = recentSettled.length ? Math.round((recentCorrect / recentSettled.length) * 100) : 0;
+            document.getElementById('pred-yesterday-count').textContent = data.filter(p => p.created_at?.slice(0, 10) === yesterday).length;
             document.getElementById('pred-today-count').textContent = data.filter(p => p.created_at?.slice(0, 10) === today).length;
             document.getElementById('pred-accuracy').textContent = (stats.accuracy || 0) + '%';
+            document.getElementById('pred-recent-winrate').textContent = recentWinrate + '%';
             document.getElementById('pred-total-count-badge').textContent = data.length;
-            document.getElementById('pred-today-list').innerHTML = data.filter(p => p.created_at?.slice(0, 10) === today && p.confidence >= 70).slice(0, 5).map(p => '<div style="background:var(--bg-primary);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span>' + p.symbol + (p.name || '') + '</span><span style="color:' + (p.direction === 'up' ? 'var(--success)' : (p.direction === 'down' ? 'var(--error)' : 'var(--warning)')) + '">看' + (p.direction === 'up' ? '涨' : (p.direction === 'down' ? '空' : '平')) + '</span><span style="color:var(--accent);font-weight:700">' + p.confidence + '%</span></div>').join('') || '<p class="empty-tip">暂无今日高置信度预测</p>';
-            document.getElementById('pred-list-body').innerHTML = data.slice(0, 20).map(p => '<tr><td>' + p.symbol + '</td><td><span class="tag ' + (p.direction === 'up' ? 'buy' : (p.direction === 'down' ? 'sell' : 'neutral')) + '">' + (p.direction === 'up' ? '看涨' : (p.direction === 'down' ? '看空' : '中性')) + '</span></td><td>' + p.confidence + '%</td><td>' + (p.target_price || 0).toFixed(2) + '</td><td>' + p.status + '</td><td>' + (p.result || '--') + '</td><td>' + (p.created_at?.slice(0, 10) || '--') + '</td></tr>').join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无预测</td></tr>';
+            const todayHighConfidence = data.filter(p => p.created_at?.slice(0, 10) === today && p.confidence >= 70).slice(0, 5);
+            document.getElementById('pred-today-count-badge').textContent = todayHighConfidence.length;
+            document.getElementById('pred-today-list').innerHTML = todayHighConfidence.map(p => '<div style="background:var(--bg-primary);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span>' + p.symbol + ' ' + (p.name || '') + '</span><span style="color:' + (p.direction === 'up' ? 'var(--success)' : (p.direction === 'down' ? 'var(--error)' : 'var(--warning)')) + '">看' + (p.direction === 'up' ? '涨' : (p.direction === 'down' ? '空' : '平')) + '</span><span style="color:var(--accent);font-weight:700">' + p.confidence + '%</span></div>').join('') || '<p class="empty-tip">暂无今日高置信度预测</p>';
+            document.getElementById('pred-list-body').innerHTML = data.slice(0, 20).map(p => {
+                const result = p.result_status || p.result?.status || p.result || '--';
+                return '<tr><td>' + p.symbol + '</td><td><span class="tag ' + (p.direction === 'up' ? 'tag-buy' : (p.direction === 'down' ? 'tag-sell' : 'tag-neutral')) + '">' + (p.direction === 'up' ? '看涨' : (p.direction === 'down' ? '看空' : '中性')) + '</span></td><td>' + p.confidence + '%</td><td>' + (p.target_price || 0).toFixed(2) + '</td><td>' + (p.status || '--') + '</td><td>' + result + '</td><td>' + (p.created_at?.slice(0, 10) || '--') + '</td></tr>';
+            }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无预测</td></tr>';
         }
 
         async function loadSelectorData() {
-            const data = await fetchAPI('/selector-results', []);
-            document.getElementById('selector-today-recommend').innerHTML = data.slice(0, 5).map(p => '<div style="background:var(--bg-primary);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span>' + p.symbol + (p.name || '') + '</span><span style="color:var(--accent);font-weight:700">置信度 ' + p.confidence + '%</span></div>').join('') || '<p class="empty-tip">暂无今日推荐</p>';
+            const payload = await fetchAPI('/selector-results', {});
+            const data = Array.isArray(payload.results) ? payload.results : [];
+            document.getElementById('selector-today-recommend').innerHTML = data.slice(0, 5).map(p => '<div style="background:var(--bg-primary);padding:12px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span>' + p.symbol + ' ' + (p.name || '') + '</span><span style="color:var(--accent);font-weight:700">置信度 ' + p.confidence + '%</span></div>').join('') || '<p class="empty-tip">暂无近 7 日推荐</p>';
         }
 
-        async function loadResearchData() { document.getElementById('research-today').innerHTML = '<p class="empty-tip">今日研报生成中...</p>'; document.getElementById('research-hotnews').innerHTML = '<p class="empty-tip">热点聚合中...</p>'; }
+        async function loadResearchData() {
+            const data = await fetchAPI('/research-summary', {});
+            const reports = Array.isArray(data.reports) ? data.reports : [];
+            const hotTopics = Array.isArray(data.hot_topics) ? data.hot_topics : [];
+            document.getElementById('research-today').innerHTML = reports.map(report => {
+                const targetPrice = typeof report.target_price === 'number' ? report.target_price.toFixed(2) : (report.target_price || '--');
+                return '<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="color:var(--text-primary);margin-bottom:4px">' + (report.code || '--') + ' ' + (report.name || '未命名') + '</div><div style="color:var(--text-secondary);font-size:11px">' + (report.industry || '未分类') + ' | 评分 ' + (report.score || 0) + ' | 目标价 ¥' + targetPrice + '</div><div style="color:var(--text-secondary);font-size:11px;margin-top:4px">' + ((report.reasons || []).join(' / ') || (report.recommendation || '--')) + '</div></div>';
+            }).join('') || '<p class="empty-tip">暂无近期开出的深度研报</p>';
+            document.getElementById('research-hotnews').innerHTML = hotTopics.map(topic => '<div style="padding:12px 0;border-bottom:1px solid var(--border);color:var(--text-primary)">' + topic + '</div>').join('') || '<p class="empty-tip">暂无热点聚合结果</p>';
+        }
 
         async function loadEventData() {
-            const data = await fetchAPI('/events-today', []);
-            document.getElementById('event-policy-count').textContent = data.filter(e => e.event_types && e.event_types.includes('政策')).length || 0;
-            document.getElementById('event-data-count').textContent = data.filter(e => e.event_types && e.event_types.includes('数据')).length || 0;
-            document.getElementById('event-news-count').textContent = data.filter(e => e.event_types && e.event_types.includes('新闻')).length || 0;
+            const payload = await fetchAPI('/events-today', {});
+            const data = Array.isArray(payload.events) ? payload.events : [];
+            document.getElementById('event-policy-count').textContent = data.filter(e => String(e.event_types || '').includes('政策')).length || 0;
+            document.getElementById('event-data-count').textContent = data.filter(e => String(e.event_types || '').includes('数据')).length || 0;
+            document.getElementById('event-news-count').textContent = data.filter(e => String(e.event_types || '').includes('新闻')).length || 0;
             document.getElementById('event-total-count').textContent = data.length;
-            document.getElementById('event-list').innerHTML = data.slice(0, 10).map(e => '<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="color:var(--text-primary);margin-bottom:4px">' + (e.title || '无标题') + '</div><div style="color:var(--text-secondary);font-size:11px">' + (e.event_types || '综合') + ' | 影响: ' + (e.impact_score || '未知') + '</div></div>').join('') || '<p class="empty-tip">暂无今日事件</p>';
+            document.getElementById('event-list-count').textContent = data.length;
+            document.getElementById('event-list').innerHTML = data.slice(0, 10).map(e => '<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="color:var(--text-primary);margin-bottom:4px">' + (e.title || '无标题') + '</div><div style="color:var(--text-secondary);font-size:11px">' + (e.event_types || '综合') + ' | 影响: ' + (e.impact_score || '未知') + ' | 关联股票 ' + (e['关联股票数'] || 0) + '</div></div>').join('') || '<p class="empty-tip">暂无今日事件</p>';
         }
 
         async function loadTradingData() {
-            const data = await fetchAPI('/overview', {});
+            const data = await fetchAPI('/trading-summary', {});
             const acc = data.account || {};
-            document.getElementById('trading-market-value').textContent = '¥' + (acc.total_asset || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
-            document.getElementById('trading-today-profit').textContent = (acc.total_profit || 0).toFixed(2);
+            const todayTrades = Array.isArray(data.today_trades) ? data.today_trades : [];
+            document.getElementById('trading-market-value').textContent = '¥' + (acc.market_value || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
+            document.getElementById('trading-today-profit').textContent = (acc.daily_profit || 0).toFixed(2);
             document.getElementById('trading-positions-count').textContent = data.positions?.length || 0;
+            document.getElementById('trading-today-count').textContent = todayTrades.length;
+            document.getElementById('trading-today-body').innerHTML = todayTrades.map(trade => '<tr><td>' + (trade.executed_at || '--') + '</td><td>' + (trade.symbol || '--') + '</td><td>' + (trade.direction || '--') + '</td><td>' + (trade.shares || 0) + '</td><td>' + (trade.price || 0).toFixed(2) + '</td><td>' + (trade.amount || 0).toFixed(2) + '</td><td>' + (trade.reason || '--') + '</td></tr>').join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无今日交易</td></tr>';
         }
 
         async function loadPositionsData() {
-            const data = await fetchAPI('/overview', {});
-            document.getElementById('positions-count-badge').textContent = data.positions?.length || 0;
-            document.getElementById('positions-body-full').innerHTML = (data.positions || []).map(p => '<tr><td>' + p.symbol + '</td><td>' + (p.name || '') + '</td><td>' + (p.shares || 0) + '</td><td>' + (p.cost_price || 0).toFixed(2) + '</td><td>' + (p.current_price || 0).toFixed(2) + '</td><td>' + (p.market_value || (p.shares || 0) * (p.current_price || 0) || 0).toFixed(2) + '</td><td class="' + (p.profit_loss >= 0 ? 'positive' : 'negative') + '">' + (p.profit_loss || 0).toFixed(2) + '</td><td class="' + (p.profit_loss_pct >= 0 ? 'positive' : 'negative') + '">' + (p.profit_loss_pct || 0).toFixed(2) + '%</td><td><button class="btn btn-sm btn-secondary">详情</button></td></tr>').join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary)">暂无持仓</td></tr>';
+            const data = await fetchAPI('/trading-summary', {});
+            const positions = Array.isArray(data.positions) ? data.positions : [];
+            document.getElementById('positions-count-badge').textContent = positions.length;
+            document.getElementById('positions-body-full').innerHTML = positions.map(p => '<tr><td>' + p.symbol + '</td><td>' + (p.name || '') + '</td><td>' + (p.shares || 0) + '</td><td>' + (p.cost_price || 0).toFixed(2) + '</td><td>' + (p.current_price || 0).toFixed(2) + '</td><td>' + (p.market_value || (p.shares || 0) * (p.current_price || 0) || 0).toFixed(2) + '</td><td class="' + (p.profit_loss >= 0 ? 'positive' : 'negative') + '">' + (p.profit_loss || 0).toFixed(2) + '</td><td class="' + (p.profit_loss_pct >= 0 ? 'positive' : 'negative') + '">' + (p.profit_loss_pct || 0).toFixed(2) + '%</td><td><button class="btn btn-sm btn-secondary">详情</button></td></tr>').join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary)">暂无持仓</td></tr>';
+            document.getElementById('positions-stop-loss').innerHTML = positions.map(p => {
+                const takeProfit = typeof p.take_profit === 'number' ? p.take_profit.toFixed(2) : '--';
+                const stopLoss = typeof p.stop_loss === 'number' ? p.stop_loss.toFixed(2) : '--';
+                return '<tr><td>' + p.symbol + '</td><td>' + takeProfit + '</td><td>' + stopLoss + '</td><td>' + (p.status || 'holding') + '</td></tr>';
+            }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">暂无持仓风控设置</td></tr>';
         }
 
         async function loadValidationData() {
@@ -1099,25 +1416,32 @@ HTML_CONTENT = '''<!DOCTYPE html>
             )).join('') || '<p class="empty-tip">暂无验证池数据</p>';
         }
 
-        async function loadBacktestData() { document.getElementById('backtest-body').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无回测结果</td></tr>'; }
+        async function loadBacktestData() {
+            const data = await fetchAPI('/backtests', {});
+            const rows = Array.isArray(data.results) ? data.results : [];
+            document.getElementById('backtest-body').innerHTML = rows.map(row => '<tr><td>' + row.id + '</td><td>' + (row.strategy_name || '--') + '</td><td>' + (row.period || '--') + '</td><td>' + (row.return_pct || '--') + '</td><td>' + (row.max_drawdown || '--') + '</td><td>' + (row.sharpe_ratio || '--') + '</td><td>' + (row.created_at || '--') + '</td></tr>').join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无回测结果</td></tr>';
+        }
 
         async function loadReportsData() {
-            const data = await fetchAPI('/overview', {});
-            const acc = data.account || {};
-            const today = new Date().toISOString().slice(0, 10);
-            document.getElementById('report-today-date').textContent = today;
-            document.getElementById('report-total-asset').textContent = '¥' + (acc.total_asset || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
-            document.getElementById('report-today-profit').textContent = (acc.total_profit || 0).toFixed(2);
-            document.getElementById('report-today-ops').textContent = '无操作';
-            document.getElementById('report-week-date').textContent = '2026-W11';
-            document.getElementById('report-week-profit').textContent = '+1.2%';
-            document.getElementById('report-week-yoy').textContent = '-2.3%';
-            document.getElementById('report-week-cumulative').textContent = '+12.5%';
+            const data = await fetchAPI('/reports-summary', {});
+            const daily = data.daily || {};
+            const weekly = data.weekly || {};
+            document.getElementById('report-today-date').textContent = daily.date || '--';
+            document.getElementById('report-total-asset').textContent = '¥' + (daily.total_asset || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
+            document.getElementById('report-today-profit').textContent = (daily.profit || 0).toFixed(2);
+            document.getElementById('report-today-ops').textContent = daily.operation || '近期无交易';
+            document.getElementById('report-week-date').textContent = weekly.period || '--';
+            document.getElementById('report-week-profit').textContent = weekly.accuracy || '--';
+            document.getElementById('report-week-yoy').textContent = weekly.score || '--';
+            document.getElementById('report-week-cumulative').textContent = weekly.summary || '--';
         }
 
         async function loadNewsData() {
-            document.getElementById('news-today-count').textContent = 12; document.getElementById('news-urgent-count').textContent = 3;
-            document.getElementById('news-stream').innerHTML = '<p class="empty-tip">实时新闻流待加载...</p>';
+            const data = await fetchAPI('/news-summary', {});
+            const news = Array.isArray(data.news) ? data.news : [];
+            document.getElementById('news-today-count').textContent = data.today_count || 0;
+            document.getElementById('news-urgent-count').textContent = data.urgent_count || 0;
+            document.getElementById('news-stream').innerHTML = news.map(item => '<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="color:var(--text-primary);margin-bottom:4px">' + (item.title || '无标题') + '</div><div style="color:var(--text-secondary);font-size:11px">' + (item.source || '未知来源') + ' | 情绪 ' + (item.sentiment || '--') + ' | 影响 ' + (item.impact_score || '--') + ' | 时间 ' + (item.news_time || '--') + '</div></div>').join('') || '<p class="empty-tip">暂无新闻流数据</p>';
         }
 
         function updatePanelState() {
@@ -1223,6 +1547,54 @@ def handle_api_validation_summary():
         logger.error(f"Validation summary error: {e}")
         return {"error": str(e)}
 
+
+def handle_api_monitoring_summary():
+    try:
+        return get_monitoring_snapshot()
+    except Exception as e:
+        logger.error(f"Monitoring summary error: {e}")
+        return {"error": str(e)}
+
+
+def handle_api_research_summary():
+    try:
+        return get_research_snapshot()
+    except Exception as e:
+        logger.error(f"Research summary error: {e}")
+        return {"error": str(e), "reports": [], "hot_topics": []}
+
+
+def handle_api_trading_summary():
+    try:
+        return get_trading_snapshot()
+    except Exception as e:
+        logger.error(f"Trading summary error: {e}")
+        return {"error": str(e), "account": {}, "positions": [], "today_trades": [], "recent_trades": [], "proposals": []}
+
+
+def handle_api_backtests():
+    try:
+        return {"results": get_backtest_results(10)}
+    except Exception as e:
+        logger.error(f"Backtests error: {e}")
+        return {"error": str(e), "results": []}
+
+
+def handle_api_reports_summary():
+    try:
+        return get_reports_snapshot()
+    except Exception as e:
+        logger.error(f"Reports summary error: {e}")
+        return {"error": str(e), "daily": {}, "weekly": {}}
+
+
+def handle_api_news_summary():
+    try:
+        return get_news_snapshot(20)
+    except Exception as e:
+        logger.error(f"News summary error: {e}")
+        return {"error": str(e), "today_count": 0, "urgent_count": 0, "news": []}
+
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def send_json(self, data, status=200):
         self.send_response(status)
@@ -1264,6 +1636,18 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
                 self.send_json(handle_api_watchlist())
             elif endpoint == 'validation-summary':
                 self.send_json(handle_api_validation_summary())
+            elif endpoint == 'monitoring-summary':
+                self.send_json(handle_api_monitoring_summary())
+            elif endpoint == 'research-summary':
+                self.send_json(handle_api_research_summary())
+            elif endpoint == 'trading-summary':
+                self.send_json(handle_api_trading_summary())
+            elif endpoint == 'backtests':
+                self.send_json(handle_api_backtests())
+            elif endpoint == 'reports-summary':
+                self.send_json(handle_api_reports_summary())
+            elif endpoint == 'news-summary':
+                self.send_json(handle_api_news_summary())
             elif endpoint == 'openclaw_cron':
                 self.send_json(handle_api_openclaw_cron())
             elif endpoint == 'enhanced_cron':
