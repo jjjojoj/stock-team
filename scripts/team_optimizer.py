@@ -16,6 +16,7 @@ from typing import Dict, List, Optional
 import urllib.request
 
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
+sys.path.insert(0, PROJECT_ROOT)
 
 ACCURACY_FILE = os.path.join(PROJECT_ROOT, "learning", "accuracy_stats.json")
 RULES_FILE = os.path.join(PROJECT_ROOT, "learning", "prediction_rules.json")
@@ -26,14 +27,16 @@ POSITIONS_FILE = os.path.join(PROJECT_ROOT, "config", "positions.json")
 PREDICTIONS_FILE = os.path.join(PROJECT_ROOT, "data", "predictions.json")
 TEAM_HEALTH_FILE = os.path.join(PROJECT_ROOT, "learning", "team_health.json")
 
+from core.storage import load_rules, load_validation_pool, save_rules
+
 
 class TeamOptimizer:
     """团队级优化智能体"""
     
     def __init__(self):
         self.accuracy = self._load_json(ACCURACY_FILE, {})
-        self.rules = self._load_json(RULES_FILE, {})
-        self.validation_pool = self._load_json(VALIDATION_POOL_FILE, {})
+        self.rules = load_rules({})
+        self.validation_pool = load_validation_pool({})
         self.experience = self._load_json(EXPERIENCE_FILE, {})
         self.portfolio = self._load_json(PORTFOLIO_FILE, {})
         self.positions = self._load_json(POSITIONS_FILE, {})
@@ -349,7 +352,7 @@ class TeamOptimizer:
                             rule["weight"] = old_weight * 0.9  # 降低10%
                             actions.append(f"降低未使用规则权重: {rule_id}")
                 
-                self._save_json(RULES_FILE, self.rules)
+                save_rules(self.rules)
                 print(f"  ✅ 已调整 {len(actions)} 条规则权重")
         
         if not actions:

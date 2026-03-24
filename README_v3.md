@@ -26,6 +26,12 @@
 - 查看任务：`python3 scripts/scheduler.py list --json`
 - 立即执行：`python3 scripts/scheduler.py run <job_id>`
 
+**验证/观察相关 API**：
+- `GET /api/rules`
+- `GET /api/validation-pool`
+- `GET /api/watchlist`
+- `GET /api/validation-summary`
+
 ---
 
 ## 📊 数据源统一标准（v3.0）

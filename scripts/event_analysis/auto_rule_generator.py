@@ -6,6 +6,7 @@
 
 import sqlite3
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List
 import logging
@@ -14,6 +15,10 @@ from datetime import datetime
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 DATABASE_PATH = PROJECT_ROOT / "database" / "stock_team.db"
 LEARNING_DIR = PROJECT_ROOT / "learning"
+
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.storage import load_validation_pool, save_validation_pool
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -93,26 +98,37 @@ class AutoRuleGenerator:
     
     def save_rules_to_validation_pool(self, rules: List[Dict]):
         """将规则保存到验证池"""
-        validation_pool_file = LEARNING_DIR / "rule_validation_pool.json"
-        
-        # 读取现有验证池
-        if validation_pool_file.exists():
-            with open(validation_pool_file, 'r', encoding='utf-8') as f:
-                validation_pool = json.load(f)
-        else:
-            validation_pool = {'rules': {}}
-            
-        if 'rules' not in validation_pool:
-            validation_pool['rules'] = {}
-            
-        # 添加新规则
+        validation_pool = load_validation_pool({})
+
         for rule in rules:
-            rule_id = rule['id']
-            validation_pool['rules'][rule_id] = rule
-            
-        # 保存回文件
-        with open(validation_pool_file, 'w', encoding='utf-8') as f:
-            json.dump(validation_pool, f, ensure_ascii=False, indent=2)
+            rule_id = rule["id"]
+            validation_pool[rule_id] = {
+                "rule_id": rule_id,
+                "source": rule.get("source", "auto_generated_event_rule"),
+                "source_book": "event_analysis",
+                "rule": rule.get("condition", rule_id),
+                "testable_form": rule.get("prediction", ""),
+                "category": "事件驱动",
+                "backtest": {
+                    "samples": rule.get("samples", 0),
+                    "success_rate": rule.get("success_rate", 0.0),
+                    "avg_profit": 0.0,
+                    "avg_loss": 0.0,
+                    "profit_factor": 0.0,
+                },
+                "live_test": {
+                    "samples": 0,
+                    "success_rate": 0.0,
+                    "started_at": datetime.now().isoformat(),
+                },
+                "status": "validating",
+                "confidence": min(0.95, max(0.5, float(rule.get("success_rate", 0.0) or 0.0))),
+                "created_at": rule.get("created_at", datetime.now().isoformat()),
+                "updated_at": datetime.now().isoformat(),
+                "metadata": rule,
+            }
+
+        save_validation_pool(validation_pool)
             
         logger.info(f"Added {len(rules)} new event-based rules to validation pool")
         

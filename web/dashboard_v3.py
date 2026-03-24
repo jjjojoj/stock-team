@@ -23,7 +23,15 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 import logging
 
-from core.storage import DB_PATH
+from core.storage import (
+    DB_PATH,
+    LEARNING_DIR,
+    load_json,
+    load_rejected_rules,
+    load_rules,
+    load_validation_pool,
+    load_watchlist,
+)
 
 PORT = 8082
 
@@ -102,6 +110,133 @@ def get_account_latest():
 
 def get_positions():
     return query_sql("SELECT * FROM positions ORDER BY profit_loss_pct DESC")
+
+
+def flatten_rule_library(limit: Optional[int] = None):
+    """Flatten the rule library into a ranked list."""
+    rules = load_rules({})
+    items = []
+    for category, category_rules in rules.items():
+        for rule_id, rule in category_rules.items():
+            entry = dict(rule)
+            entry["rule_id"] = rule_id
+            entry["category"] = category
+            items.append(entry)
+
+    items.sort(
+        key=lambda item: (
+            float(item.get("success_rate", 0.0) or 0.0),
+            int(item.get("samples", 0) or 0),
+            float(item.get("weight", 0.0) or 0.0),
+        ),
+        reverse=True,
+    )
+    return items[:limit] if limit else items
+
+
+def get_watchlist_items(limit: Optional[int] = None):
+    """Return watchlist entries as a list for APIs/UI."""
+    watchlist = load_watchlist({})
+    items = []
+    for symbol, info in watchlist.items():
+        entry = dict(info)
+        entry["symbol"] = symbol
+        items.append(entry)
+
+    items.sort(
+        key=lambda item: (
+            {"high": 0, "medium": 1, "low": 2}.get(item.get("priority", "medium"), 1),
+            -(float(item.get("score", 0) or 0)),
+        )
+    )
+    return items[:limit] if limit else items
+
+
+def get_validation_pool_items(limit: Optional[int] = None):
+    """Return validation-pool entries as a ranked list."""
+    pool = load_validation_pool({})
+    items = []
+    for rule_id, rule in pool.items():
+        entry = dict(rule)
+        entry["rule_id"] = rule_id
+        items.append(entry)
+
+    items.sort(
+        key=lambda item: (
+            float(item.get("confidence", 0.0) or 0.0),
+            float(item.get("live_test", {}).get("success_rate", 0.0) or 0.0),
+            int(item.get("backtest", {}).get("samples", 0) or 0),
+        ),
+        reverse=True,
+    )
+    return items[:limit] if limit else items
+
+
+def get_validation_summary():
+    """Build dashboard-friendly summary for rule validation and learning."""
+    rule_items = flatten_rule_library()
+    validation_pool_items = get_validation_pool_items()
+    rejected_items = list(load_rejected_rules({}).values())
+    book_knowledge = load_json(LEARNING_DIR / "book_knowledge.json", {})
+
+    active_with_samples = [item for item in rule_items if int(item.get("samples", 0) or 0) > 0]
+    validated_library_rules = [
+        item for item in rule_items
+        if int(item.get("samples", 0) or 0) >= 1 and float(item.get("success_rate", 0.0) or 0.0) >= 0.5
+    ]
+    ready_pool_rules = [
+        item for item in validation_pool_items
+        if item.get("status") in {"ready_for_promotion", "proven"}
+    ]
+    hot_rules = [
+        item for item in rule_items
+        if int(item.get("samples", 0) or 0) >= 5 and float(item.get("success_rate", 0.0) or 0.0) >= 0.6
+    ]
+    hot_pool_rules = [item for item in validation_pool_items if float(item.get("confidence", 0.0) or 0.0) >= 0.7]
+    warm_rule_count = max(
+        0,
+        len(rule_items) + len(validation_pool_items) - len(hot_rules) - len(hot_pool_rules),
+    )
+
+    total_points = 0
+    for book in book_knowledge.values():
+        total_points += len(book.get("key_points", []))
+
+    in_sample = round(
+        (
+            sum(float(item.get("success_rate", 0.0) or 0.0) for item in active_with_samples) / len(active_with_samples) * 100
+        ) if active_with_samples else 0.0,
+        1,
+    )
+    live_pool_items = [
+        item for item in validation_pool_items if int(item.get("live_test", {}).get("samples", 0) or 0) > 0
+    ]
+    out_sample = round(
+        (
+            sum(float(item.get("live_test", {}).get("success_rate", 0.0) or 0.0) for item in live_pool_items) / len(live_pool_items) * 100
+        ) if live_pool_items else 0.0,
+        1,
+    )
+
+    return {
+        "passed_rules": len(validated_library_rules) + len(ready_pool_rules),
+        "failed_rules": len(rejected_items),
+        "pending_rules": max(0, len(validation_pool_items) - len(ready_pool_rules)),
+        "learning_points": total_points,
+        "memory": {
+            "hot": len(hot_rules) + len(hot_pool_rules),
+            "warm": warm_rule_count,
+            "cold": len(rejected_items),
+        },
+        "overfitting": {
+            "in_sample_accuracy": in_sample,
+            "out_sample_accuracy": out_sample,
+            "risk": "low" if abs(in_sample - out_sample) <= 10 else ("medium" if abs(in_sample - out_sample) <= 20 else "high"),
+        },
+        "top_rules": rule_items[:8],
+        "validation_pool": validation_pool_items[:8],
+        "watchlist_count": len(get_watchlist_items()),
+    }
 
 def get_trades(limit=20):
     return query_sql("SELECT * FROM trades ORDER BY executed_at DESC LIMIT ?", (limit,))
@@ -699,6 +834,10 @@ HTML_CONTENT = '''<!DOCTYPE html>
                     <div style="background:var(--bg-primary);padding:16px;border-radius:8px;text-align:center"><div style="font-size:32px;font-weight:700;color:var(--accent)" id="mem-warm">--</div><div style="color:var(--text-secondary);font-size:12px">温暖记忆</div></div>
                     <div style="background:var(--bg-primary);padding:16px;border-radius:8px;text-align:center"><div style="font-size:32px;font-weight:700;color:var(--text-secondary)" id="mem-cold">--</div><div style="color:var(--text-secondary);font-size:12px">冷门归档</div></div>
                 </div></div></div>
+                <div class="content-grid">
+                    <div class="card"><div class="card-title"><span>规则库 Top</span><span class="badge" id="validation-rules-count">--</span></div><div class="card-content" id="validation-rules-list"><p class="empty-tip">加载中...</p></div></div>
+                    <div class="card"><div class="card-title"><span>验证池候选</span><span class="badge" id="validation-pool-count">--</span></div><div class="card-content" id="validation-pool-list"><p class="empty-tip">加载中...</p></div></div>
+                </div>
                 <div class="card"><div class="card-title"><span>过拟合检测</span><span class="badge badge-success">🟢 低风险</span></div><div class="card-content">
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">样本内准确率</div><div class="status-meta" id="overfitting-in-sample">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">样本外准确率</div><div class="status-meta" id="overfitting-out-sample">--</div></div></div>
@@ -934,10 +1073,30 @@ HTML_CONTENT = '''<!DOCTYPE html>
         }
 
         async function loadValidationData() {
-            document.getElementById('val-passed').textContent = 12; document.getElementById('val-failed').textContent = 3; document.getElementById('val-pending').textContent = 5;
-            document.getElementById('val-progress').textContent = 245;
-            document.getElementById('mem-hot').textContent = 45; document.getElementById('mem-warm').textContent = 128; document.getElementById('mem-cold').textContent = 356;
-            document.getElementById('overfitting-in-sample').textContent = '72.5%'; document.getElementById('overfitting-out-sample').textContent = '68.2%';
+            const data = await fetchAPI('/validation-summary', {});
+            document.getElementById('val-passed').textContent = data.passed_rules || 0;
+            document.getElementById('val-failed').textContent = data.failed_rules || 0;
+            document.getElementById('val-pending').textContent = data.pending_rules || 0;
+            document.getElementById('val-progress').textContent = data.learning_points || 0;
+            document.getElementById('mem-hot').textContent = data.memory?.hot || 0;
+            document.getElementById('mem-warm').textContent = data.memory?.warm || 0;
+            document.getElementById('mem-cold').textContent = data.memory?.cold || 0;
+            document.getElementById('overfitting-in-sample').textContent = (data.overfitting?.in_sample_accuracy || 0) + '%';
+            document.getElementById('overfitting-out-sample').textContent = (data.overfitting?.out_sample_accuracy || 0) + '%';
+            document.getElementById('validation-rules-count').textContent = data.top_rules?.length || 0;
+            document.getElementById('validation-pool-count').textContent = data.validation_pool?.length || 0;
+            document.getElementById('validation-rules-list').innerHTML = (data.top_rules || []).map(rule => (
+                '<div style="padding:12px 0;border-bottom:1px solid var(--border)">' +
+                '<div style="color:var(--text-primary);margin-bottom:4px">' + rule.rule_id + '</div>' +
+                '<div style="color:var(--text-secondary);font-size:11px">' + rule.category + ' | 样本 ' + (rule.samples || 0) + ' | 胜率 ' + (((rule.success_rate || 0) * 100).toFixed(1)) + '%</div>' +
+                '</div>'
+            )).join('') || '<p class="empty-tip">暂无规则库数据</p>';
+            document.getElementById('validation-pool-list').innerHTML = (data.validation_pool || []).map(rule => (
+                '<div style="padding:12px 0;border-bottom:1px solid var(--border)">' +
+                '<div style="color:var(--text-primary);margin-bottom:4px">' + (rule.rule || rule.rule_id || '未命名规则') + '</div>' +
+                '<div style="color:var(--text-secondary);font-size:11px">' + (rule.category || '未分类') + ' | 置信度 ' + ((rule.confidence || 0).toFixed(2)) + ' | 实盘样本 ' + (rule.live_test?.samples || 0) + '</div>' +
+                '</div>'
+            )).join('') || '<p class="empty-tip">暂无验证池数据</p>';
         }
 
         async function loadBacktestData() { document.getElementById('backtest-body').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无回测结果</td></tr>'; }
@@ -1032,6 +1191,38 @@ def handle_api_trades():
         logger.error(f"Trades error: {e}")
         return {"trades": []}
 
+
+def handle_api_rules():
+    try:
+        return {"rules": flatten_rule_library(100)}
+    except Exception as e:
+        logger.error(f"Rules error: {e}")
+        return {"rules": []}
+
+
+def handle_api_validation_pool():
+    try:
+        return {"rules": get_validation_pool_items(100)}
+    except Exception as e:
+        logger.error(f"Validation pool error: {e}")
+        return {"rules": []}
+
+
+def handle_api_watchlist():
+    try:
+        return {"watchlist": get_watchlist_items(100)}
+    except Exception as e:
+        logger.error(f"Watchlist error: {e}")
+        return {"watchlist": []}
+
+
+def handle_api_validation_summary():
+    try:
+        return get_validation_summary()
+    except Exception as e:
+        logger.error(f"Validation summary error: {e}")
+        return {"error": str(e)}
+
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def send_json(self, data, status=200):
         self.send_response(status)
@@ -1065,6 +1256,14 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
                 self.send_json(handle_api_realtime_prices())
             elif endpoint == 'trades':
                 self.send_json(handle_api_trades())
+            elif endpoint == 'rules':
+                self.send_json(handle_api_rules())
+            elif endpoint == 'validation-pool':
+                self.send_json(handle_api_validation_pool())
+            elif endpoint == 'watchlist':
+                self.send_json(handle_api_watchlist())
+            elif endpoint == 'validation-summary':
+                self.send_json(handle_api_validation_summary())
             elif endpoint == 'openclaw_cron':
                 self.send_json(handle_api_openclaw_cron())
             elif endpoint == 'enhanced_cron':

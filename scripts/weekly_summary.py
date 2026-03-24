@@ -15,6 +15,7 @@ from typing import Dict, List
 from collections import defaultdict
 
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
+sys.path.insert(0, PROJECT_ROOT)
 
 ACCURACY_FILE = os.path.join(PROJECT_ROOT, "learning", "accuracy_stats.json")
 RULES_FILE = os.path.join(PROJECT_ROOT, "learning", "prediction_rules.json")
@@ -22,13 +23,15 @@ MEMORY_FILE = os.path.join(PROJECT_ROOT, "learning", "memory.md")
 STRATEGY_FILE = os.path.join(PROJECT_ROOT, "config", "strategy.md")
 REPORT_DIR = os.path.join(PROJECT_ROOT, "data", "weekly_reports")
 
+from core.storage import load_rules
+
 
 class WeeklySummary:
     """周总结生成器"""
     
     def __init__(self):
         self.accuracy = self._load_json(ACCURACY_FILE, {})
-        self.rules = self._load_json(RULES_FILE, {})
+        self.rules = load_rules({})
         os.makedirs(REPORT_DIR, exist_ok=True)
         
     def _load_json(self, path: str, default):
@@ -282,6 +285,26 @@ def main():
     print()
     print(f"📝 报告已保存: {filepath}")
     print("=" * 70)
+    
+    # 发送飞书通知
+    try:
+        from feishu_notifier import send_feishu_message
+        
+        week_start, week_end = generator._get_week_range()
+        title = f"📊 周总结 - {week_start} 至 {week_end}"
+        
+        # 提取关键信息
+        lines = report.split('\n')
+        summary_lines = []
+        for line in lines:
+            if any(kw in line for kw in ['准确率', '最佳规则', '最差规则', '下周策略', '✅', '❌', '🔶']):
+                summary_lines.append(line)
+        
+        content = '\n'.join(summary_lines[:15])  # 限制长度
+        send_feishu_message(title, content, level='info')
+        print("✅ 飞书通知已发送")
+    except Exception as e:
+        print(f"⚠️ 飞书通知发送失败: {e}")
 
 
 if __name__ == "__main__":

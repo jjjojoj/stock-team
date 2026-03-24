@@ -20,10 +20,12 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
+sys.path.insert(0, PROJECT_ROOT)
 
 # Agent角色
 from scripts.ai_predictor import AIPredictor  # 量化师
 from scripts.daily_stock_research import StockResearcher  # 研究员
+from core.storage import load_watchlist
 # 风控官、CIO、交易员 - 功能已分散在现有脚本中
 
 
@@ -33,7 +35,7 @@ class TeamCoordinator:
     def __init__(self):
         self.config = self._load_config()
         self.positions = self._load_json("config/positions.json", {})
-        self.watchlist = self._load_json("config/watchlist.json", {})
+        self.watchlist = load_watchlist({})
         self.portfolio = self._load_json("config/portfolio.json", {})
         
     def _load_config(self):

@@ -267,7 +267,7 @@ def main():
     args = parser.parse_args()
     
     if args.action == "list":
-        watchlist = load_json(CONFIG_DIR / "watchlist.json")
+        watchlist = load_watchlist({})
         print("\n📈 观察池股票:")
         for code, info in watchlist.items():
             priority = info.get('priority', '?')

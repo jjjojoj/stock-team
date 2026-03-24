@@ -11,6 +11,9 @@ import requests
 from datetime import datetime
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+
+from core.storage import load_watchlist
 
 
 class WebSearcher:
@@ -85,11 +88,8 @@ class WebSearcher:
     def search_watchlist(self):
         """搜索自选股最新信息"""
         print("\n🔍 搜索自选股...")
-        
-        # 读取自选
-        watchlist_file = os.path.join(PROJECT_ROOT, "config", "watchlist.json")
-        with open(watchlist_file, 'r', encoding='utf-8') as f:
-            watchlist = json.load(f)
+
+        watchlist = load_watchlist({})
         
         results = {}
         for code, info in list(watchlist.items())[:5]:  # 只搜索前5只

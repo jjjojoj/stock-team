@@ -15,10 +15,12 @@ from typing import Dict, List, Optional
 import re
 
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
+sys.path.insert(0, PROJECT_ROOT)
 NEWS_CACHE_FILE = os.path.join(PROJECT_ROOT, "data", "news_cache.json")
 PREDICTIONS_FILE = os.path.join(PROJECT_ROOT, "data", "predictions.json")
 POSITIONS_FILE = os.path.join(PROJECT_ROOT, "config", "positions.json")
-WATCHLIST_FILE = os.path.join(PROJECT_ROOT, "config", "watchlist.json")
+
+from core.storage import load_watchlist
 
 # 新闻关键词权重（影响程度）
 NEWS_KEYWORDS = {
@@ -159,6 +161,12 @@ class NewsMonitor:
         positions = self._load_positions()
         for code, pos in positions.items():
             if pos.get("name", "") in text:
+                affected_stocks.add(code)
+
+        # 从观察池中识别股票
+        watchlist = load_watchlist({})
+        for code, info in watchlist.items():
+            if info.get("name", "") in text:
                 affected_stocks.add(code)
         
         # 判断情绪

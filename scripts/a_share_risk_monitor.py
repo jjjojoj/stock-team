@@ -29,6 +29,8 @@ import logging
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
 sys.path.insert(0, PROJECT_ROOT)
 
+from core.storage import load_watchlist
+
 # 配置
 CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
 LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
@@ -420,16 +422,11 @@ class AShareRiskMonitor:
                 logger.info(f"加载持仓股票 {len(positions)} 只")
         
         # 2. 加载自选股（config/watchlist.json）
-        watchlist_file = os.path.join(CONFIG_DIR, "watchlist.json")
-        if os.path.exists(watchlist_file):
-            with open(watchlist_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                watchlist = data.get("stocks", [])
-                # 去重
-                for code in watchlist:
-                    if code not in stocks:
-                        stocks.append(code)
-                logger.info(f"加载自选股 {len(watchlist)} 只")
+        watchlist = load_watchlist({})
+        for code in watchlist.keys():
+            if code not in stocks:
+                stocks.append(code)
+        logger.info(f"加载自选股 {len(watchlist)} 只")
         
         return stocks
 

@@ -101,6 +101,8 @@ GET /api/agents        # Agent 数据（硬编码）
 GET /api/cron          # Cron 任务（从 OpenClaw cron 实时读取）
 GET /api/rules         # 规则库（从 SQLite `prediction_rules` / JSON 镜像读取）
 GET /api/validation-pool # 验证池（从 SQLite `rule_validation_pool` / JSON 镜像读取）
+GET /api/watchlist     # 观察池（从 SQLite `watchlist` / JSON 镜像读取）
+GET /api/validation-summary # 验证/学习摘要（从规则库、验证池、淘汰库聚合）
 GET /api/knowledge     # 知识库（从 learning/knowledge_base.json 读取）
 ```
 

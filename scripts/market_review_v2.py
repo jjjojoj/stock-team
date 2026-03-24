@@ -22,7 +22,10 @@ DATA_DIR = PROJECT_ROOT / "data"
 CONFIG_DIR = PROJECT_ROOT / "config"
 LEARNING_DIR = PROJECT_ROOT / "learning"
 
+sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from core.storage import load_watchlist
 
 # 导入必要的模块
 try:
@@ -176,18 +179,11 @@ class MarketReview:
     
     def _find_prediction_reasons(self, code: str) -> List[str]:
         """查找预测理由"""
-        watchlist_file = CONFIG_DIR / "watchlist.json"
-        
-        if not watchlist_file.exists():
-            return ["未知"]
-        
         try:
-            with open(watchlist_file, 'r', encoding='utf-8') as f:
-                watchlist = json.load(f)
-            
-            for stock in watchlist:
-                if stock['code'] == code:
-                    return stock.get('added_reason', '未知').split(', ')
+            watchlist = load_watchlist({})
+            if code in watchlist:
+                reason = watchlist[code].get('added_reason') or watchlist[code].get('reason') or '未知'
+                return [item.strip() for item in reason.split(',') if item.strip()]
         except Exception as e:
             print(f"⚠️ 读取watchlist失败: {e}")
         
