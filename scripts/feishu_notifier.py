@@ -27,17 +27,32 @@ CARD_MAX_BLOCKS = 10
 TITLE_MAX_CHARS = 60
 
 
+def _feishu_config_paths() -> List[Path]:
+    """Return tracked defaults first, then ignored local overrides."""
+    config_dir = PROJECT_ROOT / "config"
+    return [
+        config_dir / "feishu_config.json",
+        config_dir / "feishu_config.local.json",
+    ]
+
+
 def load_feishu_config() -> Dict:
-    """加载飞书配置。"""
-    config_file = PROJECT_ROOT / "config" / "feishu_config.json"
-    if config_file.exists():
+    """加载飞书配置，允许本地私有文件覆盖仓库模板。"""
+    config: Dict = {}
+    for config_file in _feishu_config_paths():
+        if not config_file.exists():
+            continue
         with config_file.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
-    return {}
+            config.update(json.load(handle))
+    return config
 
 
 def get_default_webhook_url() -> Optional[str]:
-    """读取默认 webhook。"""
+    """读取默认 webhook。环境变量优先于本地配置。"""
+    env_webhook = os.getenv("FEISHU_WEBHOOK_URL") or os.getenv("STOCK_TEAM_FEISHU_WEBHOOK_URL")
+    if env_webhook:
+        return env_webhook.strip()
+
     config = load_feishu_config()
     return config.get("webhook_url") or config.get("webhook")
 

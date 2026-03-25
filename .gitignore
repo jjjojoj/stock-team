@@ -4,9 +4,12 @@
 # Python
 **/__pycache__/
 *.py[cod]
+.env
+.env.*
 
 # Local dashboard/runtime
 logs/dashboard_v3.log
+config/feishu_config.local.json
 
 # Temporary generated reports
 reports/

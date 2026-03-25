@@ -109,9 +109,23 @@ china-stock-team/
 
 ## 通知与监控
 
-- 飞书 webhook 地址统一从 `config/feishu_config.json` 读取
+- 飞书 webhook 优先从环境变量 `FEISHU_WEBHOOK_URL` 读取
+- 也支持本地私有配置 `config/feishu_config.local.json`
+- 仓库中的 `config/feishu_config.json` 只保留非敏感默认项
 - 股票类 cron 不再依赖 OpenClaw `announce`
 - 面板会把“切换前遗留的旧投递错误”显示为已清理的历史状态，而不是当前故障
+
+本地配置示例：
+
+```bash
+export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook"
+```
+
+或复制模板后本地保存：
+
+```bash
+cp config/feishu_config.local.example.json config/feishu_config.local.json
+```
 
 ---
 
@@ -122,6 +136,7 @@ china-stock-team/
 - [docs/CRON_TASKS.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/CRON_TASKS.md)：cron 设计说明
 - [docs/REFACTOR_PHASE6_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE6_2026-03-25.md)：webhook 收口记录
 - [docs/REFACTOR_PHASE7_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE7_2026-03-25.md)：面板清理与仓库瘦身记录
+- [docs/REFACTOR_PHASE8_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE8_2026-03-25.md)：飞书密钥去明文记录
 
 ---
 

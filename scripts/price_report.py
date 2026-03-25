@@ -5,6 +5,7 @@
 """
 
 import json
+import sys
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -12,18 +13,6 @@ from pathlib import Path
 # 配置
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 POSITIONS_FILE = PROJECT_ROOT / "config" / "positions.json"
-FEISHU_CONFIG_FILE = PROJECT_ROOT / "config" / "feishu_config.json"
-
-def get_webhook_url():
-    """从配置文件读取 webhook 地址"""
-    try:
-        with FEISHU_CONFIG_FILE.open('r', encoding='utf-8') as f:
-            config = json.load(f)
-        return config.get('webhook') or config.get('webhook_url')
-    except:
-        return None
-
-WEBHOOK_URL = get_webhook_url()
 
 # 月度目标
 TARGET_PROFIT = 40000  # +20%
@@ -58,14 +47,16 @@ def get_realtime_prices(codes):
 
 def send_to_feishu(text):
     """发送到飞书群"""
-    webhook_url = WEBHOOK_URL or get_webhook_url()
-    if not webhook_url:
-        print("⚠️ 飞书 webhook 未配置")
-        return False
-
     try:
-        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
-        from feishu_notifier import send_feishu_message
+        scripts_dir = str(PROJECT_ROOT / "scripts")
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        from feishu_notifier import get_default_webhook_url, send_feishu_message
+
+        webhook_url = get_default_webhook_url()
+        if not webhook_url:
+            print("⚠️ 飞书 webhook 未配置")
+            return False
 
         lines = text.splitlines()
         title = lines[0] if lines else "📊 持仓汇报"

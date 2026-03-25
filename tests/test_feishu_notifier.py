@@ -1,4 +1,6 @@
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -10,6 +12,33 @@ import feishu_notifier
 
 
 class FeishuNotifierTests(unittest.TestCase):
+    def test_get_default_webhook_prefers_env_then_local_config(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+            config_dir = project_root / "config"
+            config_dir.mkdir(parents=True, exist_ok=True)
+            (config_dir / "feishu_config.json").write_text(
+                json.dumps({"webhook_url": "", "daily_report_enabled": True}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            (config_dir / "feishu_config.local.json").write_text(
+                json.dumps({"webhook_url": "https://local.test/hook"}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            with patch.object(feishu_notifier, "PROJECT_ROOT", project_root):
+                with patch.dict(feishu_notifier.os.environ, {}, clear=True):
+                    self.assertEqual(
+                        feishu_notifier.get_default_webhook_url(),
+                        "https://local.test/hook",
+                    )
+
+                    with patch.dict(feishu_notifier.os.environ, {"FEISHU_WEBHOOK_URL": "https://env.test/hook"}):
+                        self.assertEqual(
+                            feishu_notifier.get_default_webhook_url(),
+                            "https://env.test/hook",
+                        )
+
     def test_build_card_payload_trims_long_content_under_safe_limit(self):
         content = "\n\n".join(
             f"第{i}段 " + ("测试内容" * 400)

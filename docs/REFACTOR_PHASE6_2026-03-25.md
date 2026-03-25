@@ -4,9 +4,7 @@
 
 ## 目标
 
-把股票相关 cron 任务统一切到同一个飞书群 webhook：
-
-- `https://open.feishu.cn/open-apis/bot/v2/hook/11736928-0e52-4e41-b5c6-2c050bff11e6`
+把股票相关 cron 任务统一切到同一个飞书群 webhook。
 
 同时解决两个遗留问题：
 
@@ -49,7 +47,7 @@
 
 效果：
 
-- 地址统一从 `config/feishu_config.json` 读取
+- 地址统一从 `FEISHU_WEBHOOK_URL` 或本地私有配置读取
 - 卡片格式统一
 - 不再各脚本重复拼接 webhook payload
 

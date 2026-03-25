@@ -120,7 +120,14 @@ openclaw cron run <job_id>
 
 配置文件：
 
-- `config/feishu_config.json`
+- `config/feishu_config.json`：仓库内共享默认项
+- `config/feishu_config.local.json`：本机私有配置，已加入 `.gitignore`
+
+读取优先级：
+
+1. 环境变量 `FEISHU_WEBHOOK_URL`
+2. 本地私有配置 `config/feishu_config.local.json`
+3. 仓库模板 `config/feishu_config.json`
 
 ---
 
@@ -171,6 +178,12 @@ python3 scripts/daily_review_closed_loop.py report
 python3 scripts/feishu_notifier.py --test
 ```
 
+本地私有配置模板：
+
+```bash
+cp config/feishu_config.local.example.json config/feishu_config.local.json
+```
+
 ---
 
 ## 本周重构记录
@@ -182,3 +195,4 @@ python3 scripts/feishu_notifier.py --test
 - [docs/REFACTOR_PHASE5_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE5_2026-03-25.md)
 - [docs/REFACTOR_PHASE6_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE6_2026-03-25.md)
 - [docs/REFACTOR_PHASE7_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE7_2026-03-25.md)
+- [docs/REFACTOR_PHASE8_2026-03-25.md](/Users/joe/.openclaw/workspace/china-stock-team/docs/REFACTOR_PHASE8_2026-03-25.md)

@@ -1,6 +1,5 @@
 {
-  "webhook": "",
-  "webhook_url": "",
+  "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook",
   "daily_report_enabled": true,
   "trade_notification_enabled": true,
   "alert_notification_enabled": true,
