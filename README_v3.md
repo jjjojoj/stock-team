@@ -129,6 +129,14 @@ openclaw cron run <job_id>
 2. 本地私有配置 `config/feishu_config.local.json`
 3. 仓库模板 `config/feishu_config.json`
 
+接入步骤：
+
+1. 在飞书群里新增“自定义机器人”
+2. 复制机器人生成的 webhook
+3. 写入 `config/feishu_config.local.json`
+4. 或改为设置环境变量 `FEISHU_WEBHOOK_URL`
+5. 用 `python3 scripts/feishu_notifier.py --test` 验证
+
 ---
 
 ## 看板
@@ -183,6 +191,8 @@ python3 scripts/feishu_notifier.py --test
 ```bash
 cp config/feishu_config.local.example.json config/feishu_config.local.json
 ```
+
+然后把你在飞书申请到的 webhook 填到 `webhook_url` 字段里。
 
 ---
 

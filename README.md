@@ -115,17 +115,25 @@ china-stock-team/
 - 股票类 cron 不再依赖 OpenClaw `announce`
 - 面板会把“切换前遗留的旧投递错误”显示为已清理的历史状态，而不是当前故障
 
-本地配置示例：
+启用飞书通知：
+
+1. 在飞书群里添加“自定义机器人”，申请并复制 webhook
+2. 任选一种方式保存到本机，不要写进仓库跟踪文件
+3. 用 `python3 scripts/feishu_notifier.py --test` 验证发信是否正常
+
+环境变量示例：
 
 ```bash
 export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook"
 ```
 
-或复制模板后本地保存：
+或复制模板后，本地写入：
 
 ```bash
 cp config/feishu_config.local.example.json config/feishu_config.local.json
 ```
+
+然后把你申请到的 webhook 填到 `config/feishu_config.local.json` 的 `webhook_url` 字段里。
 
 ---
 
