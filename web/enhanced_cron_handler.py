@@ -47,6 +47,8 @@ def derive_display_status(job, state=None):
     last_error = (state.get('lastError') or '').strip()
     delivery_status = (state.get('lastDeliveryStatus') or '').strip()
     delivery_mode = ((job.get('delivery') or {}).get('mode') or '').strip()
+    last_run_at = state.get('lastRunAtMs') or 0
+    updated_at = job.get('updatedAtMs') or 0
 
     if state.get('runningAtMs'):
         return {
@@ -57,12 +59,12 @@ def derive_display_status(job, state=None):
             'raw_status': raw_status,
         }
 
-    if raw_status == 'error' and 'message failed' in last_error.lower() and delivery_mode == 'none':
+    if delivery_mode == 'none' and raw_status == 'error' and updated_at > last_run_at:
         return {
-            'status': 'warning',
-            'status_label': 'legacy_notify_error',
-            'status_color': 'warning',
-            'status_detail': '历史旧投递错误；当前已切换脚本 webhook，等待下次运行刷新',
+            'status': 'ok',
+            'status_label': 'history_cleared',
+            'status_color': 'success',
+            'status_detail': '旧错误来自切换前状态；当前已改为脚本 webhook，等待下次运行覆盖历史记录',
             'raw_status': raw_status,
         }
 

@@ -20,17 +20,18 @@ class EnhancedCronHandlerTests(unittest.TestCase):
 
     def test_legacy_message_failure_on_none_delivery_is_marked_as_history(self):
         status = derive_display_status(
-            {"delivery": {"mode": "none"}},
+            {"delivery": {"mode": "none"}, "updatedAtMs": 200},
             {
                 "lastRunStatus": "error",
                 "lastError": "⚠️ ✉️ Message failed",
                 "lastDeliveryStatus": "delivered",
+                "lastRunAtMs": 100,
             }
         )
 
-        self.assertEqual(status["status"], "warning")
-        self.assertEqual(status["status_label"], "legacy_notify_error")
-        self.assertIn("历史旧投递错误", status["status_detail"])
+        self.assertEqual(status["status"], "ok")
+        self.assertEqual(status["status_label"], "history_cleared")
+        self.assertIn("脚本 webhook", status["status_detail"])
 
     def test_running_at_timestamp_takes_priority_over_previous_error(self):
         status = derive_display_status(
