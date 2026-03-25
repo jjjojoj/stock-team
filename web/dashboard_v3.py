@@ -891,67 +891,18 @@ def get_enhanced_cron_data():
     包含更详细的状态信息、运行时间统计和下次运行时间预测
     """
     try:
-        # 从 OpenClaw CLI 获取实时数据
         cron_data = get_openclaw_cron_status()
-
-        # 从数据库获取历史运行记录
-        cron_logs = query_sql("""
-            SELECT
-                agent as script,
-                created_at as run_time,
-                strftime('%s', created_at) as run_timestamp
-            FROM agent_logs
-            WHERE created_at >= datetime('now', '-7 days')
-            ORDER BY created_at DESC
-            LIMIT 500
-        """)
-
-        # 处理日志数据，计算每个任务的统计信息
-        task_stats = {}
-        for log in cron_logs:
-            script = log["script"].lower()
-            if script not in task_stats:
-                task_stats[script] = {
-                    "run_count": 0,
-                    "success_count": 0,
-                    "error_count": 0,
-                    "last_run": None,
-                    "recent_runs": [],
-                    "durations": []
-                }
-            task_stats[script]["run_count"] += 1
-            task_stats[script]["success_count"] += 1  # 假设成功，后续可以改进
-            task_stats[script]["recent_runs"].append({
-                "time": log["run_time"],
-                "status": "ok"
-            })
-            # 保留最近 10 次运行记录
-            if len(task_stats[script]["recent_runs"]) > 10:
-                task_stats[script]["recent_runs"] = task_stats[script]["recent_runs"][:10]
-
-        # 增强 cron_data 中的每个任务
         for task in cron_data:
-            task_key = (task.get("script_key") or task.get("id", "")).lower()
-            task_id = task_key
-            stats = task_stats.get(task_key, {})
+            has_run = bool(task.get("last_run_raw"))
+            task["run_count"] = 1 if has_run else 0
+            task["success_count"] = 1 if task.get("status") == "ok" and has_run else 0
+            task["error_count"] = int(task.get("consecutive_errors", 0) or 0)
+            if task.get("status") == "error" and task["error_count"] == 0 and has_run:
+                task["error_count"] = 1
+            task["run_history"] = [task.get("status")] if has_run else []
+            task["avg_duration_ms"] = int(task.get("duration_ms") or 0)
 
-            # 添加运行统计
-            task["run_count"] = stats.get("run_count", 0)
-            task["success_count"] = stats.get("success_count", 0)
-            task["error_count"] = stats.get("error_count", 0)
-            task["run_history"] = [r["status"] for r in stats.get("recent_runs", [])]
-
-            # 计算平均运行时间（模拟）
-            if task.get("duration_ms"):
-                task["avg_duration_ms"] = task["duration_ms"]
-            else:
-                # 根据任务类型估算
-                if "backtest" in task_id or "overfit" in task_id:
-                    task["avg_duration_ms"] = 120000  # 2 分钟
-                elif "research" in task_id or "learning" in task_id:
-                    task["avg_duration_ms"] = 45000  # 45 秒
-                else:
-                    task["avg_duration_ms"] = 15000  # 15 秒
+        duration_samples = [task["avg_duration_ms"] for task in cron_data if task.get("avg_duration_ms")]
 
         return {
             "cron_tasks": cron_data,
@@ -960,7 +911,7 @@ def get_enhanced_cron_data():
             "error_count": sum(1 for t in cron_data if t.get("status") == "error"),
             "running_count": sum(1 for t in cron_data if t.get("status") == "running"),
             "idle_count": sum(1 for t in cron_data if t.get("status") in ["idle", "waiting"]),
-            "avg_duration_ms": sum(t.get("avg_duration_ms", 0) for t in cron_data) // max(len(cron_data), 1),
+            "avg_duration_ms": (sum(duration_samples) // len(duration_samples)) if duration_samples else 0,
             "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
     except Exception as e:

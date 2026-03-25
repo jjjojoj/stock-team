@@ -145,6 +145,8 @@ def get_openclaw_cron_status():
                 'agentId': job.get('agentId', 'main'),  # Alias for HTML compatibility
                 'last_run_raw': last_run or 0,  # Raw timestamp for sorting
                 'next_run_raw': next_run or 0,  # Raw timestamp for sorting
+                'duration_ms': state.get('lastDurationMs') or 0,
+                'consecutive_errors': state.get('consecutiveErrors') or 0,
                 'model': '-',
                 'target': job.get('sessionTarget', 'isolated')
             }

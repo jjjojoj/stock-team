@@ -374,13 +374,9 @@ class APIHealthMonitor:
         try:
             emoji = "⚠️" if level == "warning" else "🔴"
             sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
-            from feishu_notifier import send_feishu_message
+            from feishu_notifier import send_alert_card
 
-            send_feishu_message(
-                title=f"{emoji} API 故障通知",
-                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                level=level,
-            )
+            send_alert_card(title=f"{emoji} API 故障通知", content=message, level=level)
             logger.info("飞书通知发送成功")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")

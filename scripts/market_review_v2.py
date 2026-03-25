@@ -25,7 +25,7 @@ LEARNING_DIR = PROJECT_ROOT / "learning"
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from core.storage import load_watchlist
+from core.storage import build_portfolio_snapshot, load_watchlist
 
 # 导入必要的模块
 try:
@@ -130,7 +130,8 @@ class MarketReview:
     def _analyze_positions(self) -> Dict:
         """分析持仓"""
         try:
-            positions = self.trader._get_current_positions()
+            snapshot = build_portfolio_snapshot()
+            positions = snapshot.get("positions", [])
         except Exception as e:
             print(f"⚠️ 获取持仓失败: {e}")
             return {"message": "无法获取持仓", "total": 0, "profitable": 0, "losing": 0, "lessons": []}
@@ -145,8 +146,9 @@ class MarketReview:
             "lessons": []
         }
         
-        for code, pos in positions.items():
-            cost = pos['cost_price']
+        for pos in positions:
+            code = pos.get('code', '')
+            cost = pos.get('cost_price', 0)
             current = pos.get('current_price', cost)
             pnl_pct = (current / cost - 1) * 100
             
@@ -157,7 +159,7 @@ class MarketReview:
                     reasons = self._find_prediction_reasons(code)
                     analysis['lessons'].append({
                         "type": "success",
-                        "stock": pos['name'],
+                        "stock": pos.get('name', code),
                         "pnl_pct": pnl_pct,
                         "reasons": reasons,
                         "lesson": f"成功规则: {', '.join(reasons)}"
@@ -169,7 +171,7 @@ class MarketReview:
                     reasons = self._find_prediction_reasons(code)
                     analysis['lessons'].append({
                         "type": "failure",
-                        "stock": pos['name'],
+                        "stock": pos.get('name', code),
                         "pnl_pct": pnl_pct,
                         "reasons": reasons,
                         "lesson": f"失败原因: 需要检查 {', '.join(reasons)} 是否有效"

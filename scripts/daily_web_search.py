@@ -13,7 +13,7 @@ from datetime import datetime
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from core.storage import load_watchlist
+from core.storage import load_positions, load_watchlist
 
 
 class WebSearcher:
@@ -70,14 +70,11 @@ class WebSearcher:
         """搜索持仓股票最新信息"""
         print("\n🔍 搜索持仓股票...")
         
-        # 读取持仓
-        positions_file = os.path.join(PROJECT_ROOT, "config", "positions.json")
-        with open(positions_file, 'r', encoding='utf-8') as f:
-            positions = json.load(f)
+        positions = load_positions({})
         
         results = {}
         for code, pos in positions.items():
-            name = pos['name']
+            name = pos.get('name', code)
             query = f"{name} 投资价值 最新消息 2026"
             items = self.tavily_search(query, max_results=3)
             results[name] = items

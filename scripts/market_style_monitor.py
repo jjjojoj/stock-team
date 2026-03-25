@@ -355,13 +355,9 @@ class MarketStyleMonitor:
         """发送飞书通知"""
         try:
             sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
-            from feishu_notifier import send_feishu_message
+            from feishu_notifier import send_alert_card
 
-            if send_feishu_message(
-                title="📊 市场风格切换预警",
-                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                level="warning",
-            ):
+            if send_alert_card(title="📊 市场风格切换预警", content=message, level="warning"):
                 logger.info("飞书通知发送成功")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")

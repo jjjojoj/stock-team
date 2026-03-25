@@ -136,7 +136,7 @@ class CircuitBreaker:
             logger.error(f"获取大盘数据失败：{e}")
             return {}
     
-    def get_panic_index(self) -> float:
+    def get_panic_index(self) -> Optional[float]:
         """
         获取恐慌指数（替代 VIX）
         
@@ -164,10 +164,10 @@ class CircuitBreaker:
                     panic = min(50, max(0, -change_pct * 3 + 15))
                     return panic
             
-            return 15.0  # 默认值
+            return None
         except Exception as e:
             logger.warning(f"获取恐慌指数失败：{e}")
-            return 15.0
+            return None
     
     def check_market_conditions(self) -> Tuple[str, List[str]]:
         """
@@ -199,7 +199,7 @@ class CircuitBreaker:
         elif max_drop <= self.THRESHOLDS["market_drop_level1"]:
             self.status = self.STATUS_WARNING
             self.triggered_rules.append(f"大盘下跌{max_drop:.1f}% > {self.THRESHOLDS['market_drop_level1']}% → 停止买入")
-        elif panic_index >= self.THRESHOLDS["panic_high"]:
+        elif panic_index is not None and panic_index >= self.THRESHOLDS["panic_high"]:
             self.status = self.STATUS_WARNING
             self.triggered_rules.append(f"恐慌指数{panic_index:.1f} > {self.THRESHOLDS['panic_high']} → 预警")
         else:
@@ -256,13 +256,9 @@ class CircuitBreaker:
         """发送飞书通知"""
         try:
             sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
-            from feishu_notifier import send_feishu_message
+            from feishu_notifier import send_alert_card
 
-            if send_feishu_message(
-                title="🚨 熔断机制预警",
-                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                level="critical",
-            ):
+            if send_alert_card(title="🚨 熔断机制预警", content=message, level="critical"):
                 logger.info("飞书通知发送成功")
             else:
                 logger.error("飞书通知发送失败")

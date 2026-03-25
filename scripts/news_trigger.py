@@ -13,14 +13,15 @@ import urllib.request
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import re
+import glob
 
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
 sys.path.insert(0, PROJECT_ROOT)
 NEWS_CACHE_FILE = os.path.join(PROJECT_ROOT, "data", "news_cache.json")
 PREDICTIONS_FILE = os.path.join(PROJECT_ROOT, "data", "predictions.json")
-POSITIONS_FILE = os.path.join(PROJECT_ROOT, "config", "positions.json")
 
-from core.storage import load_watchlist
+from core.predictions import normalize_prediction_collection
+from core.storage import load_json, load_positions, load_watchlist, sync_predictions_to_db
 
 # 新闻关键词权重（影响程度）
 NEWS_KEYWORDS = {
@@ -39,11 +40,6 @@ NEWS_KEYWORDS = {
         "战": 20,  # 战争（对资源股利好）
         "冲突": 18,
         "制裁": 15,
-        "稀土": 12,
-        "锂": 10,
-        "铜": 8,
-        "铝": 8,
-        "黄金": 10,
     },
     # 负面（看空）
     "negative": {
@@ -72,6 +68,7 @@ NEWS_KEYWORDS = {
         "关税": -8,
     },
 }
+MIN_IMPACT_SCORE = 8
 
 # 行业-股票映射
 INDUSTRY_STOCKS = {
@@ -132,14 +129,14 @@ class NewsMonitor:
         self._persist_cache(self.news_cache)
     
     def _load_predictions(self) -> Dict:
-        if os.path.exists(PREDICTIONS_FILE):
-            with open(PREDICTIONS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return {"active": {}, "history": []}
+        return normalize_prediction_collection(
+            load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
+        )
     
     def _save_predictions(self):
         with open(PREDICTIONS_FILE, 'w', encoding='utf-8') as f:
             json.dump(self.predictions, f, ensure_ascii=False, indent=2)
+        sync_predictions_to_db(self.predictions)
     
     def analyze_news(self, news_item: Dict) -> Dict:
         """
@@ -162,7 +159,8 @@ class NewsMonitor:
                 "keywords_found": ["战", "涨价"],
             }
         """
-        text = f"{news_item.get('title', '')} {news_item.get('content', '')}"
+        lead_content = str(news_item.get('content', '') or '')[:240]
+        text = f"{news_item.get('title', '')} {lead_content}"
         
         impact_score = 0
         keywords_found = []
@@ -195,9 +193,9 @@ class NewsMonitor:
                 affected_stocks.add(code)
         
         # 判断情绪
-        if impact_score >= 10:
+        if impact_score >= MIN_IMPACT_SCORE:
             sentiment = "positive"
-        elif impact_score <= -10:
+        elif impact_score <= -MIN_IMPACT_SCORE:
             sentiment = "negative"
         else:
             sentiment = "neutral"
@@ -211,10 +209,7 @@ class NewsMonitor:
         }
     
     def _load_positions(self) -> Dict:
-        if os.path.exists(POSITIONS_FILE):
-            with open(POSITIONS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return {}
+        return load_positions({})
     
     def update_predictions_from_news(self, news_analysis: Dict, news_item: Dict):
         """
@@ -283,8 +278,6 @@ class NewsMonitor:
         Returns:
             有影响的新闻列表
         """
-        # 这里应该从实际新闻源获取
-        # 目前返回示例
         recent_news = self._fetch_recent_news()
         
         impactful_news = []
@@ -345,8 +338,39 @@ class NewsMonitor:
             
             return recent[-50:]  # 最多返回最近 50 条
         
-        # 如果没有数据，返回空列表
-        return []
+        # 回退到最新 daily_search 结果，避免监控链路因缓存为空而失效
+        daily_search_dir = os.path.join(PROJECT_ROOT, "data", "daily_search")
+        json_files = sorted(glob.glob(os.path.join(daily_search_dir, "*.json")))
+        if not json_files:
+            return []
+
+        try:
+            with open(json_files[-1], 'r', encoding='utf-8') as f:
+                payload = json.load(f)
+        except Exception:
+            return []
+
+        recent = []
+        for bucket in ("holdings", "watchlist", "market_overview"):
+            section = payload.get(bucket, {})
+            if not isinstance(section, dict):
+                continue
+            for source, rows in section.items():
+                if not isinstance(rows, list):
+                    continue
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    recent.append({
+                        "id": row.get("url") or row.get("title", "")[:50],
+                        "title": row.get("title", ""),
+                        "content": row.get("content", ""),
+                        "source": source,
+                        "time": payload.get("date", datetime.now().strftime("%Y-%m-%d %H:%M")),
+                        "url": row.get("url", ""),
+                    })
+
+        return recent[-50:]
     
     def generate_news_digest(self) -> str:
         """生成新闻摘要报告"""

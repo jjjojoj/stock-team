@@ -15,6 +15,7 @@
 
 import sys
 import sqlite3
+import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -25,8 +26,9 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # 虚拟环境
-VENV_PATH = PROJECT_ROOT / "venv" / "lib" / "python3.14" / "site-packages"
-sys.path.insert(0, str(VENV_PATH))
+VENV_PATH = PROJECT_ROOT / "venv" / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+if VENV_PATH.exists():
+    sys.path.insert(0, str(VENV_PATH))
 
 from core.storage import (
     DB_PATH,
@@ -65,7 +67,7 @@ try:
     HAS_ADAPTERS = True
 except ImportError:
     HAS_ADAPTERS = False
-    logger.warning("adapters 模块未找到，将使用模拟价格")
+    logger.warning("adapters 模块未找到，将使用行情 API 兜底")
 
 try:
     from scripts.feishu_notifier import send_trade_notification
@@ -221,9 +223,31 @@ class AutoTraderV3:
                     return float(price.price)
             except Exception as e:
                 logger.warning(f"获取实时价格失败 {code}: {e}")
-        
-        # 模拟价格（用于测试）
+
+        fallback_price = self._get_fallback_quote_price(code)
+        if fallback_price is not None:
+            return fallback_price
+
         return self._get_simulated_price(code)
+
+    def _get_fallback_quote_price(self, code: str) -> Optional[float]:
+        """使用腾讯行情接口兜底，避免交易链路依赖模拟价格。"""
+        try:
+            secid = code.replace(".", "")
+            request = urllib.request.Request(
+                f"http://qt.gtimg.cn/q={secid}",
+                headers={"User-Agent": "Mozilla/5.0"},
+            )
+            with urllib.request.urlopen(request, timeout=10) as response:
+                content = response.read().decode("gbk")
+            if "=" not in content:
+                return None
+            parts = content.split("=", 1)[1].strip().strip('";').split("~")
+            if len(parts) >= 4 and parts[3]:
+                return float(parts[3])
+        except Exception as exc:
+            logger.warning(f"腾讯行情兜底失败 {code}: {exc}")
+        return None
     
     def _get_simulated_price(self, code: str) -> Optional[float]:
         """获取模拟价格（从持仓成本价推算）"""

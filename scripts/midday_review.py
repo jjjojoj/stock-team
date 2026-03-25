@@ -21,6 +21,11 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 DATA_DIR = PROJECT_ROOT / "data"
 LOG_DIR = PROJECT_ROOT / "logs"
 
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from core.predictions import normalize_prediction_collection
+from core.storage import load_json
+
 
 def get_stock_price(code: str) -> float:
     """获取股票当前价（腾讯 API）"""
@@ -41,12 +46,9 @@ def get_stock_price(code: str) -> float:
 
 def verify_predictions() -> dict:
     """验证早盘预测"""
-    predictions_file = DATA_DIR / "predictions.json"
-    if not predictions_file.exists():
-        return {'verified': 0, 'correct': 0, 'wrong': 0, 'details': []}
-    
-    with open(predictions_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    data = normalize_prediction_collection(
+        load_json(DATA_DIR / "predictions.json", {"active": {}, "history": []})
+    )
     
     results = {
         'verified': 0,

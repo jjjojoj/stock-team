@@ -20,16 +20,17 @@ A 股特殊规则：
 import sys
 import os
 import json
+import glob
 import requests
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import logging
 
 # 项目根目录
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
 sys.path.insert(0, PROJECT_ROOT)
 
-from core.storage import load_watchlist
+from core.storage import load_positions, load_watchlist
 
 # 配置
 CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
@@ -62,6 +63,14 @@ class AShareRiskMonitor:
         "chinext": 0.20,    # 创业板 20%
         "st": 0.05,         # ST 股票 5%
     }
+    POLICY_KEYWORDS = [
+        "证监会", "交易所", "上交所", "深交所", "监管", "问询", "调查", "处罚",
+        "停牌", "退市", "减持", "出口管制", "关税", "限制", "整顿", "核查",
+    ]
+    POLICY_RISK_TERMS = [
+        "调查", "处罚", "退市", "停牌", "问询", "核查", "减持", "出口管制", "关税", "限制",
+    ]
+    POLICY_SOURCE_KEYWORDS = ["证监会", "交易所", "上交所", "深交所", "公告", "监管"]
     
     def __init__(self):
         self.config = self._load_config()
@@ -269,36 +278,111 @@ class AShareRiskMonitor:
             政策风险列表
         """
         risks = []
-        
+
         try:
-            # 简化版：使用新闻 API 搜索政策相关
-            # 实际应用中应该爬取证监会官网
-            from datetime import datetime
             today = datetime.now().strftime("%Y-%m-%d")
-            
-            # 这里使用占位实现，实际应该调用新闻 API
             logger.info(f"检查政策风险 ({today})...")
-            
-            # TODO: 实现证监会公告爬取
-            # 示例：https://www.csrc.gov.cn/csrc/c100028.shtml
-            
+
+            watchlist = load_watchlist({})
+            positions = load_positions({})
+            tracked_targets = {
+                **{
+                    code: {
+                        "name": info.get("name", code),
+                        "industry": info.get("industry", ""),
+                    }
+                    for code, info in watchlist.items()
+                },
+                **{
+                    code: {
+                        "name": info.get("name", code),
+                        "industry": info.get("industry", ""),
+                    }
+                    for code, info in positions.items()
+                },
+            }
+
+            news_items = self._load_recent_policy_news()
+            for item in news_items:
+                title = str(item.get("title", "") or "")
+                content = str(item.get("content", "") or "")
+                signal_text = f"{title} {content[:240]}"
+                source = str(item.get("source", "") or "")
+
+                title_has_policy_term = any(keyword in title for keyword in self.POLICY_KEYWORDS)
+                source_is_policy = any(keyword in source for keyword in self.POLICY_SOURCE_KEYWORDS)
+                text_has_risk_term = any(keyword in signal_text for keyword in self.POLICY_RISK_TERMS)
+
+                if not (title_has_policy_term or (source_is_policy and text_has_risk_term)):
+                    continue
+
+                affected = []
+                for code, info in tracked_targets.items():
+                    name = str(info.get("name", "") or "")
+                    industry = str(info.get("industry", "") or "")
+                    if (name and name in signal_text) or (industry and industry in signal_text):
+                        affected.append({"code": code, "name": name, "industry": industry})
+
+                if not affected:
+                    continue
+
+                severity = "high" if any(term in signal_text for term in self.POLICY_RISK_TERMS) else "warning"
+                risks.append(
+                    {
+                        "title": title or "政策相关风险",
+                        "source": source,
+                        "url": item.get("url", ""),
+                        "severity": severity,
+                        "affected": affected,
+                    }
+                )
+
         except Exception as e:
             logger.error(f"检查政策风险失败：{e}")
-        
+
         return risks
+
+    def _load_recent_policy_news(self) -> List[Dict]:
+        """Load recent searchable news from daily_search artifacts."""
+        items: List[Dict] = []
+        daily_search_dir = os.path.join(DATA_DIR, "daily_search")
+        json_files = sorted(glob.glob(os.path.join(daily_search_dir, "[0-9]" * 8 + ".json")))
+        if not json_files:
+            return items
+
+        latest_file = json_files[-1]
+        with open(latest_file, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+
+        for bucket_name, bucket in payload.items():
+            if not isinstance(bucket, dict):
+                continue
+            for keyword, rows in bucket.items():
+                if not isinstance(rows, list):
+                    continue
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    items.append(
+                        {
+                            "source_bucket": bucket_name,
+                            "source": keyword,
+                            "title": row.get("title", ""),
+                            "content": row.get("content", ""),
+                            "url": row.get("url", ""),
+                        }
+                    )
+
+        return items
     
     def send_feishu_notification(self, message: str, level: str = "warning"):
         """发送飞书通知"""
         try:
             emoji = "⚠️" if level == "warning" else "🚨"
             sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
-            from feishu_notifier import send_feishu_message
+            from feishu_notifier import send_alert_card
 
-            send_feishu_message(
-                title=f"{emoji} A 股风险预警",
-                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                level=level,
-            )
+            send_alert_card(title=f"{emoji} A 股风险预警", content=message, level=level)
             logger.info("飞书通知发送成功")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")
@@ -392,6 +476,15 @@ class AShareRiskMonitor:
         
         # 检查政策风险
         results["policy_risks"] = self.check_policy_risk()
+        for policy_risk in results["policy_risks"]:
+            affected_names = "、".join(item["name"] or item["code"] for item in policy_risk.get("affected", [])[:5])
+            self.send_feishu_notification(
+                f"政策/监管风险：{policy_risk['title']}\n"
+                f"影响标的：{affected_names}\n"
+                f"来源：{policy_risk.get('source', '未知')}\n"
+                f"{policy_risk.get('url', '')}".strip(),
+                level=policy_risk.get("severity", "warning"),
+            )
         
         logger.info(f"A 股风险检查完成：跌停{len(results['limit_down'])}只，停牌{len(results['suspended'])}只")
         
@@ -400,16 +493,11 @@ class AShareRiskMonitor:
     def _load_watchlist(self) -> List[str]:
         """加载持仓和自选股"""
         stocks = []
-        
-        # 1. 优先加载实际持仓（config/positions.json）
-        positions_file = os.path.join(CONFIG_DIR, "positions.json")
-        if os.path.exists(positions_file):
-            with open(positions_file, 'r', encoding='utf-8') as f:
-                positions = json.load(f)
-                stocks.extend(list(positions.keys()))
-                logger.info(f"加载持仓股票 {len(positions)} 只")
-        
-        # 2. 加载自选股（config/watchlist.json）
+
+        positions = load_positions({})
+        stocks.extend(list(positions.keys()))
+        logger.info(f"加载持仓股票 {len(positions)} 只")
+
         watchlist = load_watchlist({})
         for code in watchlist.keys():
             if code not in stocks:
@@ -468,9 +556,16 @@ def main():
             for r in results["t1_restrictions"]:
                 print(f"   {r['code']}: {r['reason']}")
             print()
+
+        if results["policy_risks"]:
+            print(f"📰 政策风险 ({len(results['policy_risks'])}):")
+            for risk in results["policy_risks"]:
+                affected = "、".join(item["name"] or item["code"] for item in risk.get("affected", [])[:3])
+                print(f"   {risk['title']} -> {affected}")
+            print()
         
         if not any([results["limit_down"], results["limit_up"], 
-                    results["suspended"], results["t1_restrictions"]]):
+                    results["suspended"], results["t1_restrictions"], results["policy_risks"]]):
             print("✅ 无风险，一切正常")
         
         print("="*60)

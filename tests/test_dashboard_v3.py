@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -119,6 +120,7 @@ class DashboardSnapshotTests(unittest.TestCase):
         self.assertEqual(results[0]["sharpe_ratio"], "1.32")
 
     def test_get_news_snapshot_filters_low_quality_rows_and_normalizes_direction(self):
+        today = datetime.now().strftime("%Y-%m-%d")
         rows = [
             {
                 "title": "公司业绩大幅增长，净利润同比增长150%",
@@ -136,11 +138,11 @@ class DashboardSnapshotTests(unittest.TestCase):
                 "sentiment": "negative",
                 "urgency": "高",
                 "impact_score": 72.0,
-                "news_time": "2026-03-25 09:00:00",
+                "news_time": f"{today} 09:00:00",
                 "source": "官方公告",
                 "event_types": '["政策法规"]',
                 "sentiment_confidence": 0.8,
-                "display_time": "2026-03-25 09:00:00",
+                "display_time": f"{today} 09:00:00",
             },
         ]
 

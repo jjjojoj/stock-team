@@ -15,7 +15,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from core.storage import PREDICTIONS_FILE, load_json, load_watchlist
+from core.predictions import normalize_prediction_collection
+from core.storage import PREDICTIONS_FILE, build_portfolio_snapshot, load_json, load_watchlist
 
 
 def load_midday_review() -> Dict:
@@ -24,19 +25,18 @@ def load_midday_review() -> Dict:
 
 
 def load_portfolio() -> Dict:
-    return load_json(PROJECT_ROOT / "config" / "portfolio.json", {})
+    return build_portfolio_snapshot()
 
 
 def load_positions() -> Dict:
-    return load_json(PROJECT_ROOT / "config" / "positions.json", {})
+    snapshot = build_portfolio_snapshot()
+    return {position["code"]: position for position in snapshot.get("positions", [])}
 
 
 def load_predictions() -> List[Dict]:
     raw = load_json(PREDICTIONS_FILE, {"active": {}, "history": []})
-    active = raw.get("active", {})
-    if isinstance(active, dict):
-        return list(active.values())
-    return []
+    normalized = normalize_prediction_collection(raw)
+    return list(normalized.get("active", {}).values())
 
 
 def summarize_predictions(predictions: List[Dict]) -> List[str]:
@@ -71,13 +71,13 @@ def summarize_lessons(midday: Dict) -> List[str]:
 
 def build_report() -> str:
     midday = load_midday_review()
-    portfolio = load_portfolio()
-    positions = load_positions()
+    portfolio = build_portfolio_snapshot()
+    positions = portfolio.get("positions", [])
     watchlist = load_watchlist({})
     predictions = load_predictions()
 
-    available_cash = portfolio.get("available_cash", 0)
-    total_assets = portfolio.get("total_capital", 0)
+    available_cash = float(portfolio.get("available_cash", 0) or 0)
+    total_assets = float(portfolio.get("total_assets", 0) or 0)
     midday_results = midday.get("results", {})
     verified = midday_results.get("verified", 0)
     correct = midday_results.get("correct", 0)

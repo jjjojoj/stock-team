@@ -12,11 +12,13 @@
 
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
 import urllib.request
 import urllib.error
+from typing import Dict, List, Optional
 
 # 项目路径
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -26,7 +28,100 @@ LOG_DIR = PROJECT_ROOT / "logs"
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.storage import load_watchlist, save_watchlist
+from core.storage import load_positions, load_watchlist, save_watchlist
+
+
+def _normalize_symbol(raw_code: str) -> str:
+    raw = raw_code.strip()
+    if raw.startswith(("sh.", "sz.")):
+        return raw
+    if raw.isdigit():
+        return f"{'sh' if raw.startswith(('6', '9')) else 'sz'}.{raw}"
+    return raw
+
+
+def _parse_market_cap(text: str) -> float:
+    match = re.search(r"(\d+(?:\.\d+)?)", text or "")
+    return float(match.group(1)) if match else 0.0
+
+
+def load_stock_pool_candidates() -> List[Dict[str, object]]:
+    """Parse the maintained stock pool markdown instead of hardcoding candidates."""
+    stock_pool_file = CONFIG_DIR / "stock_pool.md"
+    if not stock_pool_file.exists():
+        return []
+
+    rows: List[Dict[str, object]] = []
+    current_industry = ""
+    in_code_block = False
+    for raw_line in stock_pool_file.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        if line.startswith("### "):
+            current_industry = line[4:].strip()
+            continue
+        if not line.startswith("|"):
+            continue
+
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if not cells or cells[0] in {"代码", "------"}:
+            continue
+        if len(cells) < 7:
+            continue
+
+        rows.append(
+            {
+                "code": _normalize_symbol(cells[0]),
+                "name": cells[1],
+                "controller": cells[2],
+                "business": cells[3],
+                "market_cap": _parse_market_cap(cells[4]),
+                "pb_hint": cells[5],
+                "reason": cells[6],
+                "industry": current_industry or "未知",
+            }
+        )
+
+    return rows
+
+
+def load_fundamental_snapshot() -> Dict[str, Dict[str, float]]:
+    """Load maintained fundamental snapshot from markdown."""
+    fundamentals_file = CONFIG_DIR / "fundamental_data.md"
+    if not fundamentals_file.exists():
+        return {}
+
+    snapshot: Dict[str, Dict[str, float]] = {}
+    in_code_block = False
+    for raw_line in fundamentals_file.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or not line.startswith("|"):
+            continue
+
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if not cells or cells[0] in {"代码", "------"} or len(cells) < 8:
+            continue
+
+        code = _normalize_symbol(cells[0])
+        try:
+            snapshot[code] = {
+                "pb": float(cells[2]),
+                "pe": float(cells[3]),
+                "roe": float(cells[4]),
+                "net_profit_growth": float(cells[5].replace("%", "").replace("+", "")),
+                "dividend_yield": float(cells[6].replace("%", "")),
+            }
+        except ValueError:
+            continue
+
+    return snapshot
 
 def get_stock_data(code: str) -> dict:
     """获取股票实时数据（腾讯 API）"""
@@ -60,16 +155,21 @@ def get_stock_data(code: str) -> dict:
 
 
 def get_fundamental_data(code: str) -> dict:
-    """获取基本面数据（简化版，从股票池配置读取）"""
-    # 从 watchlist 或 stock_pool 读取预设数据
+    """获取维护中的基本面快照数据。"""
+    snapshot = load_fundamental_snapshot()
+    if code in snapshot:
+        return snapshot[code]
+
     watchlist = load_watchlist({})
     if code in watchlist:
         return {
+            'pb': watchlist[code].get('pb', 0),
+            'pe': watchlist[code].get('pe', 0),
             'roe': watchlist[code].get('roe', 10),
-            'gross_margin': watchlist[code].get('gross_margin', 20),
-            'net_margin': watchlist[code].get('net_margin', 10),
+            'net_profit_growth': watchlist[code].get('net_profit_growth', 0),
+            'dividend_yield': watchlist[code].get('dividend_yield', 0),
         }
-    return {'roe': 10, 'gross_margin': 20, 'net_margin': 10}  # 默认值
+    return {'pb': 0, 'pe': 0, 'roe': 0, 'net_profit_growth': 0, 'dividend_yield': 0}
 
 
 def analyze_stock(code: str, name: str, industry: str) -> dict:
@@ -85,7 +185,8 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
     # 获取基本面
     fundamental = get_fundamental_data(code)
     
-    # 分析（简化版，只用价格数据）
+    pool_entry = next((item for item in load_stock_pool_candidates() if item["code"] == code), {})
+
     analysis = {
         'code': code,
         'name': stock_data['name'],
@@ -93,22 +194,22 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
         'date': datetime.now().strftime('%Y-%m-%d'),
         'price': stock_data['price'],
         'change_pct': stock_data['change_pct'],
-        'pe': 15,  # 默认值
-        'pb': 1.5,  # 默认值
-        'market_cap': 150,  # 默认值
-        'dividend_yield': 2.0,  # 默认值
+        'pe': float(fundamental.get('pe', 0) or 0),
+        'pb': float(fundamental.get('pb', 0) or 0),
+        'market_cap': float(pool_entry.get('market_cap', 0) or 0),
+        'dividend_yield': float(fundamental.get('dividend_yield', 0) or 0),
         'roe': fundamental.get('roe', 10),
-        'gross_margin': fundamental.get('gross_margin', 20),
-        'net_margin': fundamental.get('net_margin', 10),
+        'net_profit_growth': float(fundamental.get('net_profit_growth', 0) or 0),
     }
     
     # 评分（基于投资框架）
     score = 0
     reasons = []
     
-    # 简化评分：行业 + 央企背景
     score = 50  # 基础分
     reasons.append(f"{industry}行业")
+    if pool_entry.get("reason"):
+        reasons.append(str(pool_entry["reason"]))
     
     # 价格位置评分
     if stock_data['change_pct'] < -5:
@@ -118,13 +219,21 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
         score += 5
         reasons.append(f"调整中（{stock_data['change_pct']:.1f}%）")
     
-    # ROE 评分
+    # PB / ROE / 股息率评分
+    if 0 < analysis['pb'] < 2.5:
+        score += 10
+        reasons.append(f"PB较低（{analysis['pb']:.2f}）")
+
     if fundamental.get('roe', 0) > 15:
         score += 20
         reasons.append(f"高 ROE（{fundamental['roe']:.1f}%）")
     elif fundamental.get('roe', 0) > 10:
         score += 10
         reasons.append(f"ROE{fundamental.get('roe', 0):.1f}%")
+
+    if analysis['dividend_yield'] >= 2:
+        score += 5
+        reasons.append(f"股息率 {analysis['dividend_yield']:.1f}%")
     
     # 计算目标价（简单版：当前价 * (1 + 合理涨幅)）
     target_price = stock_data['price'] * 1.2  # 20% 上涨空间
@@ -141,7 +250,7 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
     # 打印分析结果
     print(f"当前价：¥{stock_data['price']:.2f} ({stock_data['change_pct']:+.1f}%)")
     print(f"PE: {analysis['pe']:.1f} | PB: {analysis['pb']:.2f}")
-    print(f"市值：{analysis['market_cap']:.1f}亿（估算）")
+    print(f"市值：{analysis['market_cap']:.1f}亿")
     print(f"股息率：{analysis['dividend_yield']:.1f}%")
     print(f"ROE: {fundamental.get('roe', 0):.1f}%")
     print()
@@ -217,44 +326,20 @@ ROE: {analysis['roe']:.1f}%
 
 def select_stock_to_research():
     """从股票池选择 1 只未研究的股票"""
-    # 读取股票池
-    pool_file = CONFIG_DIR / "stock_pool.md"
-    positions_file = CONFIG_DIR / "positions.json"
-    
-    # 已持仓的股票
-    positions = set()
-    if positions_file.exists():
-        with open(positions_file, 'r', encoding='utf-8') as f:
-            positions = set(json.load(f).keys())
-    
-    # 已在观察池的股票
+    positions = set(load_positions({}).keys())
     watchlist = set(load_watchlist({}).keys())
-    
-    # 从 stock_pool.md 解析股票代码（简化版：硬编码重点股票）
-    # 实际应该解析 markdown 表格
-    priority_stocks = [
-        ("sz.000878", "云南铜业", "铜"),
-        ("sh.601168", "西部矿业", "铜"),
-        ("sh.600362", "江西铜业", "铜"),
-        ("sh.601600", "中国铝业", "铝"),
-        ("sz.000807", "云铝股份", "铝"),
-        ("sh.600547", "山东黄金", "黄金"),
-        ("sh.601899", "紫金矿业", "黄金"),
-        ("sz.000831", "五矿稀土", "稀土"),
-        ("sz.000960", "锡业股份", "锡"),
-        ("sh.600497", "驰宏锌锗", "锌"),
-        ("sh.688396", "华润微", "芯片"),
-        ("sh.688037", "芯源微", "芯片"),
-    ]
-    
-    # 选择未持仓且未在观察池的股票
-    for code, name, industry in priority_stocks:
+    candidates = load_stock_pool_candidates()
+
+    for candidate in candidates:
+        code = str(candidate["code"])
         if code not in positions and code not in watchlist:
-            return code, name, industry
-    
-    # 如果都在观察池了，随机选一只
-    import random
-    return random.choice(priority_stocks)
+            return code, str(candidate["name"]), str(candidate["industry"])
+
+    if candidates:
+        fallback = candidates[0]
+        return str(fallback["code"]), str(fallback["name"]), str(fallback["industry"])
+
+    raise RuntimeError("stock_pool.md 中未解析到可研究股票")
 
 
 def main():
