@@ -5,6 +5,7 @@
 
 import sys
 import os
+import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
@@ -76,7 +77,11 @@ class NewsFetcher:
         if os.path.exists(NEWS_CACHE_FILE):
             try:
                 with open(NEWS_CACHE_FILE, 'r', encoding='utf-8') as f:
-                    cache_data = json.load(f)
+                    raw = f.read().strip()
+                if not raw:
+                    return []
+
+                cache_data = json.loads(raw)
                 
                 # 检查是否是最近24小时内的数据
                 last_check = cache_data.get("last_check")

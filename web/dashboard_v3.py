@@ -22,6 +22,7 @@ import re
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
+from urllib.parse import urlparse
 import logging
 
 from core.storage import (
@@ -279,7 +280,16 @@ def get_events_today():
         LEFT JOIN event_kline_associations eka ON nl.news_id = eka.news_id
         WHERE date(nl.news_time) = date('now')
         GROUP BY nl.news_id
-        ORDER BY nl.urgency DESC, nl.news_time DESC
+        ORDER BY
+            CASE nl.urgency
+                WHEN '紧急' THEN 4
+                WHEN '高' THEN 3
+                WHEN '中' THEN 2
+                WHEN '低' THEN 1
+                ELSE 0
+            END DESC,
+            COALESCE(nl.impact_score, 0) DESC,
+            nl.news_time DESC
         LIMIT 20
     """)
 
@@ -352,6 +362,171 @@ def _strip_markdown_emphasis(value: Optional[str]) -> str:
     if not value:
         return "--"
     return re.sub(r"[*_`]+", "", str(value)).strip() or "--"
+
+
+def _parse_json_array(value) -> List[str]:
+    """Parse a JSON list string into a Python list."""
+    if isinstance(value, list):
+        return [str(item) for item in value if item]
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed if item]
+    except Exception:
+        pass
+    return [item.strip() for item in str(value).split(",") if item.strip()]
+
+
+def _urgency_rank(urgency: Optional[str]) -> int:
+    return {"紧急": 4, "高": 3, "中": 2, "低": 1}.get(str(urgency or "").strip(), 0)
+
+
+def _impact_strength_label(impact_score: float, urgency: Optional[str]) -> str:
+    if _urgency_rank(urgency) >= 4 or impact_score >= 85:
+        return "极强"
+    if _urgency_rank(urgency) >= 3 or impact_score >= 70:
+        return "强"
+    if impact_score >= 50:
+        return "中"
+    return "弱"
+
+
+def _is_low_quality_news_item(item: Dict[str, Any]) -> bool:
+    title = str(item.get("title") or "").strip()
+    source = str(item.get("source") or "").strip()
+    news_time = str(item.get("news_time") or "").strip()
+    confidence = float(item.get("sentiment_confidence") or 0.0)
+    event_types = _parse_json_array(item.get("event_types"))
+    generic_title = title.startswith("公司")
+    generic_types = len(event_types) >= 5
+    return (not news_time and not source and confidence <= 0.4 and generic_title) or (
+        generic_types and confidence <= 0.4 and not source
+    )
+
+
+def _derive_source_from_url(url: Optional[str]) -> str:
+    if not url:
+        return "联网搜索"
+    try:
+        domain = urlparse(url).netloc.lower()
+        return domain.replace("www.", "") or "联网搜索"
+    except Exception:
+        return "联网搜索"
+
+
+def _estimate_search_signal(title: str, content: str) -> Dict[str, Any]:
+    text = f"{title} {content}"
+    positive_keywords = {
+        "利好": 4,
+        "增长": 3,
+        "活跃": 2,
+        "机会": 2,
+        "机遇": 2,
+        "领涨": 3,
+        "回升": 3,
+        "企稳": 2,
+        "推进": 2,
+        "火爆": 3,
+        "改革": 1,
+    }
+    negative_keywords = {
+        "监管": 3,
+        "下跌": 3,
+        "回调": 2,
+        "调查": 4,
+        "处罚": 4,
+        "减持": 3,
+        "违约": 4,
+        "风险": 2,
+        "暴跌": 5,
+    }
+
+    score = 0
+    for keyword, weight in positive_keywords.items():
+        if keyword in text:
+            score += weight
+    for keyword, weight in negative_keywords.items():
+        if keyword in text:
+            score -= weight
+
+    if score >= 2:
+        sentiment = "positive"
+    elif score <= -2:
+        sentiment = "negative"
+    else:
+        sentiment = "neutral"
+
+    impact_score = min(85.0, 35.0 + abs(score) * 10.0)
+    urgency = "高" if impact_score >= 70 else ("中" if impact_score >= 50 else "低")
+    confidence = min(0.85, 0.45 + abs(score) * 0.08)
+    return {
+        "sentiment": sentiment,
+        "impact_score": impact_score,
+        "urgency": urgency,
+        "sentiment_confidence": confidence,
+    }
+
+
+def _get_recent_search_news(limit: int = 10) -> List[Dict[str, Any]]:
+    """Build a fallback news feed from recent daily_search outputs."""
+    direction_map = {
+        "positive": ("利多", "📈"),
+        "negative": ("利空", "📉"),
+        "neutral": ("中性", "➡️"),
+    }
+    recent_items: List[Dict[str, Any]] = []
+    seen_titles = set()
+
+    for path in _read_latest_files("data/daily_search/*.json", limit=2):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.error(f"Failed to parse daily search file {path}: {exc}")
+            continue
+
+        search_date = str(payload.get("date") or path.stem)
+        sections = {
+            "市场热点": payload.get("market_overview", {}),
+            "持仓跟踪": payload.get("holdings", {}),
+            "观察池": payload.get("watchlist", {}),
+        }
+
+        for section_name, section in sections.items():
+            if not isinstance(section, dict):
+                continue
+            for topic, items in section.items():
+                if not isinstance(items, list):
+                    continue
+                for item in items[:2]:
+                    title = str(item.get("title") or "").strip()
+                    if not title or title in seen_titles:
+                        continue
+                    signal = _estimate_search_signal(title, str(item.get("content") or ""))
+                    direction_label, direction_icon = direction_map.get(signal["sentiment"], ("中性", "➡️"))
+                    recent_items.append(
+                        {
+                            "title": title,
+                            "sentiment": signal["sentiment"],
+                            "direction_label": direction_label,
+                            "direction_icon": direction_icon,
+                            "urgency": signal["urgency"],
+                            "impact_score": signal["impact_score"],
+                            "strength_label": _impact_strength_label(signal["impact_score"], signal["urgency"]),
+                            "news_time": search_date,
+                            "display_time": search_date,
+                            "source": _derive_source_from_url(item.get("url")),
+                            "event_types": [section_name, topic],
+                            "event_types_display": topic,
+                            "sentiment_confidence": signal["sentiment_confidence"],
+                        }
+                    )
+                    seen_titles.add(title)
+                    if len(recent_items) >= limit:
+                        return recent_items
+
+    return recent_items
 
 
 def get_research_snapshot() -> Dict[str, Any]:
@@ -556,17 +731,88 @@ def get_reports_snapshot() -> Dict[str, Any]:
 def get_news_snapshot(limit: int = 20) -> Dict[str, Any]:
     """Return the latest news stream and counters from the database."""
     today = datetime.now().strftime("%Y-%m-%d")
-    recent_news = query_sql(
+    raw_news = query_sql(
         """
-        SELECT title, sentiment, urgency, news_time, source, impact_score
+        SELECT title, sentiment, urgency, news_time, source, impact_score, event_types, sentiment_confidence,
+               COALESCE(news_time, labeled_at) AS display_time
         FROM news_labels
-        ORDER BY COALESCE(news_time, labeled_at) DESC, id DESC
+        ORDER BY
+            CASE urgency
+                WHEN '紧急' THEN 4
+                WHEN '高' THEN 3
+                WHEN '中' THEN 2
+                WHEN '低' THEN 1
+                ELSE 0
+            END DESC,
+            COALESCE(impact_score, 0) DESC,
+            COALESCE(news_time, labeled_at) DESC,
+            id DESC
         LIMIT ?
         """,
-        (limit,),
+        (max(limit * 5, 50),),
     )
-    today_count = sum(1 for item in recent_news if str(item.get("news_time", "")).startswith(today))
-    urgent_count = sum(1 for item in recent_news if item.get("urgency") == "高")
+
+    direction_map = {
+        "positive": ("利多", "📈"),
+        "negative": ("利空", "📉"),
+        "neutral": ("中性", "➡️"),
+    }
+    recent_news = []
+    seen_titles = set()
+    for item in raw_news:
+        title = str(item.get("title") or "").strip()
+        if not title or title in seen_titles or _is_low_quality_news_item(item):
+            continue
+
+        sentiment = str(item.get("sentiment") or "neutral")
+        direction_label, direction_icon = direction_map.get(sentiment, ("中性", "➡️"))
+        impact_score = float(item.get("impact_score") or 0.0)
+        urgency = item.get("urgency") or "低"
+        event_types = _parse_json_array(item.get("event_types"))
+        recent_news.append(
+            {
+                "title": title,
+                "sentiment": sentiment,
+                "direction_label": direction_label,
+                "direction_icon": direction_icon,
+                "urgency": urgency,
+                "impact_score": impact_score,
+                "strength_label": _impact_strength_label(impact_score, urgency),
+                "news_time": item.get("news_time"),
+                "display_time": item.get("display_time") or "--",
+                "source": item.get("source") or "未知来源",
+                "event_types": event_types,
+                "event_types_display": " / ".join(event_types[:2]) if event_types else "未分类",
+                "sentiment_confidence": float(item.get("sentiment_confidence") or 0.0),
+            }
+        )
+        seen_titles.add(title)
+        if len(recent_news) >= limit:
+            break
+
+    fallback_news = _get_recent_search_news(limit)
+    for item in fallback_news:
+        title = item.get("title")
+        if not title or title in seen_titles or len(recent_news) >= limit:
+            continue
+        recent_news.append(item)
+        seen_titles.add(title)
+
+    recent_news.sort(
+        key=lambda item: (
+            str(item.get("display_time") or item.get("news_time") or ""),
+            _urgency_rank(item.get("urgency")),
+            float(item.get("impact_score") or 0.0),
+        ),
+        reverse=True,
+    )
+    recent_news = recent_news[:limit]
+
+    today_count = sum(1 for item in recent_news if str(item.get("display_time", "")).startswith(today))
+    urgent_count = sum(
+        1 for item in recent_news
+        if item.get("urgency") in {"高", "紧急"} or float(item.get("impact_score") or 0.0) >= 70
+    )
     return {
         "today_count": today_count,
         "urgent_count": urgent_count,
@@ -1289,16 +1535,17 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 }
 
                 grid.innerHTML = tasks.map(task => {
-                    let statusClass = 'warning';
+                    let statusClass = task.status_color || 'warning';
                     let statusEmoji = '🟡';
-                    let statusText = task.status || 'unknown';
-                    if (statusText === 'ok') { statusClass = 'success'; statusEmoji = '🟢'; }
-                    else if (statusText === 'error') { statusClass = 'error'; statusEmoji = '🔴'; }
-                    else if (statusText === 'running') { statusClass = 'accent'; statusEmoji = '🔵'; }
+                    const statusText = task.status_label || task.status || 'unknown';
+                    if (statusClass === 'success') { statusEmoji = '🟢'; }
+                    else if (statusClass === 'error') { statusEmoji = '🔴'; }
+                    else if (statusClass === 'accent') { statusEmoji = '🔵'; }
+                    const detail = task.status_detail ? (' | ' + task.status_detail) : '';
 
                     return '<div class="status-card" data-task-id="' + (task.id || '') + '">' +
                         '<div class="status-card-name">' + (task.name || '未知任务') + '</div>' +
-                        '<div class="status-card-meta"><span class="badge badge-' + statusClass + '">' + statusEmoji + ' ' + statusText + '</span> | ' + (task.schedule || '--') + '</div>' +
+                        '<div class="status-card-meta"><span class="badge badge-' + statusClass + '">' + statusEmoji + ' ' + statusText + '</span> | ' + (task.schedule || '--') + detail + '</div>' +
                         '<div class="status-card-time">上次: ' + (task.last_run || '从未运行') + '</div>' +
                         '<div class="status-card-time" style="color:var(--success)">下次: ' + (task.next_run || '未计划') + '</div>' +
                     '</div>';
@@ -1441,7 +1688,16 @@ HTML_CONTENT = '''<!DOCTYPE html>
             const news = Array.isArray(data.news) ? data.news : [];
             document.getElementById('news-today-count').textContent = data.today_count || 0;
             document.getElementById('news-urgent-count').textContent = data.urgent_count || 0;
-            document.getElementById('news-stream').innerHTML = news.map(item => '<div style="padding:12px 0;border-bottom:1px solid var(--border)"><div style="color:var(--text-primary);margin-bottom:4px">' + (item.title || '无标题') + '</div><div style="color:var(--text-secondary);font-size:11px">' + (item.source || '未知来源') + ' | 情绪 ' + (item.sentiment || '--') + ' | 影响 ' + (item.impact_score || '--') + ' | 时间 ' + (item.news_time || '--') + '</div></div>').join('') || '<p class="empty-tip">暂无新闻流数据</p>';
+            document.getElementById('news-stream').innerHTML = news.map(item => {
+                const sentiment = item.sentiment || 'neutral';
+                const directionColor = sentiment === 'positive' ? 'var(--success)' : (sentiment === 'negative' ? 'var(--error)' : 'var(--warning)');
+                const confidence = Math.round((item.sentiment_confidence || 0) * 100);
+                return '<div style="padding:12px 0;border-bottom:1px solid var(--border)">' +
+                    '<div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:6px"><div style="color:var(--text-primary)">' + (item.title || '无标题') + '</div><div style="color:' + directionColor + ';white-space:nowrap">' + (item.direction_icon || '➡️') + ' ' + (item.direction_label || '中性') + '</div></div>' +
+                    '<div style="color:var(--text-secondary);font-size:11px">' + (item.source || '未知来源') + ' | ' + (item.event_types_display || '未分类') + ' | 力度 ' + (item.strength_label || '--') + ' (' + (item.impact_score || '--') + ')</div>' +
+                    '<div style="color:var(--text-secondary);font-size:11px;margin-top:4px">时间 ' + (item.display_time || item.news_time || '--') + ' | 置信度 ' + confidence + '% | 紧急度 ' + (item.urgency || '--') + '</div>' +
+                '</div>';
+            }).join('') || '<p class="empty-tip">暂无高质量新闻流数据</p>';
         }
 
         function updatePanelState() {

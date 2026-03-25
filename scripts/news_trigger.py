@@ -95,16 +95,41 @@ class NewsMonitor:
     
     def _ensure_dirs(self):
         os.makedirs(os.path.dirname(NEWS_CACHE_FILE), exist_ok=True)
+
+    def _default_cache(self) -> Dict:
+        return {"processed": [], "last_check": None}
+
+    def _persist_cache(self, cache: Dict):
+        with open(NEWS_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
     
     def _load_cache(self) -> Dict:
-        if os.path.exists(NEWS_CACHE_FILE):
+        default_cache = self._default_cache()
+        if not os.path.exists(NEWS_CACHE_FILE):
+            return default_cache
+
+        try:
             with open(NEWS_CACHE_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return {"processed": [], "last_check": None}
+                raw = f.read().strip()
+            if not raw:
+                self._persist_cache(default_cache)
+                return default_cache
+
+            cache = json.loads(raw)
+            if not isinstance(cache, dict):
+                self._persist_cache(default_cache)
+                return default_cache
+
+            cache.setdefault("processed", [])
+            cache.setdefault("last_check", None)
+            return cache
+        except Exception as exc:
+            print(f"⚠️ 新闻缓存损坏，已重置: {exc}")
+            self._persist_cache(default_cache)
+            return default_cache
     
     def _save_cache(self):
-        with open(NEWS_CACHE_FILE, 'w', encoding='utf-8') as f:
-            json.dump(self.news_cache, f, ensure_ascii=False, indent=2)
+        self._persist_cache(self.news_cache)
     
     def _load_predictions(self) -> Dict:
         if os.path.exists(PREDICTIONS_FILE):

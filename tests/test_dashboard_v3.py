@@ -118,6 +118,45 @@ class DashboardSnapshotTests(unittest.TestCase):
         self.assertEqual(results[0]["max_drawdown"], "4.10%")
         self.assertEqual(results[0]["sharpe_ratio"], "1.32")
 
+    def test_get_news_snapshot_filters_low_quality_rows_and_normalizes_direction(self):
+        rows = [
+            {
+                "title": "公司业绩大幅增长，净利润同比增长150%",
+                "sentiment": "neutral",
+                "urgency": "中",
+                "impact_score": 50.0,
+                "news_time": None,
+                "source": "",
+                "event_types": '["政策法规","业绩财报","重组并购","订单合同","重大诉讼"]',
+                "sentiment_confidence": 0.4,
+                "display_time": None,
+            },
+            {
+                "title": "证监会加强监管，发布新规",
+                "sentiment": "negative",
+                "urgency": "高",
+                "impact_score": 72.0,
+                "news_time": "2026-03-25 09:00:00",
+                "source": "官方公告",
+                "event_types": '["政策法规"]',
+                "sentiment_confidence": 0.8,
+                "display_time": "2026-03-25 09:00:00",
+            },
+        ]
+
+        with (
+            patch.object(dashboard, "query_sql", return_value=rows),
+            patch.object(dashboard, "_get_recent_search_news", return_value=[]),
+        ):
+            snapshot = dashboard.get_news_snapshot(10)
+
+        self.assertEqual(snapshot["today_count"], 1)
+        self.assertEqual(snapshot["urgent_count"], 1)
+        self.assertEqual(len(snapshot["news"]), 1)
+        self.assertEqual(snapshot["news"][0]["direction_label"], "利空")
+        self.assertEqual(snapshot["news"][0]["strength_label"], "强")
+        self.assertEqual(snapshot["news"][0]["event_types_display"], "政策法规")
+
 
 if __name__ == "__main__":
     unittest.main()

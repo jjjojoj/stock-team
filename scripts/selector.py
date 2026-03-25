@@ -7,22 +7,37 @@
 
 import sys
 import os
+import urllib.request
+from types import SimpleNamespace
 
 # 添加项目路径
 PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
 sys.path.insert(0, PROJECT_ROOT)
 
 # 添加虚拟环境路径
-VENV_PATH = os.path.join(PROJECT_ROOT, "venv/lib/python3.14/site-packages")
-sys.path.insert(0, VENV_PATH)
+VENV_PATH = os.path.join(
+    PROJECT_ROOT,
+    "venv",
+    "lib",
+    f"python{sys.version_info.major}.{sys.version_info.minor}",
+    "site-packages",
+)
+if os.path.isdir(VENV_PATH):
+    sys.path.insert(0, VENV_PATH)
 
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 # 导入新适配器
-from adapters import get_data_manager, DataSource
-from adapters.base import AssetPrice, TechnicalIndicators
+ADAPTER_IMPORT_ERROR = None
+try:
+    from adapters import get_data_manager
+    HAS_ADAPTERS = True
+except Exception as exc:
+    get_data_manager = None
+    HAS_ADAPTERS = False
+    ADAPTER_IMPORT_ERROR = exc
 
 # 股票池
 STOCK_POOL = {
@@ -108,15 +123,51 @@ class StockSelector:
     """选股工具（使用多数据源适配器）"""
     
     def __init__(self):
-        self.dm = get_data_manager()
-        print("✅ 数据源管理器初始化完成")
-        print(f"   可用数据源: {self.dm.get_available_sources()}")
+        self.dm = get_data_manager() if HAS_ADAPTERS else None
+        if self.dm:
+            print("✅ 数据源管理器初始化完成")
+            print(f"   可用数据源: {self.dm.get_available_sources()}")
+        else:
+            print(f"⚠️ 多数据源适配器不可用，已降级为轻量模式: {ADAPTER_IMPORT_ERROR}")
+
+    def _get_fallback_price(self, code: str):
+        """使用腾讯行情接口兜底，避免适配器依赖缺失时整个任务失败。"""
+        try:
+            stock_code = code.replace(".", "")
+            if "." in code:
+                prefix, symbol = code.split(".", 1)
+                stock_code = f"{prefix}{symbol}"
+
+            url = f"http://qt.gtimg.cn/q={stock_code}"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                text = response.read().decode("gbk", errors="ignore")
+
+            if "~" not in text:
+                return None
+
+            parts = text.split("~")
+            current_price = float(parts[3]) if len(parts) > 3 and parts[3] else 0.0
+            prev_close = float(parts[4]) if len(parts) > 4 and parts[4] else 0.0
+            volume = float(parts[6]) if len(parts) > 6 and parts[6] else 0.0
+            change_pct = ((current_price - prev_close) / prev_close * 100) if prev_close else 0.0
+
+            return SimpleNamespace(
+                price=current_price,
+                change_percent=change_pct,
+                volume=volume,
+            )
+        except Exception as exc:
+            print(f"获取 {code} 实时价格失败: {exc}")
+            return None
     
     def get_stock_data(self, code: str) -> Optional[Dict]:
         """获取股票完整数据（行情 + 基本面 + 技术面）"""
         try:
             # 1. 获取实时价格（使用适配器）
-            price = self.dm.get_realtime_price(code)
+            price = self.dm.get_realtime_price(code) if self.dm else None
+            if not price:
+                price = self._get_fallback_price(code)
             if not price:
                 return None
             
@@ -129,21 +180,22 @@ class StockSelector:
             
             # 4. 获取技术指标（使用适配器）
             tech_data = None
-            try:
-                tech = self.dm.get_technical_indicators(code)
-                if tech:
-                    # 计算技术评分
-                    tech_score = self._calculate_technical_score(tech)
-                    
-                    tech_data = {
-                        "technical_score": tech_score,
-                        "recommendation": self._get_recommendation(tech_score),
-                        "macd": "金叉" if tech.macd > tech.macd_signal else "死叉",
-                        "kdj": self._get_kdj_signal(tech.rsi_14),
-                        "rsi": tech.rsi_14,
-                    }
-            except:
-                pass
+            if self.dm:
+                try:
+                    tech = self.dm.get_technical_indicators(code)
+                    if tech:
+                        # 计算技术评分
+                        tech_score = self._calculate_technical_score(tech)
+                        
+                        tech_data = {
+                            "technical_score": tech_score,
+                            "recommendation": self._get_recommendation(tech_score),
+                            "macd": "金叉" if tech.macd > tech.macd_signal else "死叉",
+                            "kdj": self._get_kdj_signal(tech.rsi_14),
+                            "rsi": tech.rsi_14,
+                        }
+                except Exception:
+                    pass
             
             # 5. 计算综合评分
             score = self._calculate_score(

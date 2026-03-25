@@ -16,8 +16,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 # 添加虚拟环境路径以导入 akshare
-VENV_PATH = str(PROJECT_ROOT / "venv" / "lib" / "python3.14" / "site-packages")
-sys.path.insert(0, VENV_PATH)
+VENV_PATH = PROJECT_ROOT / "venv" / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+if VENV_PATH.exists():
+    sys.path.insert(0, str(VENV_PATH))
 
 try:
     from prediction_system import PredictionSystem

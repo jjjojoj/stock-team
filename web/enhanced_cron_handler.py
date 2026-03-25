@@ -39,6 +39,30 @@ def extract_script_key(job):
 
     return re.sub(r'[^a-z0-9]+', '_', name).strip('_')
 
+
+def derive_display_status(state):
+    """Map OpenClaw run/delivery state into a dashboard-friendly status."""
+    raw_status = state.get('lastRunStatus') or state.get('lastStatus') or 'idle'
+    last_error = (state.get('lastError') or '').strip()
+    delivery_status = (state.get('lastDeliveryStatus') or '').strip()
+
+    if raw_status == 'error' and 'message failed' in last_error.lower():
+        return {
+            'status': 'warning',
+            'status_label': 'notify_failed',
+            'status_color': 'warning',
+            'status_detail': '脚本可能已执行，通知发送失败',
+            'raw_status': raw_status,
+        }
+
+    return {
+        'status': raw_status,
+        'status_label': raw_status,
+        'status_color': get_status_color(raw_status),
+        'status_detail': last_error or delivery_status,
+        'raw_status': raw_status,
+    }
+
 def get_openclaw_cron_status():
     """
     Get real-time cron status from OpenClaw CLI
@@ -74,8 +98,7 @@ def get_openclaw_cron_status():
             next_run_str = format_timestamp(next_run) if next_run else "未计划"
             
             # Determine status color from state
-            status = state.get('lastRunStatus') or state.get('lastStatus') or 'idle'
-            status_color = get_status_color(status)
+            status_info = derive_display_status(state)
             
             # Extract schedule info
             schedule_info = job.get('schedule', {})
@@ -88,8 +111,13 @@ def get_openclaw_cron_status():
                 'enabled': job.get('enabled', True),
                 'last_run': last_run_str,
                 'next_run': next_run_str,
-                'status': status,
-                'status_color': status_color,
+                'status': status_info['status'],
+                'status_label': status_info['status_label'],
+                'status_color': status_info['status_color'],
+                'status_detail': status_info['status_detail'],
+                'raw_status': status_info['raw_status'],
+                'last_error': state.get('lastError'),
+                'last_delivery_status': state.get('lastDeliveryStatus'),
                 'script_key': extract_script_key(job),
                 'agent_id': job.get('agentId', 'main'),
                 'agentId': job.get('agentId', 'main'),  # Alias for HTML compatibility
@@ -122,6 +150,7 @@ def get_status_color(status):
     status_colors = {
         'ok': 'success',
         'error': 'error',
+        'warning': 'warning',
         'idle': 'warning',
         'running': 'accent'
     }
@@ -136,6 +165,7 @@ def handle_api_openclaw_cron():
             "total_count": len(cron_data),
             "success_count": sum(1 for task in cron_data if task['status'] == 'ok'),
             "error_count": sum(1 for task in cron_data if task['status'] == 'error'),
+            "warning_count": sum(1 for task in cron_data if task['status'] == 'warning'),
             "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
     except Exception as e:
