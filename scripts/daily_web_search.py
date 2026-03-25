@@ -183,6 +183,19 @@ def main():
     with open(summary_file, 'w', encoding='utf-8') as f:
         f.write(summary)
 
+    try:
+        sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+        from feishu_notifier import send_feishu_message
+
+        send_feishu_message(
+            title=f"🔎 开盘前联网搜索 - {datetime.now().strftime('%Y-%m-%d')}",
+            content=summary,
+            level="info",
+        )
+        print("✅ 飞书通知已发送")
+    except Exception as exc:
+        print(f"⚠️ 飞书通知发送失败: {exc}")
+
 
 if __name__ == "__main__":
     main()

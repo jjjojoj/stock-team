@@ -540,12 +540,14 @@ def main() -> None:
     validator = RuleValidator()
 
     if len(sys.argv) <= 1:
-        validator.validate_all()
+        results = validator.validate_all()
+        _notify_rule_validation(validator, results)
         return
 
     command = sys.argv[1]
     if command in {"validate", "validate-all"}:
-        validator.validate_all()
+        results = validator.validate_all()
+        _notify_rule_validation(validator, results)
     elif command == "validate-library":
         validator.validate_rule_library()
         validator._save_data()
@@ -562,6 +564,40 @@ def main() -> None:
         print("  python rule_validator.py validate-pool    - 只更新验证池")
         print("  python rule_validator.py report           - 生成规则报告")
         sys.exit(1)
+
+
+def _notify_rule_validation(validator: RuleValidator, results: Dict[str, Dict[str, int]]) -> None:
+    """将规则验证结果发送到飞书。"""
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+        from feishu_notifier import send_feishu_message
+
+        library = results.get("library", {})
+        pool = results.get("validation_pool", {})
+        report = f"""时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+规则库
+- 总规则：{library.get('total_rules', 0)}
+- 更新：{library.get('updated', 0)}
+- 调权：{library.get('weight_adjusted', 0)}
+- 淘汰：{library.get('rejected', 0)}
+
+验证池
+- 更新：{pool.get('updated', 0)}
+- 晋升：{pool.get('promoted', 0)}
+- 淘汰：{pool.get('rejected', 0)}
+- 剩余：{len(validator.validation_pool)}
+
+Top 规则
+{validator.get_rule_report()}"""
+        send_feishu_message(
+            title=f"🧪 规则验证日报 - {datetime.now().strftime('%Y-%m-%d')}",
+            content=report,
+            level="info",
+        )
+        print("✅ 飞书通知已发送")
+    except Exception as exc:
+        print(f"⚠️ 飞书通知发送失败: {exc}")
 
 
 if __name__ == "__main__":

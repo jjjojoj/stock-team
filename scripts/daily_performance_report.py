@@ -261,9 +261,23 @@ def main():
     print("=" * 60)
     
     message = reporter.generate_daily_report()
-    
+
     print("\n" + message)
-    
+
+    try:
+        sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+        from feishu_notifier import send_feishu_message
+
+        clean_message = message.replace("**", "")
+        send_feishu_message(
+            title=f"📊 每日绩效汇报 - {reporter.date}",
+            content=clean_message,
+            level="info",
+        )
+        print("✅ 飞书通知已发送")
+    except Exception as exc:
+        print(f"⚠️ 飞书通知发送失败: {exc}")
+
     print("\n✅ 日报已生成并保存")
     print(f"📁 文件：{reporter.log_path}/{reporter.date}.md")
     print(f"📢 飞书通知：{PROJECT_ROOT}/logs/feishu_performance.txt")

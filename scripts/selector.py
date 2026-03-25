@@ -438,6 +438,26 @@ class StockSelector:
         return data
 
 
+def format_top_report(stocks: List[Dict]) -> str:
+    """格式化 Top 候选列表，供飞书卡片发送。"""
+    if not stocks:
+        return "今日未筛出符合条件的候选股。"
+
+    lines = [f"共筛出 {len(stocks)} 只候选股，按综合评分排序：", ""]
+    for index, stock in enumerate(stocks, 1):
+        score = stock["score"]
+        lines.append(f"{index}. {stock['name']} ({stock['code']})")
+        lines.append(f"   评分: {score['total']}/100 | 行业: {stock['sector']} > {stock['sub_sector']}")
+        lines.append(f"   价格: ¥{stock['price']:.2f} ({stock['change_pct']:+.2f}%) | 市值: {stock['market_cap']:.1f}亿")
+        lines.append(f"   亮点: {score.get('details', '无')}")
+        if stock.get("technical"):
+            tech = stock["technical"]
+            lines.append(f"   技术面: MACD={tech['macd']} | KDJ={tech['kdj']} | 技术评分={tech['technical_score']}")
+        lines.append("")
+
+    return "\n".join(lines).strip()
+
+
 def main():
     """主函数"""
     import argparse
@@ -455,7 +475,19 @@ def main():
         selector.scan(filter_controller=not args.all)
     elif args.action == "top":
         n = int(args.arg) if args.arg else 5
-        selector.top(n, filter_controller=not args.all)
+        top_stocks = selector.top(n, filter_controller=not args.all)
+        try:
+            sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+            from feishu_notifier import send_feishu_message
+
+            send_feishu_message(
+                title=f"🎯 动态标准选股 Top {len(top_stocks)}",
+                content=format_top_report(top_stocks),
+                level="info",
+            )
+            print("✅ 飞书通知已发送")
+        except Exception as exc:
+            print(f"⚠️ 飞书通知发送失败: {exc}")
     elif args.action == "detail":
         if not args.arg:
             print("❌ 请指定股票代码")

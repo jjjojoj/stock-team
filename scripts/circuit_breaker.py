@@ -255,33 +255,17 @@ class CircuitBreaker:
     def send_feishu_notification(self, message: str):
         """发送飞书通知"""
         try:
-            # 读取飞书配置
-            feishu_config_file = os.path.join(CONFIG_DIR, "feishu_config.json")
-            if not os.path.exists(feishu_config_file):
-                logger.warning("飞书配置文件不存在")
-                return
-            
-            with open(feishu_config_file, 'r', encoding='utf-8') as f:
-                feishu_config = json.load(f)
-            
-            webhook_url = feishu_config.get("webhook")
-            if not webhook_url:
-                logger.warning("飞书 webhook 未配置")
-                return
-            
-            # 发送通知
-            payload = {
-                "msg_type": "text",
-                "content": {
-                    "text": f"🚨 熔断机制预警\n\n{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                }
-            }
-            
-            response = requests.post(webhook_url, json=payload, timeout=10)
-            if response.status_code == 200:
+            sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+            from feishu_notifier import send_feishu_message
+
+            if send_feishu_message(
+                title="🚨 熔断机制预警",
+                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                level="critical",
+            ):
                 logger.info("飞书通知发送成功")
             else:
-                logger.error(f"飞书通知发送失败：{response.status_code}")
+                logger.error("飞书通知发送失败")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")
     

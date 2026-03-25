@@ -62,22 +62,16 @@ def send_to_feishu(text):
     if not webhook_url:
         print("⚠️ 飞书 webhook 未配置")
         return False
-    
+
     try:
-        data = {
-            "msg_type": "text",
-            "content": {"text": text}
-        }
-        
-        req = urllib.request.Request(
-            webhook_url,
-            data=json.dumps(data).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        
-        with urllib.request.urlopen(req, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            return result.get('StatusCode') == 0
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+        from feishu_notifier import send_feishu_message
+
+        lines = text.splitlines()
+        title = lines[0] if lines else "📊 持仓汇报"
+        content = "\n".join(lines[1:]).strip() or "无详细内容"
+        level = 'warning' if '暂无持仓配置' in text else 'info'
+        return send_feishu_message(title=title, content=content, level=level, webhook_url=webhook_url)
     except Exception as e:
         print(f"发送失败: {e}")
         return False

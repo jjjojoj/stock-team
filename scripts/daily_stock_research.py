@@ -184,54 +184,33 @@ def add_to_watchlist(analysis: dict):
 def send_feishu_notification(analysis: dict):
     """发送飞书通知"""
     try:
-        feishu_file = CONFIG_DIR / "feishu_config.json"
-        if not feishu_file.exists():
-            return
-        
-        with open(feishu_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        
-        webhook = config.get('webhook_url') or config.get('webhook')
-        if not webhook:
-            return
-        
-        message = f"""📊 **每日深度研究**
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+        from feishu_notifier import send_feishu_message
 
-股票：{analysis['name']} ({analysis['code']})
+        title = f"📊 每日深度研究 - {analysis['name']}"
+        content = f"""股票：{analysis['name']} ({analysis['code']})
 行业：{analysis['industry']}
 日期：{analysis['date']}
 
-💰 **估值数据**
+💰 估值数据
 当前价：¥{analysis['price']:.2f}
 PE: {analysis['pe']:.1f} | PB: {analysis['pb']:.2f}
 市值：{analysis['market_cap']:.1f}亿
 股息率：{analysis['dividend_yield']:.1f}%
 ROE: {analysis['roe']:.1f}%
 
-📈 **评级**
+📈 评级
 综合评分：{analysis['score']}分
 评级：{analysis['recommendation']}
 目标价：¥{analysis['target_price']:.2f} (+{((analysis['target_price']/analysis['price']-1)*100):.0f}%)
 止损价：¥{analysis['stop_loss']:.2f} (-{((1-analysis['stop_loss']/analysis['price'])*100):.0f}%)
 
-🎯 **推荐理由**
-{chr(10).join('✓ ' + r for r in analysis['reasons'])}
+🎯 推荐理由
+{chr(10).join('• ' + r for r in analysis['reasons'])}
 
----
 已加入观察池，持续跟踪。"""
-        
-        payload = {
-            "msg_type": "text",
-            "content": {"text": message}
-        }
-        
-        req = urllib.request.Request(
-            webhook,
-            data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            print("✅ 飞书通知发送成功")
+
+        send_feishu_message(title=title, content=content, level='info')
     except Exception as e:
         print(f"发送飞书通知失败：{e}")
 

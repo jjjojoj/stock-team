@@ -537,20 +537,22 @@ def main():
         partial = results.get("partial", 0)
         wrong = results.get("wrong", 0)
         
-        if total > 0:
-            correct_rate = correct / total * 100
-        else:
-            correct_rate = 0
-        
-        title = f"📊 每日复盘 - {today}"
-        content = f"""预测验证结果：
+        if total == 0:
+            print("ℹ️ 今日暂无到期预测，跳过飞书通知")
+            return
+
+        correct_rate = correct / total * 100
+        title = f"📊 每日预测复盘 - {today}"
+        content = f"""说明：该任务只复盘已经到达验证窗口的预测，不是盘中涨跌快评。
+
+预测验证结果：
 ✅ 正确: {correct} ({correct_rate:.1f}%)
 🔶 部分: {partial}
 ❌ 错误: {wrong}
 总计验证: {total}
 
 累计准确率: {reviewer.accuracy['correct']/max(reviewer.accuracy['total_predictions'],1)*100:.1f}%"""
-        
+
         send_feishu_message(title, content, level='info')
         print("✅ 飞书通知已发送")
     except Exception as e:

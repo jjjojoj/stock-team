@@ -372,28 +372,16 @@ class APIHealthMonitor:
     def send_feishu_notification(self, message: str, level: str = "warning"):
         """发送飞书通知"""
         try:
-            feishu_config_file = os.path.join(CONFIG_DIR, "feishu_config.json")
-            if not os.path.exists(feishu_config_file):
-                return
-            
-            with open(feishu_config_file, 'r', encoding='utf-8') as f:
-                feishu_config = json.load(f)
-            
-            webhook_url = feishu_config.get("webhook_url") or feishu_config.get("webhook")
-            if not webhook_url:
-                return
-            
             emoji = "⚠️" if level == "warning" else "🔴"
-            payload = {
-                "msg_type": "text",
-                "content": {
-                    "text": f"{emoji} API 故障通知\n\n{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                }
-            }
-            
-            response = requests.post(webhook_url, json=payload, timeout=10)
-            if response.status_code == 200:
-                logger.info("飞书通知发送成功")
+            sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+            from feishu_notifier import send_feishu_message
+
+            send_feishu_message(
+                title=f"{emoji} API 故障通知",
+                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                level=level,
+            )
+            logger.info("飞书通知发送成功")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")
     

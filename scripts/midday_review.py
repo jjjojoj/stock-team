@@ -227,53 +227,33 @@ def apply_to_future(lessons: list):
 def send_feishu_report(results: dict, lessons: list):
     """发送午盘报告到飞书"""
     try:
-        feishu_file = CONFIG_DIR / "feishu_config.json"
-        if not feishu_file.exists():
-            return
-        
-        with open(feishu_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        
-        webhook = config.get('webhook')
-        if not webhook:
-            return
-        
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+        from feishu_notifier import send_feishu_message
+
         accuracy = results['correct'] / results['verified'] * 100 if results['verified'] > 0 else 0
-        
-        message = f"""📊 **午盘反思报告**
 
-时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}
+        title = f"📊 午盘反思 - {datetime.now().strftime('%Y-%m-%d')}"
+        message = f"""时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}
 
-## 预测验证
+预测验证
 - 验证预测：{results['verified']}个
 - 正确：{results['correct']}个
 - 错误：{results['wrong']}个
-- **准确率：{accuracy:.1f}%**
+- 准确率：{accuracy:.1f}%
 
-## 详情
+详情
 """
         for d in results['details'][:5]:  # 最多显示 5 个
             message += f"{d['status']} {d['stock']}: {d['change']:+.1f}%\n"
-        
+
         if lessons:
-            message += "\n## 总结\n"
+            message += "\n总结\n"
             for lesson in lessons:
                 emoji = "✅" if lesson['type'] == 'success' else "⚠️"
                 message += f"{emoji} {lesson['content']}\n"
                 message += f"   → {lesson['action']}\n"
-        
-        payload = {
-            "msg_type": "text",
-            "content": {"text": message}
-        }
-        
-        req = urllib.request.Request(
-            webhook,
-            data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            print("✅ 飞书通知发送成功")
+
+        send_feishu_message(title=title, content=message, level='info')
     except Exception as e:
         print(f"发送飞书通知失败：{e}")
 

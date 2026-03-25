@@ -624,10 +624,10 @@ class AIPredictor:
         
         return predictions
     
-    def generate_daily_brief(self) -> str:
+    def generate_daily_brief(self, predictions: Optional[List[Dict]] = None) -> str:
         """生成每日预测简报"""
-        # 生成预测
-        predictions = self.generate_all_predictions()
+        if predictions is None:
+            predictions = self.generate_all_predictions()
         
         # 生成简报
         brief = f"📊 AI 每日预测简报\n"
@@ -668,13 +668,13 @@ def main():
     predictor = AIPredictor()
     
     if command == "generate":
-        predictor.generate_all_predictions()
+        predictions = predictor.generate_all_predictions()
         
         # 发送飞书通知
         try:
             from feishu_notifier import send_feishu_message
             from datetime import datetime
-            brief = predictor.generate_daily_brief()
+            brief = predictor.generate_daily_brief(predictions)
             title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
             send_feishu_message(title, brief, level='info')
             print("✅ 飞书通知已发送")
@@ -684,6 +684,16 @@ def main():
     elif command == "brief":
         brief = predictor.generate_daily_brief()
         print(brief)
+        if "--notify" in sys.argv[2:]:
+            try:
+                from feishu_notifier import send_feishu_message
+                from datetime import datetime
+
+                title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
+                send_feishu_message(title, brief, level='info')
+                print("✅ 飞书通知已发送")
+            except Exception as e:
+                print(f"⚠️ 飞书通知发送失败: {e}")
     
     elif command == "single":
         if len(sys.argv) < 3:

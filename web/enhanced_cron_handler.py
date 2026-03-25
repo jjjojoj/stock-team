@@ -40,11 +40,31 @@ def extract_script_key(job):
     return re.sub(r'[^a-z0-9]+', '_', name).strip('_')
 
 
-def derive_display_status(state):
+def derive_display_status(job, state=None):
     """Map OpenClaw run/delivery state into a dashboard-friendly status."""
+    state = state or job.get('state', {}) or {}
     raw_status = state.get('lastRunStatus') or state.get('lastStatus') or 'idle'
     last_error = (state.get('lastError') or '').strip()
     delivery_status = (state.get('lastDeliveryStatus') or '').strip()
+    delivery_mode = ((job.get('delivery') or {}).get('mode') or '').strip()
+
+    if state.get('runningAtMs'):
+        return {
+            'status': 'running',
+            'status_label': 'running',
+            'status_color': 'accent',
+            'status_detail': '任务执行中',
+            'raw_status': raw_status,
+        }
+
+    if raw_status == 'error' and 'message failed' in last_error.lower() and delivery_mode == 'none':
+        return {
+            'status': 'warning',
+            'status_label': 'legacy_notify_error',
+            'status_color': 'warning',
+            'status_detail': '历史旧投递错误；当前已切换脚本 webhook，等待下次运行刷新',
+            'raw_status': raw_status,
+        }
 
     if raw_status == 'error' and 'message failed' in last_error.lower():
         return {
@@ -98,7 +118,7 @@ def get_openclaw_cron_status():
             next_run_str = format_timestamp(next_run) if next_run else "未计划"
             
             # Determine status color from state
-            status_info = derive_display_status(state)
+            status_info = derive_display_status(job, state)
             
             # Extract schedule info
             schedule_info = job.get('schedule', {})

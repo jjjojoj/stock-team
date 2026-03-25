@@ -513,6 +513,21 @@ def main():
         print("\n4. 生成报告...")
         output_file = args.output or os.path.join(REPORTS_DIR, f"overfitting_verify_{datetime.now().strftime('%Y%m%d')}.md")
         verifyer.generate_report(output_file)
+        try:
+            sys.path.insert(0, PROJECT_ROOT)
+            from feishu_notifier import send_feishu_message
+
+            with open(output_file, 'r', encoding='utf-8') as handle:
+                report = handle.read()
+
+            send_feishu_message(
+                title=f"🧪 每月过拟合测试 - {datetime.now().strftime('%Y-%m-%d')}",
+                content=report,
+                level="info",
+            )
+            print("✅ 飞书通知已发送")
+        except Exception as exc:
+            print(f"⚠️ 飞书通知发送失败: {exc}")
     
     elif args.action == "verify":
         print("\n🧪 过拟合测试系统测试")

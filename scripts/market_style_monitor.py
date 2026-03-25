@@ -354,33 +354,15 @@ class MarketStyleMonitor:
     def send_feishu_notification(self, message: str):
         """发送飞书通知"""
         try:
-            feishu_config_file = os.path.join(CONFIG_DIR, "feishu_config.json")
-            if not os.path.exists(feishu_config_file):
-                return
+            sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+            from feishu_notifier import send_feishu_message
 
-            with open(feishu_config_file, 'r', encoding='utf-8') as f:
-                feishu_config = json.load(f)
-
-            webhook_url = feishu_config.get("webhook")
-            if not webhook_url:
-                return
-
-            payload = {
-                "msg_type": "text",
-                "content": {
-                    "text": f"📊 市场风格切换预警\n\n{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                }
-            }
-
-            req = urllib.request.Request(
-                webhook_url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
-            )
-
-            with urllib.request.urlopen(req, timeout=10) as response:
-                if response.status == 200:
-                    logger.info("飞书通知发送成功")
+            if send_feishu_message(
+                title="📊 市场风格切换预警",
+                content=f"{message}\n\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                level="warning",
+            ):
+                logger.info("飞书通知发送成功")
         except Exception as e:
             logger.error(f"发送飞书通知失败：{e}")
     

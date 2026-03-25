@@ -765,6 +765,8 @@ class Backverifyer:
         
         print("\n测试极端市场场景下的策略表现：\n")
         
+        summary_lines = ["极端市场场景测试结果：", ""]
+
         for scenario_name, start, end, expected_drop in scenarios:
             print(f"场景：{scenario_name} ({start} 至 {end})")
             print(f"预期跌幅：{expected_drop:.0%}")
@@ -787,13 +789,33 @@ class Backverifyer:
             # 评估
             if actual_return > expected_drop:
                 print(f"  ✅ 跑赢预期（跌幅小于{expected_drop:.0%}）")
+                verdict = "跑赢预期"
             else:
                 print(f"  ⚠️ 未跑赢预期")
+                verdict = "未跑赢预期"
             print()
+            summary_lines.append(
+                f"- {scenario_name}: 实际收益 {actual_return:.2%} | 预期阈值 {expected_drop:.0%} | {verdict}"
+            )
         
         print("="*60)
         print("✅ 压力测试完成")
         print("\n💡 建议：在极端市场下保持低仓位，严格执行止损")
+
+        try:
+            sys.path.insert(0, PROJECT_ROOT)
+            from feishu_notifier import send_feishu_message
+
+            summary_lines.append("")
+            summary_lines.append("建议：在极端市场下保持低仓位，严格执行止损。")
+            send_feishu_message(
+                title=f"🧪 压力测试完成 - {datetime.now().strftime('%Y-%m-%d')}",
+                content="\n".join(summary_lines),
+                level="info",
+            )
+            print("✅ 飞书通知已发送")
+        except Exception as exc:
+            print(f"⚠️ 飞书通知失败：{exc}")
 
 
 # 全局变量用于跟踪买入日期（简单策略示例）

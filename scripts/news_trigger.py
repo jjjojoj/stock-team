@@ -351,25 +351,28 @@ class NewsMonitor:
     def generate_news_digest(self) -> str:
         """生成新闻摘要报告"""
         impactful = self.check_news_impact()
-        
+        return self.render_impactful_digest(impactful)
+
+    def render_impactful_digest(self, impactful: List[Dict]) -> str:
+        """根据已识别的重要新闻生成摘要，避免重复 check。"""
         digest = f"📰 新闻监控摘要 ({datetime.now().strftime('%Y-%m-%d %H:%M')})\n"
         digest += "=" * 50 + "\n\n"
-        
+
         if not impactful:
             digest += "暂无影响持仓/预测的重要新闻\n"
         else:
             digest += f"发现 {len(impactful)} 条相关新闻:\n\n"
-            
+
             for item in impactful:
                 news = item["news"]
                 analysis = item["analysis"]
-                
+
                 sentiment_icon = "📈" if analysis["sentiment"] == "positive" else "📉"
                 digest += f"{sentiment_icon} {news['title']}\n"
                 digest += f"   影响: {analysis['sentiment']}\n"
                 digest += f"   关键词: {', '.join(analysis['keywords_found'][:5])}\n"
                 digest += f"   相关股票: {', '.join(analysis['affected_stocks'])}\n\n"
-        
+
         return digest
 
 
@@ -388,6 +391,20 @@ def main():
     if command == "check":
         impactful = monitor.check_news_impact()
         print(f"检查完成: 发现 {len(impactful)} 条有影响的新闻")
+        if impactful:
+            try:
+                sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+                from feishu_notifier import send_feishu_message
+
+                digest = monitor.render_impactful_digest(impactful)
+                send_feishu_message(
+                    title=f"📰 新闻监控更新 - {datetime.now().strftime('%Y-%m-%d')}",
+                    content=digest,
+                    level="info",
+                )
+                print("✅ 飞书通知已发送")
+            except Exception as exc:
+                print(f"⚠️ 飞书通知发送失败: {exc}")
     
     elif command == "digest":
         print(monitor.generate_news_digest())
