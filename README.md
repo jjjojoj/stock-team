@@ -78,6 +78,20 @@ python3 -m unittest \
   tests.test_dashboard_v3
 ```
 
+## Deploy With OpenClaw
+
+项目已经提供给 OpenClaw 使用的部署入口：
+
+- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
+- `bash scripts/bootstrap_openclaw.sh`
+- `requirements-openclaw.txt`
+
+如果你希望别人直接把仓库交给 OpenClaw 开箱即用，最短可用提示词是：
+
+```text
+请把 jjjojoj/stock-team 部署到本地 ~/.openclaw/workspace/china-stock-team：如果目录不存在就 clone，进入项目后执行 bash scripts/bootstrap_openclaw.sh，不要把任何 webhook 或 API key 写进 git 跟踪文件；如需飞书通知就引导我把 webhook 写到 config/feishu_config.local.json 或 FEISHU_WEBHOOK_URL，最后启动 python3 web/dashboard_v3.py 并验证 http://127.0.0.1:8082 可访问。
+```
+
 ## Repository Structure
 
 ```text
@@ -137,6 +151,7 @@ cp config/feishu_config.local.example.json config/feishu_config.local.json
 ### 核心文档
 
 - [运行手册](README_v3.md)
+- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
 - [数据标准](DATA_STANDARD.md)
 - [实盘环境说明](REAL_TRADING_ENV.md)
 - [团队章程](TEAM_CHARTER.md)

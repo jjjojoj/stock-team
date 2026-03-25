@@ -1,135 +1,95 @@
 #!/bin/bash
-# 全自动股票交易系统 - 启动脚本
 
-set -e
+set -euo pipefail
 
-PROJECT_ROOT="$HOME/.openclaw/workspace/china-stock-team"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOOTSTRAP_SCRIPT="$PROJECT_ROOT/scripts/bootstrap_openclaw.sh"
 VENV_PYTHON="$PROJECT_ROOT/venv/bin/python3"
 
-echo "======================================================================"
-echo "🚀 全自动股票交易系统"
-echo "======================================================================"
-echo ""
-
-# 检查虚拟环境
-if [ ! -f "$VENV_PYTHON" ]; then
-    echo "❌ 虚拟环境不存在，请先运行："
-    echo "   cd $PROJECT_ROOT"
-    echo "   python3 -m venv venv"
-    echo "   source venv/bin/activate"
-    echo "   pip install baostock pandas"
-    exit 1
-fi
-
-# 功能菜单
-show_menu() {
-    echo "请选择功能："
-    echo ""
-    echo "  1) 📊 综合仪表盘（查看所有关键信息）"
-    echo "  2) 🔍 股票筛选（基本面+技术面）"
-    echo "  3) 📈 商品价格跟踪（铜/铝/锂/稀土）"
-    echo "  4) ⚠️  风险评估（多维度风险）"
-    echo "  5) 📰 新闻监控（事件影响分析）"
-    echo "  6) 👀 实时盯盘（持仓+自选股）"
-    echo "  7) 📝 生成研究报告（个股深度分析）"
-    echo "  8) 🧠 学习引擎（查看规则/复盘）"
-    echo "  9) 🤖 启动全自动系统（后台运行）"
-    echo "  10) 📅 每日扫描（手动触发）"
-    echo ""
-    echo "  0) 退出"
-    echo ""
-    read -p "请输入选项: " choice
+print_header() {
+    echo "============================================================"
+    echo "China Stock Team"
+    echo "OpenClaw-ready local launcher"
+    echo "============================================================"
+    echo
 }
 
-# 主循环
+ensure_python() {
+    if [ ! -x "$VENV_PYTHON" ]; then
+        echo "本地虚拟环境尚未准备好。"
+        echo "建议先运行：bash scripts/bootstrap_openclaw.sh"
+        return 1
+    fi
+    return 0
+}
+
+show_menu() {
+    echo "请选择操作："
+    echo
+    echo "  1) 初始化本地环境"
+    echo "  2) 启动监控面板 (8082)"
+    echo "  3) 动态选股"
+    echo "  4) 生成早盘预测"
+    echo "  5) 规则验证报告"
+    echo "  6) 飞书测试消息"
+    echo "  7) 查看 OpenClaw cron 状态"
+    echo "  8) 查看 OpenClaw 一句话部署说明"
+    echo
+    echo "  0) 退出"
+    echo
+    read -r -p "请输入选项: " choice
+}
+
+show_deploy_prompt() {
+    sed -n '1,220p' "$PROJECT_ROOT/OPENCLAW_DEPLOY.md"
+}
+
 while true; do
+    print_header
     show_menu
-    
-    case $choice in
+
+    case "$choice" in
         1)
-            echo ""
-            echo "📊 启动综合仪表盘..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/dashboard.py"
+            bash "$BOOTSTRAP_SCRIPT"
             ;;
         2)
-            echo ""
-            echo "🔍 启动股票筛选..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/selector_v3.py" top 5
+            ensure_python || continue
+            "$VENV_PYTHON" "$PROJECT_ROOT/web/dashboard_v3.py"
             ;;
         3)
-            echo ""
-            echo "📈 查看商品价格..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/commodity_tracker.py" prices
+            ensure_python || continue
+            "$VENV_PYTHON" "$PROJECT_ROOT/scripts/selector.py" top 5
             ;;
         4)
-            echo ""
-            echo "⚠️  生成风险评估..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/risk_assessment.py" report
+            ensure_python || continue
+            "$VENV_PYTHON" "$PROJECT_ROOT/scripts/ai_predictor.py" generate
             ;;
         5)
-            echo ""
-            echo "📰 测试新闻监控..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/news_monitor.py" test
+            ensure_python || continue
+            "$VENV_PYTHON" "$PROJECT_ROOT/scripts/rule_validator.py" report
             ;;
         6)
-            echo ""
-            echo "👀 启动实时盯盘..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/realtime_monitor.py" all
+            ensure_python || continue
+            "$VENV_PYTHON" "$PROJECT_ROOT/scripts/feishu_notifier.py" --test
             ;;
         7)
-            echo ""
-            read -p "请输入股票代码（如 sh.600459）: " code
-            echo "📝 生成研究报告..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/research_generator.py" "$code"
-            ;;
-        8)
-            echo ""
-            echo "🧠 学习引擎..."
-            echo "  1) 查看激活规则"
-            echo "  2) 每周复盘"
-            echo "  3) 测试成功案例"
-            echo "  4) 测试失败案例"
-            read -p "请选择: " learn_choice
-            
-            case $learn_choice in
-                1) $VENV_PYTHON "$PROJECT_ROOT/scripts/learning_engine.py" rules ;;
-                2) $VENV_PYTHON "$PROJECT_ROOT/scripts/learning_engine.py" review ;;
-                3) $VENV_PYTHON "$PROJECT_ROOT/scripts/learning_engine.py" test_success ;;
-                4) $VENV_PYTHON "$PROJECT_ROOT/scripts/learning_engine.py" test_failure ;;
-                *) echo "无效选项" ;;
-            esac
-            ;;
-        9)
-            echo ""
-            echo "🤖 启动全自动系统..."
-            echo "⚠️  注意：系统将在后台运行"
-            echo "   日志文件：$PROJECT_ROOT/logs/"
-            echo ""
-            read -p "确认启动？(y/n): " confirm
-            
-            if [ "$confirm" = "y" ]; then
-                nohup $VENV_PYTHON "$PROJECT_ROOT/scripts/auto_trader.py" start > "$PROJECT_ROOT/logs/auto_trader.log" 2>&1 &
-                echo "✅ 系统已启动，PID: $!"
-                echo "   查看日志：tail -f $PROJECT_ROOT/logs/auto_trader.log"
+            if command -v openclaw >/dev/null 2>&1; then
+                openclaw cron list --json
+            else
+                echo "当前环境未找到 openclaw 命令。"
             fi
             ;;
-        10)
-            echo ""
-            echo "📅 运行每日扫描..."
-            $VENV_PYTHON "$PROJECT_ROOT/scripts/daily_scan.py" test
+        8)
+            show_deploy_prompt
             ;;
         0)
-            echo ""
-            echo "👋 再见！"
             exit 0
             ;;
         *)
-            echo ""
-            echo "❌ 无效选项，请重新选择"
+            echo "无效选项。"
             ;;
     esac
-    
-    echo ""
-    read -p "按回车继续..."
-    echo ""
+
+    echo
+    read -r -p "按回车继续..." _
 done

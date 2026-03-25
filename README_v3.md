@@ -31,6 +31,11 @@ openclaw cron list --json
 openclaw cron run <job_id>
 ```
 
+OpenClaw 首次部署入口：
+
+- `bash scripts/bootstrap_openclaw.sh`
+- 说明文档见 [OPENCLAW_DEPLOY.md](OPENCLAW_DEPLOY.md)
+
 ## 3. Daily Workflow
 
 ### 开盘前
@@ -178,7 +183,21 @@ python3 scripts/daily_review_closed_loop.py report
 python3 web/dashboard_v3.py
 ```
 
-## 8. Reference Documents
+## 8. OpenClaw Turnkey Delivery
+
+如果你要把项目交给其他 OpenClaw 用户，推荐直接给对方：
+
+1. 仓库地址
+2. [OPENCLAW_DEPLOY.md](OPENCLAW_DEPLOY.md) 里的“一句话 Prompt”
+3. 本地敏感信息配置原则：只写本地私有文件，不写 git 跟踪文件
+
+标准初始化命令：
+
+```bash
+bash scripts/bootstrap_openclaw.sh
+```
+
+## 9. Reference Documents
 
 ### 基础文档
 
