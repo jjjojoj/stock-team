@@ -202,6 +202,7 @@ bash scripts/bootstrap_openclaw.sh
 ### 基础文档
 
 - [README](README.md)
+- [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
 - [数据标准](DATA_STANDARD.md)
 - [实盘环境说明](REAL_TRADING_ENV.md)
 - [团队章程](TEAM_CHARTER.md)
@@ -224,3 +225,6 @@ bash scripts/bootstrap_openclaw.sh
 - [Phase 6](docs/REFACTOR_PHASE6_2026-03-25.md)
 - [Phase 7](docs/REFACTOR_PHASE7_2026-03-25.md)
 - [Phase 8](docs/REFACTOR_PHASE8_2026-03-25.md)
+- [Phase 9](docs/REFACTOR_PHASE9_2026-03-26.md)
+- [Phase 10](docs/REFACTOR_PHASE10_2026-03-26.md)
+- [Phase 11](docs/REFACTOR_PHASE11_2026-03-26.md)

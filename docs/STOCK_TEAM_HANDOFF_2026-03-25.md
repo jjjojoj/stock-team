@@ -187,6 +187,7 @@ openclaw cron list --json
 - `README.md`
 - `README_v3.md`
 - `OPENCLAW_DEPLOY.md`
+- `docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md`
 
 ### 核心系统
 
