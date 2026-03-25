@@ -123,6 +123,51 @@ class RuleStorageTests(unittest.TestCase):
         self.assertEqual(counts["pool"], 1)
         self.assertEqual(counts["rejected"], 1)
 
+    def test_load_rule_state_reconciles_duplicate_rule_ids(self):
+        rules = {
+            "direction_rules": {
+                "dir_rsi_oversold": {
+                    "condition": "RSI < 30",
+                    "prediction": "反弹",
+                    "samples": 6,
+                    "success_rate": 2 / 3,
+                    "updated_at": "2026-03-25T19:30:04",
+                }
+            }
+        }
+        validation_pool = {
+            "dir_rsi_oversold": {
+                "rule": "旧验证池副本",
+                "status": "validating",
+                "confidence": 0.08,
+                "updated_at": "2026-03-25T19:29:00",
+            }
+        }
+        rejected_rules = {
+            "dir_rsi_oversold": {
+                "rule_id": "dir_rsi_oversold",
+                "status": "rejected",
+                "reject_reason": "旧淘汰记录",
+                "rejected_at": "2026-03-23T16:00:00",
+            }
+        }
+
+        storage.save_rules(rules, db_path=self.db_path)
+        storage.save_validation_pool(validation_pool, db_path=self.db_path)
+        storage.save_rejected_rules(rejected_rules, db_path=self.db_path)
+
+        loaded_rules, loaded_pool, loaded_rejected, summary = storage.load_rule_state(
+            {},
+            {},
+            {},
+            db_path=self.db_path,
+        )
+
+        self.assertTrue(summary["changed"])
+        self.assertIn("dir_rsi_oversold", loaded_rules["direction_rules"])
+        self.assertNotIn("dir_rsi_oversold", loaded_pool)
+        self.assertNotIn("dir_rsi_oversold", loaded_rejected)
+
 
 if __name__ == "__main__":
     unittest.main()

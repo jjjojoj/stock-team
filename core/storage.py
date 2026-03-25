@@ -6,7 +6,7 @@ import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from .predictions import normalize_prediction_collection, prediction_result_status
 
@@ -34,6 +34,16 @@ REJECTED_RULES_FILE = LEARNING_DIR / "rejected_rules.json"
 REVIEW_DIR = DATA_DIR / "reviews"
 
 
+class ManagedConnection(sqlite3.Connection):
+    """SQLite connection that closes itself when used as a context manager."""
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+
+
 def load_json(path: Path, default: Any) -> Any:
     """Load json from disk or return the default value."""
     if Path(path).exists():
@@ -52,7 +62,7 @@ def save_json(path: Path, data: Any) -> None:
 
 def get_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """Open a SQLite connection with row access by name."""
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, factory=ManagedConnection)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -71,6 +81,19 @@ def _get_table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
     """Return the set of column names present in a table."""
     rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
     return {row["name"] for row in rows}
+
+
+def _parse_timestamp(value: Any) -> datetime:
+    """Best-effort timestamp parsing for rule-state reconciliation."""
+    if not value:
+        return datetime.min
+    text = str(value).strip()
+    if not text:
+        return datetime.min
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return datetime.min
 
 
 def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
@@ -325,6 +348,144 @@ def save_watchlist(
     """Persist watchlist to SQLite and JSON mirror."""
     sync_watchlist_to_db(watchlist_data, db_path=db_path)
     save_json(WATCHLIST_FILE, watchlist_data)
+
+
+def load_positions(
+    default: Optional[Dict[str, Dict[str, Any]]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Dict[str, Any]]:
+    """Load current holding positions from SQLite, falling back to JSON."""
+    try:
+        with get_db(db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT symbol, name, shares, cost_price, current_price, market_value,
+                       profit_loss, profit_loss_pct, position_pct, stop_loss,
+                       take_profit, status, bought_at, sold_at, updated_at
+                FROM positions
+                WHERE status = 'holding'
+                ORDER BY symbol
+                """
+            ).fetchall()
+    except sqlite3.Error:
+        rows = []
+
+    if rows:
+        positions: Dict[str, Dict[str, Any]] = {}
+        for row in rows:
+            positions[row["symbol"]] = {
+                "name": row["name"] or row["symbol"],
+                "shares": int(row["shares"] or 0),
+                "cost_price": float(row["cost_price"] or 0.0),
+                "current_price": float(row["current_price"] or row["cost_price"] or 0.0),
+                "market_value": float(row["market_value"] or 0.0),
+                "profit_loss": float(row["profit_loss"] or 0.0),
+                "profit_loss_pct": float(row["profit_loss_pct"] or 0.0),
+                "position_pct": float(row["position_pct"] or 0.0),
+                "stop_loss": row["stop_loss"],
+                "take_profit": row["take_profit"],
+                "status": row["status"] or "holding",
+                "bought_at": row["bought_at"],
+                "sold_at": row["sold_at"],
+                "updated_at": row["updated_at"],
+            }
+        return positions
+
+    fallback = load_json(POSITIONS_FILE, default or {})
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def load_account(
+    default: Optional[Dict[str, Any]] = None,
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """Load the latest account snapshot from SQLite, if available."""
+    try:
+        with get_db(db_path) as conn:
+            row = conn.execute(
+                """
+                SELECT date, total_asset, cash, market_value, total_profit,
+                       total_profit_pct, daily_profit, daily_profit_pct,
+                       position_count, max_drawdown, updated_at
+                FROM account
+                ORDER BY date DESC, updated_at DESC
+                LIMIT 1
+                """
+            ).fetchone()
+    except sqlite3.Error:
+        row = None
+
+    if row:
+        return dict(row)
+
+    fallback = load_json(PORTFOLIO_FILE, default or {})
+    return fallback if isinstance(fallback, dict) else (default or {})
+
+
+def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
+    """Build a current portfolio snapshot from DB holdings plus portfolio cash."""
+    positions = load_positions({}, db_path=db_path)
+    latest_account = load_account({}, db_path=db_path)
+    raw_portfolio = load_json(PORTFOLIO_FILE, {})
+
+    position_details = []
+    total_value = 0.0
+    total_profit = 0.0
+
+    for symbol, position in positions.items():
+        shares = int(position.get("shares", 0) or 0)
+        cost_price = float(position.get("cost_price", 0.0) or 0.0)
+        current_price = float(position.get("current_price", cost_price) or cost_price)
+        market_value = float(position.get("market_value", current_price * shares) or 0.0)
+        profit = float(position.get("profit_loss", (current_price - cost_price) * shares) or 0.0)
+        profit_pct = float(
+            position.get(
+                "profit_loss_pct",
+                ((current_price - cost_price) / cost_price * 100) if cost_price else 0.0,
+            )
+            or 0.0
+        )
+
+        total_value += market_value
+        total_profit += profit
+        position_details.append(
+            {
+                "name": position.get("name", symbol),
+                "code": symbol,
+                "shares": shares,
+                "cost_price": cost_price,
+                "current_price": current_price,
+                "market_value": market_value,
+                "profit": profit,
+                "profit_pct": profit_pct,
+            }
+        )
+
+    available_cash = raw_portfolio.get("available_cash")
+    if available_cash is None:
+        available_cash = latest_account.get("cash", 0.0)
+    available_cash = float(available_cash or 0.0)
+
+    total_capital = raw_portfolio.get("total_capital")
+    if total_capital is None:
+        inferred_total_capital = latest_account.get("total_asset", 0.0) - latest_account.get("total_profit", 0.0)
+        total_capital = inferred_total_capital if inferred_total_capital else (available_cash + total_value)
+    total_capital = float(total_capital or 0.0)
+
+    total_assets = available_cash + total_value
+    current_total_profit = total_assets - total_capital
+    total_profit_pct = (current_total_profit / total_capital * 100) if total_capital else 0.0
+
+    return {
+        "total_capital": total_capital,
+        "available_cash": available_cash,
+        "total_value": total_value,
+        "total_profit": current_total_profit,
+        "total_profit_pct": total_profit_pct,
+        "total_assets": total_assets,
+        "positions": sorted(position_details, key=lambda item: item.get("profit_pct", 0.0), reverse=True),
+        "account": latest_account,
+    }
 
 
 def sync_rules_to_db(rules_data: Dict[str, Dict[str, Dict[str, Any]]], db_path: Path = DB_PATH) -> None:
@@ -634,6 +795,147 @@ def save_rejected_rules(
     """Persist rejected rules to SQLite and JSON mirror."""
     sync_rejected_rules_to_db(rejected_rules, db_path=db_path)
     save_json(REJECTED_RULES_FILE, rejected_rules)
+
+
+def reconcile_rule_stores(
+    rules_data: Dict[str, Dict[str, Dict[str, Any]]],
+    validation_pool: Dict[str, Dict[str, Any]],
+    rejected_rules: Dict[str, Dict[str, Any]],
+) -> Tuple[
+    Dict[str, Dict[str, Dict[str, Any]]],
+    Dict[str, Dict[str, Any]],
+    Dict[str, Dict[str, Any]],
+    Dict[str, Any],
+]:
+    """Resolve duplicate rule IDs across active/pool/rejected stores."""
+    rules_data = {
+        category: {rule_id: dict(rule or {}) for rule_id, rule in (category_rules or {}).items()}
+        for category, category_rules in (rules_data or {}).items()
+    }
+    validation_pool = {rule_id: dict(rule or {}) for rule_id, rule in (validation_pool or {}).items()}
+    rejected_rules = {rule_id: dict(rule or {}) for rule_id, rule in (rejected_rules or {}).items()}
+
+    candidates: Dict[str, list[Dict[str, Any]]] = {}
+
+    for category, category_rules in rules_data.items():
+        for rule_id, rule in category_rules.items():
+            candidates.setdefault(rule_id, []).append(
+                {
+                    "store": "active",
+                    "category": category,
+                    "rule_id": rule_id,
+                    "rule": rule,
+                    "timestamp": _parse_timestamp(
+                        rule.get("updated_at") or rule.get("promoted_at") or rule.get("created_at")
+                    ),
+                }
+            )
+
+    for rule_id, rule in validation_pool.items():
+        candidates.setdefault(rule_id, []).append(
+            {
+                "store": "validation_pool",
+                "category": None,
+                "rule_id": rule_id,
+                "rule": rule,
+                "timestamp": _parse_timestamp(
+                    rule.get("updated_at") or rule.get("created_at") or rule.get("started_at")
+                ),
+            }
+        )
+
+    for rule_id, rule in rejected_rules.items():
+        candidates.setdefault(rule_id, []).append(
+            {
+                "store": "rejected",
+                "category": rule.get("category"),
+                "rule_id": rule_id,
+                "rule": rule,
+                "timestamp": _parse_timestamp(
+                    rule.get("rejected_at") or rule.get("updated_at") or rule.get("created_at")
+                ),
+            }
+        )
+
+    clean_rules: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    clean_pool: Dict[str, Dict[str, Any]] = {}
+    clean_rejected: Dict[str, Dict[str, Any]] = {}
+    removed: Dict[str, list[str]] = {"active": [], "validation_pool": [], "rejected": []}
+
+    for rule_id, entries in candidates.items():
+        active_entries = [entry for entry in entries if entry["store"] == "active"]
+        pool_entries = [entry for entry in entries if entry["store"] == "validation_pool"]
+        rejected_entries = [entry for entry in entries if entry["store"] == "rejected"]
+
+        if active_entries:
+            winner = max(active_entries, key=lambda item: item["timestamp"])
+            latest_rejected = max(rejected_entries, key=lambda item: item["timestamp"]) if rejected_entries else None
+            if latest_rejected and latest_rejected["timestamp"] > winner["timestamp"]:
+                winner = latest_rejected
+        elif pool_entries:
+            winner = max(pool_entries, key=lambda item: item["timestamp"])
+            latest_rejected = max(rejected_entries, key=lambda item: item["timestamp"]) if rejected_entries else None
+            if latest_rejected and latest_rejected["timestamp"] > winner["timestamp"]:
+                winner = latest_rejected
+        else:
+            winner = max(rejected_entries, key=lambda item: item["timestamp"])
+
+        for entry in entries:
+            if entry is not winner:
+                removed[entry["store"]].append(rule_id)
+
+        if winner["store"] == "active":
+            category = winner["category"] or "uncategorized"
+            clean_rules.setdefault(category, {})[rule_id] = winner["rule"]
+        elif winner["store"] == "validation_pool":
+            clean_pool[rule_id] = winner["rule"]
+        else:
+            clean_rejected[rule_id] = winner["rule"]
+
+    clean_rules = {category: category_rules for category, category_rules in clean_rules.items() if category_rules}
+    changed = any(removed.values()) or (
+        len(clean_rules) != len(rules_data)
+        or len(clean_pool) != len(validation_pool)
+        or len(clean_rejected) != len(rejected_rules)
+    )
+
+    return clean_rules, clean_pool, clean_rejected, {"changed": changed, "removed": removed}
+
+
+def load_rule_state(
+    default_rules: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None,
+    default_validation_pool: Optional[Dict[str, Dict[str, Any]]] = None,
+    default_rejected_rules: Optional[Dict[str, Dict[str, Any]]] = None,
+    db_path: Path = DB_PATH,
+) -> Tuple[
+    Dict[str, Dict[str, Dict[str, Any]]],
+    Dict[str, Dict[str, Any]],
+    Dict[str, Dict[str, Any]],
+    Dict[str, Any],
+]:
+    """Load and reconcile active rules, validation pool, and rejected rules."""
+    rules_data = load_rules(default_rules or {}, db_path=db_path)
+    validation_pool = load_validation_pool(default_validation_pool or {}, db_path=db_path)
+    rejected_rules = load_rejected_rules(default_rejected_rules or {}, db_path=db_path)
+    return reconcile_rule_stores(rules_data, validation_pool, rejected_rules)
+
+
+def save_rule_state(
+    rules_data: Dict[str, Dict[str, Dict[str, Any]]],
+    validation_pool: Dict[str, Dict[str, Any]],
+    rejected_rules: Dict[str, Dict[str, Any]],
+    db_path: Path = DB_PATH,
+) -> Dict[str, Any]:
+    """Persist a reconciled rule-state snapshot to SQLite and JSON mirrors."""
+    clean_rules, clean_pool, clean_rejected, summary = reconcile_rule_stores(
+        rules_data,
+        validation_pool,
+        rejected_rules,
+    )
+    save_rules(clean_rules, db_path=db_path)
+    save_validation_pool(clean_pool, db_path=db_path)
+    save_rejected_rules(clean_rejected, db_path=db_path)
+    return summary
 
 
 def sync_predictions_to_db(predictions_data: Dict[str, Any], db_path: Path = DB_PATH) -> None:

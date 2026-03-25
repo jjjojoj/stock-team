@@ -17,7 +17,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from core.storage import build_portfolio_snapshot, load_positions as load_positions_snapshot
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # 飞书官方内容平台提到自定义机器人消息体 JSON 建议不超过 30 KB。
 # 这里保守一些，避免卡片超长触发 webhook 拒绝。
@@ -120,35 +124,20 @@ def _card_template(level: str) -> str:
 
 
 def _build_card_payload(title: str, content: str, level: str) -> Dict:
+    """构建 schema 2.0 通用卡片。"""
     blocks = _split_markdown_blocks(content)
-    footer = f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | stock-team webhook"
+    footer = f"更新时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} · stock-team"
 
     while True:
-        elements = [
-            {
-                "tag": "div",
-                "text": {
-                    "tag": "lark_md",
-                    "content": block,
-                },
-            }
-            for block in blocks
-        ]
-        elements.append(
-            {
-                "tag": "note",
-                "elements": [
-                    {
-                        "tag": "plain_text",
-                        "content": footer,
-                    }
-                ],
-            }
-        )
+        elements = [{"tag": "markdown", "content": block} for block in blocks]
+        elements.append({"tag": "hr"})
+        elements.append({"tag": "markdown", "content": f"<font color=gray>{footer}</font>"})
 
         payload = {
             "msg_type": "interactive",
             "card": {
+                "schema": "2.0",
+                "config": {"wide_screen_mode": True},
                 "header": {
                     "title": {
                         "tag": "plain_text",
@@ -156,7 +145,7 @@ def _build_card_payload(title: str, content: str, level: str) -> Dict:
                     },
                     "template": _card_template(level),
                 },
-                "elements": elements,
+                "body": {"elements": elements},
             },
         }
 
@@ -170,6 +159,73 @@ def _build_card_payload(title: str, content: str, level: str) -> Dict:
             continue
 
         blocks = [_truncate_text(blocks[0], max(CARD_BLOCK_CHARS // 2, 200))]
+
+
+def _build_portfolio_card(title: str, portfolio: Dict, level: str) -> Dict:
+    """构建 schema 2.0 专属持仓汇报卡片（四列数据 + 持仓明细表格）。"""
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    total_profit = portfolio.get("total_profit", 0)
+    total_profit_pct = portfolio.get("total_profit_pct", 0)
+    profit_color = "green" if total_profit >= 0 else "red"
+    profit_sign = "+" if total_profit >= 0 else ""
+
+    # 顶部四列资金概览
+    summary_columns = [
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**总资产**\n¥{portfolio.get('total_assets', 0):,.0f}"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**可用现金**\n¥{portfolio.get('available_cash', 0):,.0f}"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**持仓市值**\n¥{portfolio.get('total_value', 0):,.0f}"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**总盈亏**\n<font color={profit_color}>{profit_sign}¥{total_profit:,.0f} ({profit_sign}{total_profit_pct:.2f}%)</font>"}]},
+    ]
+
+    elements = [
+        {"tag": "column_set", "flex_mode": "none", "columns": summary_columns},
+        {"tag": "hr"},
+    ]
+
+    # 持仓明细
+    positions = portfolio.get("positions", [])
+    if positions:
+        # 表头
+        elements.append({
+            "tag": "column_set", "flex_mode": "none", "background_style": "grey",
+            "columns": [
+                {"tag": "column", "width": "weighted", "weight": 2, "elements": [{"tag": "markdown", "content": "**股票**"}]},
+                {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": "**成本/现价**"}]},
+                {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": "**市值**"}]},
+                {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": "**盈亏**"}]},
+            ]
+        })
+        for pos in positions:
+            p_color = "green" if pos.get("profit", 0) >= 0 else "red"
+            p_sign = "+" if pos.get("profit", 0) >= 0 else ""
+            current = pos.get("current_price") or pos.get("cost_price", 0)
+            elements.append({
+                "tag": "column_set", "flex_mode": "none",
+                "columns": [
+                    {"tag": "column", "width": "weighted", "weight": 2, "elements": [{"tag": "markdown", "content": f"**{pos['name']}**\n{pos['code']} · {pos.get('shares', 0)}股"}]},
+                    {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"¥{pos.get('cost_price', 0):.2f}\n→ ¥{current:.2f}"}]},
+                    {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"¥{pos.get('market_value', 0):,.0f}"}]},
+                    {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"<font color={p_color}>{p_sign}¥{pos.get('profit', 0):,.0f}\n({p_sign}{pos.get('profit_pct', 0):.2f}%)</font>"}]},
+                ]
+            })
+    else:
+        elements.append({"tag": "markdown", "content": "<font color=gray>当前空仓，无持仓股票</font>"})
+
+    elements.append({"tag": "hr"})
+    elements.append({"tag": "markdown", "content": f"<font color=gray>更新时间：{now_str} · stock-team</font>"})
+
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "schema": "2.0",
+            "config": {"wide_screen_mode": True},
+            "header": {
+                "title": {"tag": "plain_text", "content": _truncate_text(_normalize_text(title), TITLE_MAX_CHARS)},
+                "template": _card_template(level),
+            },
+            "body": {"elements": elements},
+        },
+    }
 
 
 def _build_text_payload(title: str, content: str) -> Dict:
@@ -281,57 +337,105 @@ def send_daily_report(portfolio, alerts):
     )
 
 
-def send_trade_notification(action, code, name, shares, price, profit=None):
-    """发送交易通知。"""
-    if action == "BUY":
-        content = (
-            f"买入 {name} ({code})\n"
-            f"数量: {shares}股\n"
-            f"价格: ¥{price:.2f}\n"
-            f"金额: ¥{shares * price:,.2f}"
-        )
-        level = "info"
-    else:
-        profit_text = f"\n盈亏: ¥{profit:,.2f}" if profit is not None else ""
-        content = (
-            f"卖出 {name} ({code})\n"
-            f"数量: {shares}股\n"
-            f"价格: ¥{price:.2f}{profit_text}"
-        )
-        level = "success" if profit is None or profit >= 0 else "warning"
+def send_trade_notification(action, code, name, shares, price, profit=None, webhook_url=None):
+    """发送交易通知（schema 2.0 卡片）。"""
+    webhook = webhook_url or get_default_webhook_url()
+    is_buy = action == "BUY"
+    level = "info" if is_buy else ("success" if profit is None or profit >= 0 else "warning")
+    title = f"{'🛒 买入' if is_buy else '💰 卖出'} · {name} ({code})"
+    amount = shares * price
 
-    send_feishu_message(
-        title=f"{'🛒' if action == 'BUY' else '💰'} 交易通知",
-        content=content,
-        level=level,
-    )
+    # 构建卡片列
+    cols = [
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**操作**\n{'买入 🛒' if is_buy else '卖出 💰'}"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**股票**\n{name} ({code})"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**数量**\n{shares}股"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**价格**\n¥{price:.2f}"}]},
+        {"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**金额**\n¥{amount:,.0f}"}]},
+    ]
+    if not is_buy and profit is not None:
+        p_color = "green" if profit >= 0 else "red"
+        p_sign = "+" if profit >= 0 else ""
+        cols.append({"tag": "column", "width": "weighted", "weight": 1, "elements": [{"tag": "markdown", "content": f"**盈亏**\n<font color={p_color}>{p_sign}¥{profit:,.0f}</font>"}]})
+
+    elements = [
+        {"tag": "column_set", "flex_mode": "none", "columns": cols},
+        {"tag": "hr"},
+        {"tag": "markdown", "content": f"<font color=gray>时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} · stock-team</font>"},
+    ]
+    payload = {
+        "msg_type": "interactive",
+        "card": {
+            "schema": "2.0",
+            "config": {"wide_screen_mode": True},
+            "header": {"title": {"tag": "plain_text", "content": title}, "template": _card_template(level)},
+            "body": {"elements": elements},
+        },
+    }
+    if webhook:
+        try:
+            success, _ = _post_webhook(payload, webhook)
+            if success:
+                print(f"✅ 交易卡片发送成功: {title}")
+                return
+        except Exception as exc:
+            print(f"⚠️ 交易卡片失败，回退文本: {exc}")
+    # 回退文本
+    content = f"{'买入' if is_buy else '卖出'} {name} ({code})\n数量: {shares}股 | 价格: ¥{price:.2f} | 金额: ¥{amount:,.0f}"
+    send_feishu_message(title=title, content=content, level=level, webhook_url=webhook_url)
+
+
+def send_alert_card(title: str, content: str, level: str = "warning", items: Optional[List[str]] = None, webhook_url: Optional[str] = None) -> bool:
+    """发送通用预警/故障卡片（schema 2.0）。适用于熔断、风险、API故障、市场预警等。"""
+    webhook = webhook_url or get_default_webhook_url()
+    if not webhook:
+        print("⚠️ 飞书 webhook 未配置")
+        return False
+
+    elements = [{"tag": "markdown", "content": content}]
+    if items:
+        items_md = "\n".join(f"• {item}" for item in items[:10])
+        elements.append({"tag": "markdown", "content": items_md})
+    elements.append({"tag": "hr"})
+    elements.append({"tag": "markdown", "content": f"<font color=gray>时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} · stock-team</font>"})
+
+    payload = {
+        "msg_type": "interactive",
+        "card": {
+            "schema": "2.0",
+            "config": {"wide_screen_mode": True},
+            "header": {"title": {"tag": "plain_text", "content": _truncate_text(_normalize_text(title), TITLE_MAX_CHARS)}, "template": _card_template(level)},
+            "body": {"elements": elements},
+        },
+    }
+    try:
+        success, result = _post_webhook(payload, webhook)
+        if success:
+            print(f"✅ 预警卡片发送成功: {title}")
+            return True
+        print(f"⚠️ 预警卡片失败，回退文本: {result}")
+    except Exception as exc:
+        print(f"⚠️ 预警卡片异常，回退文本: {exc}")
+    return send_feishu_message(title=title, content=content, level=level, webhook_url=webhook_url)
 
 
 def send_alert_notification(alert):
     """发送预警通知。"""
-    send_feishu_message(
+    send_alert_card(
         title=f"⚠️ 股票预警 - {alert['name']}",
         content=alert["message"],
-        level=alert["level"],
+        level=alert.get("level", "warning"),
     )
 
 
 def load_positions():
     """加载持仓数据。"""
-    positions_file = PROJECT_ROOT / "config" / "positions.json"
-    if positions_file.exists():
-        with positions_file.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
-    return {}
+    return load_positions_snapshot({})
 
 
 def load_portfolio():
     """加载资金数据。"""
-    portfolio_file = PROJECT_ROOT / "config" / "portfolio.json"
-    if portfolio_file.exists():
-        with portfolio_file.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
-    return {}
+    return build_portfolio_snapshot()
 
 
 def get_realtime_price(code: str) -> Optional[float]:
@@ -349,59 +453,52 @@ def get_realtime_price(code: str) -> Optional[float]:
     return None
 
 
+def send_portfolio_report(report_type: str, webhook_url: Optional[str] = None) -> bool:
+    """生成并发送结构化持仓汇报卡片（schema 2.0）。"""
+    type_config = {
+        "morning": ("🌅 早盘持仓汇报", "info"),
+        "noon_close": ("🕛 午盘收盘汇报", "info"),
+        "noon_open": ("🕐 午盘开盘汇报", "info"),
+        "close": ("🌙 收盘汇总汇报", "info"),
+    }
+    title, _ = type_config.get(report_type, ("📊 持仓汇报", "info"))
+
+    portfolio = generate_portfolio_report(report_type)
+    level = "success" if portfolio["total_profit"] >= 0 else "warning"
+
+    webhook = webhook_url or get_default_webhook_url()
+    if not webhook:
+        print("⚠️ 飞书 webhook 未配置")
+        return False
+
+    card_payload = _build_portfolio_card(title, portfolio, level)
+
+    try:
+        success, result = _post_webhook(card_payload, webhook)
+        if success:
+            print(f"✅ 飞书持仓卡片发送成功: {title}")
+            return True
+        print(f"⚠️ 飞书持仓卡片发送失败，回退文本: {result}")
+    except Exception as exc:
+        print(f"⚠️ 飞书持仓卡片异常，回退文本: {exc}")
+
+    # 回退文本
+    _, content, level = format_report(report_type, portfolio)
+    return send_feishu_message(title=title, content=content, level=level, webhook_url=webhook_url)
+
+
 def generate_portfolio_report(report_type: str) -> Dict:
     """生成持仓汇报。"""
-    positions = load_positions()
-    portfolio = load_portfolio()
-
-    total_capital = portfolio.get("total_capital", 200000)
-    available_cash = portfolio.get("available_cash", total_capital)
-
-    position_details = []
-    total_value = 0.0
-    total_profit = 0.0
-
-    for code, pos in positions.items():
-        current_price = get_realtime_price(code)
-        cost_price = pos.get("cost_price", 0)
-        shares = pos.get("shares", 0)
-
-        if current_price:
-            market_value = shares * current_price
-            profit = shares * (current_price - cost_price)
-            profit_pct = (current_price / cost_price - 1) * 100 if cost_price > 0 else 0
-        else:
-            market_value = shares * cost_price
-            profit = 0
-            profit_pct = 0
-
-        total_value += market_value
-        total_profit += profit
-
-        position_details.append(
-            {
-                "name": pos.get("name", code),
-                "code": code,
-                "shares": shares,
-                "cost_price": cost_price,
-                "current_price": current_price,
-                "market_value": market_value,
-                "profit": profit,
-                "profit_pct": profit_pct,
-            }
-        )
-
-    total_assets = available_cash + total_value
-    total_profit_pct = (total_profit / total_value * 100) if total_value > 0 else 0
-
+    snapshot = build_portfolio_snapshot()
     return {
-        "total_capital": total_capital,
-        "available_cash": available_cash,
-        "total_value": total_value,
-        "total_profit": total_profit,
-        "total_profit_pct": total_profit_pct,
-        "total_assets": total_assets,
-        "positions": position_details,
+        "report_type": report_type,
+        "total_capital": float(snapshot.get("total_capital", 0.0) or 0.0),
+        "available_cash": float(snapshot.get("available_cash", 0.0) or 0.0),
+        "total_value": float(snapshot.get("total_value", 0.0) or 0.0),
+        "total_profit": float(snapshot.get("total_profit", 0.0) or 0.0),
+        "total_profit_pct": float(snapshot.get("total_profit_pct", 0.0) or 0.0),
+        "total_assets": float(snapshot.get("total_assets", 0.0) or 0.0),
+        "positions": list(snapshot.get("positions", [])),
     }
 
 
@@ -429,17 +526,20 @@ def format_report(report_type: str, portfolio: Dict) -> Tuple[str, str, str]:
         f"📈 持仓详情 ({len(portfolio['positions'])}只)",
     ]
 
-    for pos in portfolio["positions"]:
-        emoji = "🟢" if pos["profit"] >= 0 else "🔴"
-        current_price = pos["current_price"] if pos["current_price"] is not None else pos["cost_price"]
-        lines.append(f"{emoji} {pos['name']} ({pos['code']})")
-        lines.append(
-            f"持仓: {pos['shares']}股 | 成本: ¥{pos['cost_price']:.2f} → 现价: ¥{current_price:.2f}"
-        )
-        lines.append(
-            f"市值: ¥{pos['market_value']:,.2f} | 盈亏: ¥{pos['profit']:,.2f} ({pos['profit_pct']:+.2f}%)"
-        )
-        lines.append("")
+    if portfolio["positions"]:
+        for pos in portfolio["positions"]:
+            emoji = "🟢" if pos["profit"] >= 0 else "🔴"
+            current_price = pos["current_price"] if pos["current_price"] is not None else pos["cost_price"]
+            lines.append(f"{emoji} {pos['name']} ({pos['code']})")
+            lines.append(
+                f"持仓: {pos['shares']}股 | 成本: ¥{pos['cost_price']:.2f} → 现价: ¥{current_price:.2f}"
+            )
+            lines.append(
+                f"市值: ¥{pos['market_value']:,.2f} | 盈亏: ¥{pos['profit']:,.2f} ({pos['profit_pct']:+.2f}%)"
+            )
+            lines.append("")
+    else:
+        lines.append("当前空仓，暂无持仓股票。")
 
     content = "\n".join(lines).strip()
     level = "success" if portfolio["total_profit"] >= 0 else "warning"
@@ -460,9 +560,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.report:
-        portfolio_data = generate_portfolio_report(args.report)
-        title, content, level = format_report(args.report, portfolio_data)
-        send_feishu_message(title=title, content=content, level=level)
+        send_portfolio_report(args.report)
     elif args.test:
         send_feishu_message(
             title="🧪 测试消息",

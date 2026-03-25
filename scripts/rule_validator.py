@@ -22,12 +22,8 @@ from core.storage import (
     CONFIG_DIR,
     DATA_DIR,
     load_json,
-    load_rejected_rules,
-    load_rules,
-    load_validation_pool,
-    save_rejected_rules,
-    save_rules,
-    save_validation_pool,
+    load_rule_state,
+    save_rule_state,
 )
 
 LEARNING_DIR = PROJECT_ROOT / "learning"
@@ -70,9 +66,12 @@ class RuleValidator:
 
     def _load_data(self) -> None:
         """Load rules, pool, trades, and supporting files."""
-        self.rules = load_rules({})
-        self.validation_pool = load_validation_pool({})
-        self.rejected = load_rejected_rules({})
+        (
+            self.rules,
+            self.validation_pool,
+            self.rejected,
+            self.rule_state_summary,
+        ) = load_rule_state({}, {}, {})
         self.predictions = normalize_prediction_collection(
             load_json(self.predictions_file, {"active": {}, "history": []})
         )
@@ -81,9 +80,13 @@ class RuleValidator:
 
     def _save_data(self) -> None:
         """Persist all mutable rule stores."""
-        save_rules(self.rules)
-        save_validation_pool(self.validation_pool)
-        save_rejected_rules(self.rejected)
+        self.rule_state_summary = save_rule_state(self.rules, self.validation_pool, self.rejected)
+        (
+            self.rules,
+            self.validation_pool,
+            self.rejected,
+            _,
+        ) = load_rule_state({}, {}, {})
 
     def validate_rule_library(self) -> Dict[str, int]:
         """Validate active rules already in the rule library."""
@@ -175,6 +178,8 @@ class RuleValidator:
         print("=" * 60)
         print(f"🧪 统一规则验证 - {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         print("=" * 60)
+        if self.rule_state_summary.get("changed"):
+            print("🧹 已自动清理规则库 / 验证池 / 淘汰库中的重复规则状态")
 
         library_stats = self.validate_rule_library()
 

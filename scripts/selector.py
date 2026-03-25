@@ -118,6 +118,8 @@ FUNDAMENTAL_DATA = {
     "sh.688037": {"pb": 5.85, "pe": 58.2, "roe": 10.1, "net_profit_growth": 22.3, "dividend_yield": 0.2},
 }
 
+MIN_TOP_CANDIDATE_SCORE = 20
+
 
 class StockSelector:
     """选股工具（使用多数据源适配器）"""
@@ -377,10 +379,13 @@ class StockSelector:
     def top(self, n: int = 5, filter_controller: bool = True) -> List[Dict]:
         """显示评分最高的 n 只股票"""
         results = self.scan(filter_controller)
-        top_n = results[:n]
+        top_n = [stock for stock in results if float(stock.get("score", {}).get("total", 0) or 0) >= MIN_TOP_CANDIDATE_SCORE][:n]
         
         print(f"\n🏆 TOP {n} 股票：")
         print("=" * 80)
+        if not top_n:
+            print(f"\n⚠️ 当前没有综合评分达到 {MIN_TOP_CANDIDATE_SCORE} 分的候选股")
+            return []
         
         for i, stock in enumerate(top_n, 1):
             score = stock["score"]
@@ -441,9 +446,9 @@ class StockSelector:
 def format_top_report(stocks: List[Dict]) -> str:
     """格式化 Top 候选列表，供飞书卡片发送。"""
     if not stocks:
-        return "今日未筛出符合条件的候选股。"
+        return f"今日未筛出综合评分达到 {MIN_TOP_CANDIDATE_SCORE} 分的候选股。"
 
-    lines = [f"共筛出 {len(stocks)} 只候选股，按综合评分排序：", ""]
+    lines = [f"共筛出 {len(stocks)} 只达标候选股（综合评分 >= {MIN_TOP_CANDIDATE_SCORE}），按综合评分排序：", ""]
     for index, stock in enumerate(stocks, 1):
         score = stock["score"]
         lines.append(f"{index}. {stock['name']} ({stock['code']})")

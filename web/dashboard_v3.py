@@ -29,9 +29,7 @@ from core.storage import (
     DB_PATH,
     LEARNING_DIR,
     load_json,
-    load_rejected_rules,
-    load_rules,
-    load_validation_pool,
+    load_rule_state,
     load_watchlist,
 )
 
@@ -116,7 +114,7 @@ def get_positions():
 
 def flatten_rule_library(limit: Optional[int] = None):
     """Flatten the rule library into a ranked list."""
-    rules = load_rules({})
+    rules, _, _, _ = load_rule_state({}, {}, {})
     items = []
     for category, category_rules in rules.items():
         for rule_id, rule in category_rules.items():
@@ -156,7 +154,7 @@ def get_watchlist_items(limit: Optional[int] = None):
 
 def get_validation_pool_items(limit: Optional[int] = None):
     """Return validation-pool entries as a ranked list."""
-    pool = load_validation_pool({})
+    _, pool, _, _ = load_rule_state({}, {}, {})
     items = []
     for rule_id, rule in pool.items():
         entry = dict(rule)
@@ -176,9 +174,36 @@ def get_validation_pool_items(limit: Optional[int] = None):
 
 def get_validation_summary():
     """Build dashboard-friendly summary for rule validation and learning."""
-    rule_items = flatten_rule_library()
-    validation_pool_items = get_validation_pool_items()
-    rejected_items = list(load_rejected_rules({}).values())
+    rules, validation_pool, rejected_rules, _ = load_rule_state({}, {}, {})
+    rule_items = []
+    for category, category_rules in rules.items():
+        for rule_id, rule in category_rules.items():
+            entry = dict(rule)
+            entry["rule_id"] = rule_id
+            entry["category"] = category
+            rule_items.append(entry)
+    rule_items.sort(
+        key=lambda item: (
+            float(item.get("success_rate", 0.0) or 0.0),
+            int(item.get("samples", 0) or 0),
+            float(item.get("weight", 0.0) or 0.0),
+        ),
+        reverse=True,
+    )
+    validation_pool_items = []
+    for rule_id, rule in validation_pool.items():
+        entry = dict(rule)
+        entry["rule_id"] = rule_id
+        validation_pool_items.append(entry)
+    validation_pool_items.sort(
+        key=lambda item: (
+            float(item.get("confidence", 0.0) or 0.0),
+            float(item.get("live_test", {}).get("success_rate", 0.0) or 0.0),
+            int(item.get("backtest", {}).get("samples", 0) or 0),
+        ),
+        reverse=True,
+    )
+    rejected_items = list(rejected_rules.values())
     book_knowledge = load_json(LEARNING_DIR / "book_knowledge.json", {})
 
     active_with_samples = [item for item in rule_items if int(item.get("samples", 0) or 0) > 0]

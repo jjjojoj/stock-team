@@ -70,84 +70,23 @@ def send_to_feishu(text):
 
 def generate_report():
     """生成汇报内容"""
-    with POSITIONS_FILE.open('r', encoding='utf-8') as f:
-        positions = json.load(f)
-    
     now = datetime.now()
     time_str = now.strftime("%m-%d %H:%M")
-    
-    # 空持仓检查
-    if not positions:
-        text = f"【持仓汇报】{time_str}\n\n⚠️ 暂无持仓配置\n请在 config/positions.json 中添加持仓信息"
-        success = send_to_feishu(text)
-        print(f"[{time_str}] {'✅ 发送成功(空持仓)' if success else '❌ 发送失败'}")
-        return success
-    
-    prices = get_realtime_prices(positions.keys())
-    hour = now.hour
-    
-    # 判断时段
-    if hour < 10:
-        period = "🌅 早盘开盘"
-    elif hour < 12:
-        period = "☀️ 午盘收盘"
-    elif hour < 15:
-        period = "🌤️ 午盘进行"
+    if now.hour < 10:
+        report_type = "morning"
+    elif now.hour < 12:
+        report_type = "noon_close"
+    elif now.hour < 15:
+        report_type = "noon_open"
     else:
-        period = "🌆 收盘汇总"
-    
-    # 计算盈亏
-    total_cost = 0
-    total_value = 0
-    lines = []
-    
-    lines.append(f"【持仓汇报】{period} {time_str}")
-    lines.append("=" * 30)
-    
-    for code, pos in positions.items():
-        stock_code = code.split('.')[1]
-        shares = pos['shares']
-        cost = pos['cost_price']
-        
-        current_price = prices.get(stock_code, {}).get('price', cost)
-        change_pct = prices.get(stock_code, {}).get('change_pct', 0)
-        
-        cost_amount = shares * cost
-        value = shares * current_price
-        profit = value - cost_amount
-        profit_pct = (current_price / cost - 1) * 100
-        
-        total_cost += cost_amount
-        total_value += value
-        
-        # 格式化
-        profit_sign = "+" if profit >= 0 else ""
-        today_sign = "+" if change_pct >= 0 else ""
-        
-        lines.append(f"\n【{pos['name']}】{stock_code}")
-        lines.append(f"  现价: ¥{current_price:.2f} ({today_sign}{change_pct:.2f}%)")
-        lines.append(f"  盈亏: {profit_sign}¥{profit:,.0f} ({profit_sign}{profit_pct:.2f}%)")
-    
-    lines.append("\n" + "=" * 30)
-    
-    # 总盈亏
-    total_profit = total_value - total_cost
-    if total_cost > 0:
-        total_pct = (total_value / total_cost - 1) * 100
-        progress_pct = (total_profit / TARGET_PROFIT) * 100
-    else:
-        total_pct = 0
-        progress_pct = 0
-    
-    profit_sign = "+" if total_profit >= 0 else ""
-    
-    lines.append(f"\n📊 总盈亏: {profit_sign}¥{total_profit:,.0f} ({profit_sign}{total_pct:.2f}%)")
-    lines.append(f"🎯 月目标: {progress_pct:.1f}% (目标+¥{TARGET_PROFIT:,})")
-    
-    # 发送
-    text = "\n".join(lines)
-    success = send_to_feishu(text)
-    
+        report_type = "close"
+
+    scripts_dir = str(PROJECT_ROOT / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    from feishu_notifier import send_portfolio_report
+
+    success = send_portfolio_report(report_type)
     print(f"[{time_str}] {'✅ 发送成功' if success else '❌ 发送失败'}")
     return success
 

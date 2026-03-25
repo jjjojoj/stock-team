@@ -50,7 +50,7 @@ class FeishuNotifierTests(unittest.TestCase):
 
         self.assertEqual(payload["msg_type"], "interactive")
         self.assertLessEqual(len(encoded), feishu_notifier.SAFE_JSON_BYTES)
-        self.assertLessEqual(len(payload["card"]["elements"]), feishu_notifier.CARD_MAX_BLOCKS + 1)
+        self.assertLessEqual(len(payload["card"]["body"]["elements"]), feishu_notifier.CARD_MAX_BLOCKS + 2)
 
     def test_send_feishu_message_falls_back_to_text_when_card_fails(self):
         captured_payloads = []
@@ -71,6 +71,39 @@ class FeishuNotifierTests(unittest.TestCase):
         self.assertEqual(len(captured_payloads), 2)
         self.assertEqual(captured_payloads[0]["msg_type"], "interactive")
         self.assertEqual(captured_payloads[1]["msg_type"], "text")
+
+    def test_generate_portfolio_report_uses_unified_snapshot(self):
+        snapshot = {
+            "total_capital": 200000.0,
+            "available_cash": 274898.0,
+            "total_value": 0.0,
+            "total_profit": 74898.0,
+            "total_profit_pct": 37.449,
+            "total_assets": 274898.0,
+            "positions": [],
+        }
+
+        with patch.object(feishu_notifier, "build_portfolio_snapshot", return_value=snapshot):
+            report = feishu_notifier.generate_portfolio_report("close")
+
+        self.assertEqual(report["available_cash"], 274898.0)
+        self.assertEqual(report["positions"], [])
+        self.assertAlmostEqual(report["total_profit_pct"], 37.449)
+
+    def test_format_report_handles_empty_positions_without_config_warning(self):
+        portfolio = {
+            "total_assets": 274898.0,
+            "available_cash": 274898.0,
+            "total_value": 0.0,
+            "total_profit": 74898.0,
+            "total_profit_pct": 37.45,
+            "positions": [],
+        }
+
+        _, content, _ = feishu_notifier.format_report("close", portfolio)
+
+        self.assertIn("当前空仓", content)
+        self.assertNotIn("暂无持仓配置", content)
 
 
 if __name__ == "__main__":
