@@ -29,6 +29,9 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
+from core.fundamentals import get_fundamental_bundles
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+
 # 导入新适配器
 ADAPTER_IMPORT_ERROR = None
 try:
@@ -126,6 +129,7 @@ class StockSelector:
     
     def __init__(self):
         self.dm = get_data_manager() if HAS_ADAPTERS else None
+        self.fundamentals: Dict[str, Dict] = {}
         if self.dm:
             print("✅ 数据源管理器初始化完成")
             print(f"   可用数据源: {self.dm.get_available_sources()}")
@@ -175,10 +179,12 @@ class StockSelector:
             
             # 2. 计算市值
             total_shares = TOTAL_SHARES.get(code, 10)
-            market_cap = float(price.price) * total_shares
+            fund_data = self.fundamentals.get(code) or {}
+            market_cap = float(fund_data.get("market_cap", 0) or 0) or (float(price.price) * total_shares)
             
-            # 3. 获取基本面数据
-            fund_data = FUNDAMENTAL_DATA.get(code, {})
+            # 3. 获取基本面数据（实时优先，静态表兜底）
+            if not fund_data:
+                fund_data = get_fundamental_bundles([code], legacy_data=FUNDAMENTAL_DATA).get(code, {})
             
             # 4. 获取技术指标（使用适配器）
             tech_data = None
@@ -349,6 +355,13 @@ class StockSelector:
     def scan(self, filter_controller: bool = True) -> List[Dict]:
         """扫描股票池"""
         results = []
+        all_codes = [
+            code
+            for sub_sectors in STOCK_POOL.values()
+            for codes in sub_sectors.values()
+            for code in codes
+        ]
+        self.fundamentals = get_fundamental_bundles(all_codes, legacy_data=FUNDAMENTAL_DATA)
         
         print("\n📊 开始扫描股票池...")
         print("=" * 60)
@@ -474,30 +487,45 @@ def main():
     
     args = parser.parse_args()
     
-    selector = StockSelector()
-    
-    if args.action == "scan":
-        selector.scan(filter_controller=not args.all)
-    elif args.action == "top":
-        n = int(args.arg) if args.arg else 5
-        top_stocks = selector.top(n, filter_controller=not args.all)
-        try:
-            sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
-            from feishu_notifier import send_feishu_message
+    try:
+        with task_lock("selector"):
+            guard = evaluate_runtime_mode("selection", universe_count=len(STOCK_POOL))
+            for warning in guard.warnings:
+                print(f"⚠️ {warning}")
+                record_guardrail_event("selector", "warning", warning)
+            if not guard.ok:
+                for reason in guard.reasons:
+                    print(f"⛔ {reason}")
+                    record_guardrail_event("selector", "error", reason)
+                return
 
-            send_feishu_message(
-                title=f"🎯 动态标准选股 Top {len(top_stocks)}",
-                content=format_top_report(top_stocks),
-                level="info",
-            )
-            print("✅ 飞书通知已发送")
-        except Exception as exc:
-            print(f"⚠️ 飞书通知发送失败: {exc}")
-    elif args.action == "detail":
-        if not args.arg:
-            print("❌ 请指定股票代码")
-            return
-        selector.detail(args.arg)
+            selector = StockSelector()
+
+            if args.action == "scan":
+                selector.scan(filter_controller=not args.all)
+            elif args.action == "top":
+                n = int(args.arg) if args.arg else 5
+                top_stocks = selector.top(n, filter_controller=not args.all)
+                try:
+                    sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
+                    from feishu_notifier import send_feishu_message
+
+                    send_feishu_message(
+                        title=f"🎯 动态标准选股 Top {len(top_stocks)}",
+                        content=format_top_report(top_stocks),
+                        level="info",
+                    )
+                    print("✅ 飞书通知已发送")
+                except Exception as exc:
+                    print(f"⚠️ 飞书通知发送失败: {exc}")
+            elif args.action == "detail":
+                if not args.arg:
+                    print("❌ 请指定股票代码")
+                    return
+                selector.detail(args.arg)
+    except TaskLockedError as exc:
+        print(f"⚠️ {exc}")
+        record_guardrail_event("selector", "warning", str(exc))
 
 
 if __name__ == "__main__":

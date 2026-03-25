@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "force_read_only": false,
+  "lock_stale_seconds": 7200,
+  "freshness": {
+    "daily_search_hours": 18,
+    "predictions_hours": 36,
+    "fundamental_snapshot_hours": 240,
+    "stock_pool_hours": 240
+  },
+  "midday_learning": {
+    "min_verified_predictions": 4,
+    "min_wrong_cases": 3,
+    "min_bias_ratio": 0.6,
+    "consecutive_error_runs": 2,
+    "adjustment_step": 0.02,
+    "min_confidence_threshold": 0.65,
+    "max_confidence_threshold": 0.9,
+    "rollback_window_runs": 3,
+    "rollback_drop_pct": 8.0
+  }
+}

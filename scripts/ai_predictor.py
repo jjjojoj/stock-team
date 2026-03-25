@@ -31,7 +31,8 @@ except ImportError:
     PredictionSystem = prediction_module.PredictionSystem
 from news_fetcher import NewsFetcher
 from news_trigger import NewsMonitor
-from core.storage import POSITIONS_FILE, load_rules, load_watchlist
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+from core.storage import load_positions, load_rules, load_watchlist
 
 # 尝试导入 akshare 用于计算真实技术指标
 try:
@@ -77,21 +78,10 @@ class AIPredictor:
         return load_rules({})
     
     def _load_positions(self) -> Dict:
-        if POSITIONS_FILE.exists():
-            with POSITIONS_FILE.open('r', encoding='utf-8') as f:
-                return json.load(f)
-        return {}
+        return load_positions({})
     
     def _load_watchlist(self) -> Dict:
-        watchlist = load_watchlist({})
-        if watchlist:
-            return watchlist
-        # 默认自选股
-        return {
-            "sh.600111": {"name": "北方稀土", "industry": "稀土"},
-            "sh.601168": {"name": "西部矿业", "industry": "铜"},
-            "sh.601600": {"name": "中国铝业", "industry": "铝"},
-        }
+        return load_watchlist({})
     
     def _get_current_price(self, code: str) -> Optional[float]:
         """获取当前价格"""
@@ -665,48 +655,62 @@ def main():
         sys.exit(1)
     
     command = sys.argv[1]
-    predictor = AIPredictor()
-    
-    if command == "generate":
-        predictions = predictor.generate_all_predictions()
-        
-        # 发送飞书通知
-        try:
-            from feishu_notifier import send_feishu_message
-            from datetime import datetime
-            brief = predictor.generate_daily_brief(predictions)
-            title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
-            send_feishu_message(title, brief, level='info')
-            print("✅ 飞书通知已发送")
-        except Exception as e:
-            print(f"⚠️ 飞书通知发送失败: {e}")
-    
-    elif command == "brief":
-        brief = predictor.generate_daily_brief()
-        print(brief)
-        if "--notify" in sys.argv[2:]:
-            try:
-                from feishu_notifier import send_feishu_message
-                from datetime import datetime
+    try:
+        with task_lock("ai_predictor"):
+            predictor = AIPredictor()
+            universe_count = len(predictor.positions) + len(predictor.watchlist)
+            guard = evaluate_runtime_mode("prediction_generate", universe_count=universe_count)
+            for warning in guard.warnings:
+                print(f"⚠️ {warning}")
+                record_guardrail_event("ai_predictor", "warning", warning)
+            if not guard.ok:
+                for reason in guard.reasons:
+                    print(f"⛔ {reason}")
+                    record_guardrail_event("ai_predictor", "error", reason)
+                return
 
-                title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
-                send_feishu_message(title, brief, level='info')
-                print("✅ 飞书通知已发送")
-            except Exception as e:
-                print(f"⚠️ 飞书通知发送失败: {e}")
-    
-    elif command == "single":
-        if len(sys.argv) < 3:
-            print("请指定股票代码")
-            sys.exit(1)
-        
-        code = sys.argv[2]
-        pred = predictor.generate_prediction(code, force=True)
-        if pred:
-            print(f"\n预测生成成功:")
-            print(f"  方向: {pred['direction']}")
-            print(f"  目标价: ¥{pred['target_price']}")
-            print(f"  置信度: {pred['confidence']}%")
+            if command == "generate":
+                predictions = predictor.generate_all_predictions()
+
+                try:
+                    from feishu_notifier import send_feishu_message
+                    from datetime import datetime
+                    brief = predictor.generate_daily_brief(predictions)
+                    title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
+                    send_feishu_message(title, brief, level='info')
+                    print("✅ 飞书通知已发送")
+                except Exception as e:
+                    print(f"⚠️ 飞书通知发送失败: {e}")
+
+            elif command == "brief":
+                brief = predictor.generate_daily_brief()
+                print(brief)
+                if "--notify" in sys.argv[2:]:
+                    try:
+                        from feishu_notifier import send_feishu_message
+                        from datetime import datetime
+
+                        title = f"📊 早盘预测 - {datetime.now().strftime('%Y-%m-%d')}"
+                        send_feishu_message(title, brief, level='info')
+                        print("✅ 飞书通知已发送")
+                    except Exception as e:
+                        print(f"⚠️ 飞书通知发送失败: {e}")
+
+            elif command == "single":
+                if len(sys.argv) < 3:
+                    print("请指定股票代码")
+                    sys.exit(1)
+
+                code = sys.argv[2]
+                pred = predictor.generate_prediction(code, force=True)
+                if pred:
+                    print(f"\n预测生成成功:")
+                    print(f"  方向: {pred['direction']}")
+                    print(f"  目标价: ¥{pred['target_price']}")
+                    print(f"  置信度: {pred['confidence']}%")
+    except TaskLockedError as exc:
+        print(f"⚠️ {exc}")
+        record_guardrail_event("ai_predictor", "warning", str(exc))
 
 
 if __name__ == "__main__":

@@ -28,6 +28,8 @@ LOG_DIR = PROJECT_ROOT / "logs"
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.fundamentals import get_fundamental_bundle
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
 from core.storage import load_positions, load_watchlist, save_watchlist
 
 
@@ -155,21 +157,18 @@ def get_stock_data(code: str) -> dict:
 
 
 def get_fundamental_data(code: str) -> dict:
-    """获取维护中的基本面快照数据。"""
-    snapshot = load_fundamental_snapshot()
-    if code in snapshot:
-        return snapshot[code]
-
     watchlist = load_watchlist({})
-    if code in watchlist:
-        return {
-            'pb': watchlist[code].get('pb', 0),
-            'pe': watchlist[code].get('pe', 0),
-            'roe': watchlist[code].get('roe', 10),
-            'net_profit_growth': watchlist[code].get('net_profit_growth', 0),
-            'dividend_yield': watchlist[code].get('dividend_yield', 0),
-        }
-    return {'pb': 0, 'pe': 0, 'roe': 0, 'net_profit_growth': 0, 'dividend_yield': 0}
+    bundle = get_fundamental_bundle(code, watchlist_data=watchlist)
+    return {
+        'pb': float(bundle.get('pb', 0) or 0),
+        'pe': float(bundle.get('pe', 0) or 0),
+        'roe': float(bundle.get('roe', 0) or 0),
+        'net_profit_growth': float(bundle.get('net_profit_growth', 0) or 0),
+        'dividend_yield': float(bundle.get('dividend_yield', 0) or 0),
+        'market_cap': float(bundle.get('market_cap', 0) or 0),
+        'source': bundle.get('source', 'snapshot'),
+        'fetched_at': bundle.get('fetched_at'),
+    }
 
 
 def analyze_stock(code: str, name: str, industry: str) -> dict:
@@ -196,10 +195,11 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
         'change_pct': stock_data['change_pct'],
         'pe': float(fundamental.get('pe', 0) or 0),
         'pb': float(fundamental.get('pb', 0) or 0),
-        'market_cap': float(pool_entry.get('market_cap', 0) or 0),
+        'market_cap': float(fundamental.get('market_cap', 0) or pool_entry.get('market_cap', 0) or 0),
         'dividend_yield': float(fundamental.get('dividend_yield', 0) or 0),
         'roe': fundamental.get('roe', 10),
         'net_profit_growth': float(fundamental.get('net_profit_growth', 0) or 0),
+        'fundamental_source': fundamental.get('source', 'snapshot'),
     }
     
     # 评分（基于投资框架）
@@ -253,6 +253,7 @@ def analyze_stock(code: str, name: str, industry: str) -> dict:
     print(f"市值：{analysis['market_cap']:.1f}亿")
     print(f"股息率：{analysis['dividend_yield']:.1f}%")
     print(f"ROE: {fundamental.get('roe', 0):.1f}%")
+    print(f"基本面来源：{analysis['fundamental_source']}")
     print()
     print(f"综合评分：{score}分")
     print(f"评级：{analysis['recommendation']}")
@@ -307,6 +308,7 @@ PE: {analysis['pe']:.1f} | PB: {analysis['pb']:.2f}
 市值：{analysis['market_cap']:.1f}亿
 股息率：{analysis['dividend_yield']:.1f}%
 ROE: {analysis['roe']:.1f}%
+基本面来源：{analysis.get('fundamental_source', 'snapshot')}
 
 📈 评级
 综合评分：{analysis['score']}分
@@ -344,31 +346,45 @@ def select_stock_to_research():
 
 def main():
     """主函数"""
-    print("=" * 60)
-    print(f"📚 每日深度研究 - {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print("=" * 60)
-    
-    # 选择股票
-    code, name, industry = select_stock_to_research()
-    print(f"\n🎯 今日研究：{name} ({code}) - {industry}")
-    
-    # 深度分析
-    analysis = analyze_stock(code, name, industry)
-    if not analysis:
-        print("❌ 分析失败")
-        return
-    
-    # 加入观察池
-    add_to_watchlist(analysis)
-    
-    # 发送飞书通知
-    send_feishu_notification(analysis)
-    
-    # 保存研究报告
-    report_file = DATA_DIR / f"research_{code}_{analysis['date']}.json"
-    with open(report_file, 'w', encoding='utf-8') as f:
-        json.dump(analysis, f, ensure_ascii=False, indent=2)
-    print(f"\n📄 报告已保存：{report_file}")
+    try:
+        with task_lock("daily_stock_research"):
+            positions = load_positions({})
+            watchlist = load_watchlist({})
+            guard = evaluate_runtime_mode(
+                "research",
+                universe_count=len(load_stock_pool_candidates()) or len(watchlist) or len(positions),
+            )
+            for warning in guard.warnings:
+                print(f"⚠️ {warning}")
+                record_guardrail_event("daily_stock_research", "warning", warning)
+            if not guard.ok:
+                for reason in guard.reasons:
+                    print(f"⛔ {reason}")
+                    record_guardrail_event("daily_stock_research", "error", reason)
+                return
+
+            print("=" * 60)
+            print(f"📚 每日深度研究 - {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+            print("=" * 60)
+
+            code, name, industry = select_stock_to_research()
+            print(f"\n🎯 今日研究：{name} ({code}) - {industry}")
+
+            analysis = analyze_stock(code, name, industry)
+            if not analysis:
+                print("❌ 分析失败")
+                return
+
+            add_to_watchlist(analysis)
+            send_feishu_notification(analysis)
+
+            report_file = DATA_DIR / f"research_{code}_{analysis['date']}.json"
+            with open(report_file, 'w', encoding='utf-8') as f:
+                json.dump(analysis, f, ensure_ascii=False, indent=2)
+            print(f"\n📄 报告已保存：{report_file}")
+    except TaskLockedError as exc:
+        print(f"⚠️ {exc}")
+        record_guardrail_event("daily_stock_research", "warning", str(exc))
 
 
 if __name__ == "__main__":

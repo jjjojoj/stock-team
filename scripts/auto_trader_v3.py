@@ -42,6 +42,7 @@ from core.storage import (
     save_json,
     sync_positions_and_account_to_db,
 )
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
 
 # 配置目录
 CONFIG_DIR = PROJECT_ROOT / "config"
@@ -769,109 +770,112 @@ def main():
 
     trader = AutoTraderV3()
 
-    # 处理买入逻辑
-    if args.buy:
-        logger.info("执行买入逻辑...")
-        # 扫描观察池中的高置信度预测
-        buy_signals = []
-        watchlist = load_json(WATCHLIST_FILE, {})
+    try:
+        if args.buy:
+            with task_lock("auto_trader_v3_buy"):
+                guard = evaluate_runtime_mode(
+                    "trade_buy",
+                    universe_count=len(load_json(WATCHLIST_FILE, {})),
+                    active_prediction_count=len(trader.predictions.get("active", {})),
+                    available_cash=trader.cash,
+                )
+                for warning in guard.warnings:
+                    logger.warning("⚠️ %s", warning)
+                    record_guardrail_event("auto_trader_v3_buy", "warning", warning)
+                if not guard.ok:
+                    for reason in guard.reasons:
+                        logger.error("⛔ %s", reason)
+                        record_guardrail_event("auto_trader_v3_buy", "error", reason)
+                    return 1
 
-        for code, stock in watchlist.items():
-            # code 已经是股票代码，stock 是字典包含 name, industry 等信息
+                logger.info("执行买入逻辑...")
+                buy_signals = []
+                watchlist = load_json(WATCHLIST_FILE, {})
 
-            # 查找该股票的预测
-            for pred_id, pred in trader.predictions.get("active", {}).items():
-                if pred.get("code") == code:
-                    confidence = pred.get("confidence", 0)
-                    # 置信度 ≥ 80 且不在持仓中
-                    if confidence >= 80 and code not in trader.positions:
-                        price = trader.get_realtime_price(code)
-                        if price:
-                            buy_signals.append({
-                                "code": code,
-                                "name": stock.get("name", code),
-                                "price": price,
-                                "confidence": confidence,
-                                "reasons": stock.get("reason", stock.get("added_reason", "")),
-                            })
+                for code, stock in watchlist.items():
+                    for pred_id, pred in trader.predictions.get("active", {}).items():
+                        if pred.get("code") == code:
+                            confidence = pred.get("confidence", 0)
+                            if confidence >= 80 and code not in trader.positions:
+                                price = trader.get_realtime_price(code)
+                                if price:
+                                    buy_signals.append({
+                                        "code": code,
+                                        "name": stock.get("name", code),
+                                        "price": price,
+                                        "confidence": confidence,
+                                        "reasons": stock.get("reason", stock.get("added_reason", "")),
+                                    })
 
-        # 按置信度排序
-        buy_signals.sort(key=lambda x: x["confidence"], reverse=True)
+                buy_signals.sort(key=lambda x: x["confidence"], reverse=True)
 
-        if buy_signals:
-            logger.info(f"\n发现 {len(buy_signals)} 个买入信号:")
-            for i, signal in enumerate(buy_signals, 1):
-                logger.info(f"\n[{i}] {signal['name']} ({signal['code']})")
-                logger.info(f"    价格: ¥{signal['price']:.2f}")
-                logger.info(f"    置信度: {signal['confidence']}%")
-                logger.info(f"    理由: {signal['reasons']}")
+                if buy_signals:
+                    logger.info(f"\n发现 {len(buy_signals)} 个买入信号:")
+                    for i, signal in enumerate(buy_signals, 1):
+                        logger.info(f"\n[{i}] {signal['name']} ({signal['code']})")
+                        logger.info(f"    价格: ¥{signal['price']:.2f}")
+                        logger.info(f"    置信度: {signal['confidence']}%")
+                        logger.info(f"    理由: {signal['reasons']}")
 
-            # 执行买入
-            if args.execute and not args.dry_run:
-                logger.info("\n执行买入...")
-                for signal in buy_signals[:2]:  # 最多买入2只
-                    # 【修复 P0-4】执行前进行风控检查
-                    passed, risk_msg, risk_level = trader.check_risk_assessment(signal['code'], signal)
+                    if args.execute and not args.dry_run:
+                        logger.info("\n执行买入...")
+                        for signal in buy_signals[:2]:
+                            passed, risk_msg, risk_level = trader.check_risk_assessment(signal['code'], signal)
 
-                    if not passed:
-                        logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
-                        trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
-                        continue  # 跳过该交易
+                            if not passed:
+                                logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
+                                trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
+                                continue
 
-                    logger.info(f"✅ {signal['name']}: 风控检查通过 - {risk_level}")
+                            logger.info(f"✅ {signal['name']}: 风控检查通过 - {risk_level}")
 
-                    # 计算买入数量（每只5万）
-                    buy_amount = 50000
-                    shares = int(buy_amount / signal['price'])
-                    if shares > 0:
-                        trader.positions[signal['code']] = {
-                            "name": signal['name'],
-                            "cost_price": signal['price'],
-                            "shares": shares,
-                            "buy_date": datetime.now().strftime("%Y-%m-%d"),
-                            "buy_reason": signal['reasons'],
-                        }
-                        trader.cash -= shares * signal['price']
+                            buy_amount = 50000
+                            shares = int(buy_amount / signal['price'])
+                            if shares > 0:
+                                trader.positions[signal['code']] = {
+                                    "name": signal['name'],
+                                    "cost_price": signal['price'],
+                                    "shares": shares,
+                                    "buy_date": datetime.now().strftime("%Y-%m-%d"),
+                                    "buy_reason": signal['reasons'],
+                                }
+                                trader.cash -= shares * signal['price']
+                                trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
+                                prediction_id = trader._find_latest_prediction(signal['code'])
+                                trader.trade_history.append({
+                                    "type": "buy",
+                                    "code": signal['code'],
+                                    "name": signal['name'],
+                                    "price": signal['price'],
+                                    "shares": shares,
+                                    "reason": signal['reasons'],
+                                    "prediction_id": prediction_id,
+                                    "timestamp": datetime.now().isoformat(),
+                                })
 
-                        # 保存风控评估
-                        trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
+                                logger.info(f"买入: {signal['name']} {shares}股 @¥{signal['price']:.2f}")
 
-                        # 查找关联的预测ID（修复 P0-3）
-                        prediction_id = trader._find_latest_prediction(signal['code'])
+                        trader._save_data()
+                        logger.info("✅ 买入执行完成")
+                    else:
+                        logger.info("\n💡 提示: 使用 --execute 参数自动执行买入")
+                else:
+                    logger.info("\n✅ 无买入信号")
+                return 0
 
-                        # 记录交易
-                        trader.trade_history.append({
-                            "type": "buy",
-                            "code": signal['code'],
-                            "name": signal['name'],
-                            "price": signal['price'],
-                            "shares": shares,
-                            "reason": signal['reasons'],
-                            "prediction_id": prediction_id,  # 添加预测ID关联
-                            "timestamp": datetime.now().isoformat(),
-                        })
-
-                        logger.info(f"买入: {signal['name']} {shares}股 @¥{signal['price']:.2f}")
-
-                trader._save_data()
-                logger.info("✅ 买入执行完成")
-            else:
-                logger.info("\n💡 提示: 使用 --execute 参数自动执行买入")
-        else:
-            logger.info("\n✅ 无买入信号")
-        return
-
-    # 处理卖出逻辑
-    if args.sell or (not args.buy and not args.sell):
-        # 运行卖出检查
-        auto_execute = args.execute and not args.dry_run
-        signals = trader.run(auto_execute=auto_execute)
-
-        # 返回退出码
-        if signals:
-            return 0  # 有信号
-        else:
-            return 1  # 无信号
+        if args.sell or (not args.buy and not args.sell):
+            with task_lock("auto_trader_v3_sell"):
+                guard = evaluate_runtime_mode("trade_sell")
+                for warning in guard.warnings:
+                    logger.warning("⚠️ %s", warning)
+                    record_guardrail_event("auto_trader_v3_sell", "warning", warning)
+                auto_execute = args.execute and not args.dry_run
+                signals = trader.run(auto_execute=auto_execute)
+                return 0 if signals else 1
+    except TaskLockedError as exc:
+        logger.warning("⚠️ %s", exc)
+        record_guardrail_event("auto_trader_v3", "warning", str(exc))
+        return 1
 
 
 if __name__ == "__main__":

@@ -78,6 +78,26 @@
 - `web/enhanced_cron_handler.py`
 - `scripts/scheduler.py`
 
+### 4.1 运行护栏与半自动托管增强
+
+已完成：
+
+- 新增运行护栏配置与状态层，统一管理任务锁、只读模式、数据新鲜度检查
+- 选股、研究、预测、交易、午盘学习已接入 guardrails
+- 午盘学习从“单次启发式调参”升级为“最小样本门槛 + 连续错误触发 + 小步调整 + 自动回滚”
+- 新增共享基本面访问层，优先尝试实时/缓存数据，失败时再回退到维护快照
+
+关键文件：
+
+- `config/runtime_guardrails.json`
+- `core/runtime_guardrails.py`
+- `core/fundamentals.py`
+- `scripts/midday_review.py`
+- `scripts/daily_stock_research.py`
+- `scripts/selector.py`
+- `scripts/ai_predictor.py`
+- `scripts/auto_trader_v3.py`
+
 ### 5. 监控面板改为真实数据
 
 已完成：
@@ -189,6 +209,9 @@ openclaw cron list --json
 - `docs/REFACTOR_PHASE6_2026-03-25.md`
 - `docs/REFACTOR_PHASE7_2026-03-25.md`
 - `docs/REFACTOR_PHASE8_2026-03-25.md`
+- `docs/REFACTOR_PHASE9_2026-03-26.md`
+- `docs/REFACTOR_PHASE10_2026-03-26.md`
+- `docs/REFACTOR_PHASE11_2026-03-26.md`
 
 ## 五、后续 OpenClaw 需要记住的判断
 
@@ -197,3 +220,4 @@ openclaw cron list --json
 3. 任何飞书 webhook / API key 都不应进入 git 跟踪文件。
 4. 用户主对话模型和股票 cron 模型是分开的，不能因为主会话用 Claude 就推断 cron 也在用 Claude。
 5. 当前仓库已经具备 OpenClaw 开箱部署能力，优先使用 `bash scripts/bootstrap_openclaw.sh`，不要再沿用旧 `start.sh` 时代的假设。
+6. 当前主链已经接近真闭环，但午盘学习和运行安全现在由 `runtime_guardrails` 统一托底；后续任何“自动调参/自动交易”改动都不应绕过这一层。

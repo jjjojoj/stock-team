@@ -4,14 +4,16 @@ AKShare 数据源适配器
 """
 
 import sys
-import os
+from pathlib import Path
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
 
-# 添加虚拟环境路径
-VENV_PATH = os.path.expanduser("~/.openclaw/workspace/china-stock-team/venv/lib/python3.14/site-packages")
-sys.path.insert(0, VENV_PATH)
+# 添加与当前解释器版本匹配的虚拟环境路径，避免跨版本二进制包污染
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+VENV_PATH = PROJECT_ROOT / "venv" / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+if VENV_PATH.is_dir():
+    sys.path.insert(0, str(VENV_PATH))
 
 from .base import (
     BaseDataAdapter,
