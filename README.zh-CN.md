@@ -17,6 +17,10 @@
 
 > 默认定位：自动化跑完整个模拟交易闭环，但真实资金决策仍保留人工监督。
 
+## 运行预览
+
+![China Stock Team Dashboard](docs/assets/dashboard-home.png)
+
 ## 快速入口
 
 - [GitHub 首页入口](README.md)

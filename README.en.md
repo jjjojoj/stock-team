@@ -17,6 +17,10 @@ This repository is not a single stock screener and not just an agent demo that s
 
 > Default posture: automate the simulation loop, keep human supervision for real-money decisions.
 
+## Preview
+
+![China Stock Team Dashboard](docs/assets/dashboard-home.png)
+
 ## Quick Links
 
 - [Landing README](README.md)

@@ -17,6 +17,10 @@ China Stock Team is designed as a long-running operating system rather than a si
 
 > Default posture: automate the daily simulation loop, keep human oversight for real-money decisions.
 
+## Preview
+
+![China Stock Team Dashboard](docs/assets/dashboard-home.png)
+
 ## Quick Links
 
 - [中文文档](README.zh-CN.md)
