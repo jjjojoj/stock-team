@@ -1,10 +1,37 @@
-# China Stock Team
+<div align="center">
 
-[简体中文](README.zh-CN.md) | [English](README.en.md)
+# China Stock Team
 
 An OpenClaw-managed research, prediction, and paper-trading system for the China A-share market.
 
+[简体中文](README.zh-CN.md) | [English](README.en.md)
+
+![Python](https://img.shields.io/badge/Python-3-blue)
+![OpenClaw](https://img.shields.io/badge/OpenClaw-cron%20managed-black)
+![SQLite](https://img.shields.io/badge/Data-SQLite-0f766e)
+![Mode](https://img.shields.io/badge/Trading-Paper-orange)
+
+</div>
+
 This repository is not a single stock screener and not just an agent demo that sends reports. It is a long-running operating system built around news tracking, prediction generation, rule validation, simulated execution, closed-loop review, and operator monitoring.
+
+> Default posture: automate the simulation loop, keep human supervision for real-money decisions.
+
+## Quick Links
+
+- [Landing README](README.md)
+- [中文 README](README.zh-CN.md)
+- [Operations Manual](README_v3.md)
+- [Deploy With OpenClaw](OPENCLAW_DEPLOY.md)
+- [OpenClaw Operator Checklist](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
+
+## Contents
+
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Configuration and Security](#configuration-and-security)
+- [Documentation](#documentation)
+- [Current Scope](#current-scope)
 
 ## Overview
 

@@ -1,10 +1,37 @@
-# China Stock Team
+<div align="center">
 
-[简体中文](README.zh-CN.md) | [English](README.en.md)
+# China Stock Team
 
 一个面向 A 股场景的 OpenClaw 托管式投研与模拟交易系统。
 
+[简体中文](README.zh-CN.md) | [English](README.en.md)
+
+![Python](https://img.shields.io/badge/Python-3-blue)
+![OpenClaw](https://img.shields.io/badge/OpenClaw-cron%20managed-black)
+![SQLite](https://img.shields.io/badge/Data-SQLite-0f766e)
+![Mode](https://img.shields.io/badge/Trading-Paper-orange)
+
+</div>
+
 它不是单一的选股脚本，也不是只会发日报的 Agent Demo，而是一套围绕“新闻跟踪、预测生成、规则验证、模拟交易、复盘学习、监控值守”构建的长期运行系统。
+
+> 默认定位：自动化跑完整个模拟交易闭环，但真实资金决策仍保留人工监督。
+
+## 快速入口
+
+- [GitHub 首页入口](README.md)
+- [English README](README.en.md)
+- [运行手册](README_v3.md)
+- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
+- [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
+
+## 目录
+
+- [项目概览](#项目概览)
+- [快速开始](#快速开始)
+- [配置与安全](#配置与安全)
+- [文档入口](#文档入口)
+- [当前定位](#当前定位)
 
 ## 项目概览
 
