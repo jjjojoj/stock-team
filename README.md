@@ -15,6 +15,7 @@
 
 它不是单一的选股脚本，也不是只会发日报的 Agent Demo，而是一套围绕“新闻跟踪、预测生成、规则验证、模拟交易、复盘学习、监控值守”构建的长期运行系统。
 
+> 当前页是仓库默认中文首页；如果你只想快速浏览项目亮点，请看 [中文速览版](README.zh-CN.md)。
 > 默认定位：自动化跑完整个模拟交易闭环，但真实资金决策仍保留人工监督。
 
 ## 运行预览
@@ -24,6 +25,7 @@
 ## 快速入口
 
 - [English README](README.en.md)
+- [中文速览版](README.zh-CN.md)
 - [运行手册](README_v3.md)
 - [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
 - [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
@@ -334,7 +336,7 @@ python3 scripts/feishu_notifier.py --test
 
 ### 运维与部署
 
-- [中文镜像 README](README.zh-CN.md)
+- [中文速览版](README.zh-CN.md)
 - [English README](README.en.md)
 - [运行手册](README_v3.md)
 - [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
