@@ -32,6 +32,8 @@ This repository is not a single stock screener and not just an agent demo that s
 ## Contents
 
 - [Features](#features)
+- [System Layers](#system-layers)
+- [Current Status](#current-status)
 - [Architecture](#architecture)
 - [Overview](#overview)
 - [Quick Start](#quick-start)
@@ -70,6 +72,31 @@ This repository is not a single stock screener and not just an agent demo that s
     <td width="50%">
       <strong>Operator Cockpit</strong><br/>
       Shows cron status, rules, trades, freshness checks, self-healing events, and autopilot readiness in one place.
+    </td>
+  </tr>
+</table>
+
+## System Layers
+
+![China Stock Team System Cover](docs/assets/system-cover.svg)
+
+## Current Status
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Current Status</strong><br/><br/>
+      ✅ The end-to-end simulation loop is running under OpenClaw cron<br/>
+      ✅ SQLite is the primary ledger for portfolio, predictions, rules, and paper execution<br/>
+      ✅ Paper execution supports orders, partial fills, slippage, fees, and reconciliation<br/>
+      ✅ The dashboard exposes cron health, guardrails, self-healing, and execution state<br/>
+      ⏳ Real broker connectivity remains intentionally disabled by default
+    </td>
+    <td width="50%">
+      <strong>Roadmap</strong><br/><br/>
+      <strong>Near term</strong>: richer paper-trading analytics and stronger operator signals<br/>
+      <strong>Mid term</strong>: better fallback orchestration and more resilient research inputs<br/>
+      <strong>Long term</strong>: guarded live-trading mode with explicit human approval gates
     </td>
   </tr>
 </table>

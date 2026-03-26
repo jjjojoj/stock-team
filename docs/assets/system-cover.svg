@@ -1,0 +1,63 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1200" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="panel2" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+    <linearGradient id="panel3" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="panel4" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#C2410C"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1280" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#020617" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" rx="32" fill="url(#bg)"/>
+  <circle cx="1120" cy="120" r="220" fill="#2563EB" fill-opacity="0.12"/>
+  <circle cx="180" cy="620" r="180" fill="#14B8A6" fill-opacity="0.08"/>
+
+  <text x="80" y="96" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="20" opacity="0.8">China Stock Team</text>
+  <text x="80" y="148" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700">Layered Operating System for</text>
+  <text x="80" y="204" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700">A-share Research and Paper Trading</text>
+  <text x="80" y="252" fill="#CBD5E1" font-family="Arial, Helvetica, sans-serif" font-size="24">OpenClaw orchestration · SQLite ledger · paper execution · closed-loop learning</text>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="314" width="520" height="120" rx="24" fill="url(#panel)"/>
+    <text x="114" y="360" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18" opacity="0.9">LAYER 1</text>
+    <text x="114" y="398" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Research and Prediction</text>
+    <text x="114" y="428" fill="#DBEAFE" font-family="Arial, Helvetica, sans-serif" font-size="18">Daily web search, news trigger, AI predictor, stock selector</text>
+
+    <rect x="680" y="314" width="520" height="120" rx="24" fill="url(#panel2)"/>
+    <text x="714" y="360" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18" opacity="0.9">LAYER 2</text>
+    <text x="714" y="398" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Execution and Ledger</text>
+    <text x="714" y="428" fill="#CCFBF1" font-family="Arial, Helvetica, sans-serif" font-size="18">Paper orders, partial fills, slippage, fees, SQLite account state</text>
+
+    <rect x="80" y="474" width="520" height="120" rx="24" fill="url(#panel3)"/>
+    <text x="114" y="520" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18" opacity="0.9">LAYER 3</text>
+    <text x="114" y="558" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Learning and Governance</text>
+    <text x="114" y="588" fill="#F3E8FF" font-family="Arial, Helvetica, sans-serif" font-size="18">Closed-loop review, rule validation, promotion, rejection, memory</text>
+
+    <rect x="680" y="474" width="520" height="120" rx="24" fill="url(#panel4)"/>
+    <text x="714" y="520" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18" opacity="0.9">LAYER 4</text>
+    <text x="714" y="558" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Operator and Guardrails</text>
+    <text x="714" y="588" fill="#FFEDD5" font-family="Arial, Helvetica, sans-serif" font-size="18">Dashboard, auto read-only, retries, fallback tracking, OpenClaw cron</text>
+  </g>
+
+  <path d="M600 374H680" stroke="#93C5FD" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 10"/>
+  <path d="M600 534H680" stroke="#C4B5FD" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 10"/>
+  <path d="M340 434V474" stroke="#8B5CF6" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 10"/>
+  <path d="M940 434V474" stroke="#F59E0B" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 10"/>
+</svg>

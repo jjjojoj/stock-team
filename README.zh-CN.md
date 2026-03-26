@@ -32,6 +32,8 @@
 ## 目录
 
 - [核心模块](#核心模块)
+- [系统分层封面图](#系统分层封面图)
+- [当前状态](#当前状态)
 - [系统架构](#系统架构)
 - [项目概览](#项目概览)
 - [快速开始](#快速开始)
@@ -70,6 +72,31 @@
     <td width="50%">
       <strong>值守驾驶舱</strong><br/>
       负责统一展示 cron、规则、交易、数据新鲜度、自愈事件和托管状态。
+    </td>
+  </tr>
+</table>
+
+## 系统分层封面图
+
+![China Stock Team System Cover](docs/assets/system-cover.svg)
+
+## 当前状态
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Current Status</strong><br/><br/>
+      ✅ OpenClaw cron 下的端到端模拟闭环已经跑通<br/>
+      ✅ SQLite 已成为组合、预测、规则和模拟执行的主账本<br/>
+      ✅ 模拟执行已支持挂单、部分成交、滑点、手续费与补记<br/>
+      ✅ Dashboard 已展示 cron 健康、自愈状态、护栏与执行状态<br/>
+      ⏳ 真实券商接入仍保持默认关闭
+    </td>
+    <td width="50%">
+      <strong>Roadmap</strong><br/><br/>
+      <strong>近期</strong>：补强模拟交易分析和操作员信号提示<br/>
+      <strong>中期</strong>：增强备用源调度和研究输入稳定性<br/>
+      <strong>长期</strong>：在明确人工审批门槛下开放受控实盘模式
     </td>
   </tr>
 </table>

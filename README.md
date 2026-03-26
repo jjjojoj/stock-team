@@ -32,6 +32,8 @@ China Stock Team is designed as a long-running operating system rather than a si
 ## Contents
 
 - [Features](#features)
+- [System Layers](#system-layers)
+- [Current Status](#current-status)
 - [Architecture](#architecture)
 - [Quick Facts](#quick-facts)
 - [Quick Start](#quick-start)
@@ -69,6 +71,31 @@ China Stock Team is designed as a long-running operating system rather than a si
     <td width="50%">
       <strong>Operator Dashboard</strong><br/>
       A single cockpit for cron status, rules, trades, freshness checks, self-healing events, and autopilot state.
+    </td>
+  </tr>
+</table>
+
+## System Layers
+
+![China Stock Team System Cover](docs/assets/system-cover.svg)
+
+## Current Status
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Current Status</strong><br/><br/>
+      ✅ End-to-end simulation loop is running under OpenClaw cron<br/>
+      ✅ SQLite is the primary ledger for portfolio, predictions, rules, and paper execution<br/>
+      ✅ Paper execution now supports orders, partial fills, slippage, fees, and reconciliation<br/>
+      ✅ Dashboard exposes cron health, guardrails, self-healing, and execution state<br/>
+      ⏳ Real broker connectivity is intentionally not enabled by default
+    </td>
+    <td width="50%">
+      <strong>Roadmap</strong><br/><br/>
+      <strong>Near term</strong>: richer paper-trading analytics and tighter operator signals<br/>
+      <strong>Mid term</strong>: stronger fallback orchestration and more resilient research data inputs<br/>
+      <strong>Long term</strong>: guarded live-trading mode with explicit human approval gates
     </td>
   </tr>
 </table>
