@@ -1,72 +1,215 @@
 # China Stock Team
 
-面向 A 股场景的单人投研交易系统。项目基于 OpenClaw cron 调度，围绕“新闻跟踪、预测生成、交易执行、规则验证、复盘学习、监控面板”构建了一条可持续运行的闭环。
+一个面向 A 股场景的 OpenClaw 托管式投研与模拟交易系统。
 
-## Project Status
+它不是单一的选股脚本，也不是只会发日报的 Agent Demo，而是一套围绕“新闻跟踪、预测生成、规则验证、模拟交易、复盘学习、监控值守”构建的长期运行系统。
 
-| 项目项 | 说明 |
+## Overview
+
+| Item | Value |
 | --- | --- |
-| 当前版本 | `v3.2` |
-| 调度方式 | `OpenClaw cron` |
-| 通知方式 | 脚本自发飞书 webhook |
-| 主数据源 | `database/stock_team.db` |
-| 监控面板 | `web/dashboard_v3.py`，默认 `8082` |
-| 当前分支状态 | `main` 已完成 webhook 收口、面板清理、README 重构 |
+| Primary use case | A 股投研与模拟交易 |
+| Orchestration | `OpenClaw cron` |
+| Source of truth | `database/stock_team.db` |
+| Execution mode | Paper trading by default |
+| Notifications | Feishu webhook, script-owned delivery |
+| Dashboard | `web/dashboard_v3.py` on `8082` |
+| Runtime model | OpenClaw main chat + cron-managed workflow |
 
-## What This Project Does
+## Why This Project Exists
 
-- 开盘前抓取市场与个股新闻，生成当日预测与持仓汇报
-- 盘中根据新闻和风险条件触发预测更新与风险提醒
-- 收盘后执行动态选股、到期预测复盘和规则验证
-- 晚间从书籍与历史经验中提炼新规则，补充验证池
-- 通过统一看板展示 cron 任务、规则状态、观察池、新闻摘要和账户概况
+大多数“股票 AI 项目”只做到其中一段，比如选股、消息总结或回测展示。China Stock Team 的目标不是做一个漂亮的单点能力，而是把一条完整的日常链路真正跑起来：
 
-## System Overview
+- 开盘前收集市场信息并生成预测
+- 盘中跟踪新闻、事件和风险变化
+- 收盘后执行动态选股、到期复盘和规则验证
+- 夜间把新知识和经验沉淀进规则系统
+- 用统一面板持续监控 cron、账本、规则和运行护栏
 
-### 业务链路
+## Core Capabilities
 
-1. `daily_web_search.py` 获取市场新闻与热点线索
-2. `ai_predictor.py` 生成持仓和观察池预测
-3. `news_trigger.py` 在盘中根据新事件更新判断
-4. `auto_trader_v3.py` / 风控脚本执行交易与预警逻辑
-5. `daily_review_closed_loop.py` 复盘到期预测
-6. `rule_validator.py` 验证、调权、晋升或淘汰规则
-7. `daily_book_learning.py` 将外部知识沉淀到规则系统
-8. `dashboard_v3.py` 汇总运行态信息并对外展示
+- `News-driven research`: 跟踪市场新闻、观察池新闻和持仓相关新闻
+- `Prediction pipeline`: 生成方向判断、置信度和风险说明，并进入可复盘状态
+- `Rule engine`: 维护规则库、验证池、晋升和淘汰流程
+- `Paper execution`: 模拟下单、成交、部分成交、手续费、滑点和剩余挂单
+- `Closed-loop review`: 到期预测验证、准确率更新、规则调权和经验沉淀
+- `Operator dashboard`: 展示 cron 状态、风险、规则、观察池、交易和托管状态
+- `Runtime guardrails`: 自动只读、任务锁、自愈补跑、备用源切换、链路收口
 
-### 核心原则
+## System Design
 
-- `OpenClaw cron` 是唯一调度控制面
-- SQLite 是主真源，JSON 保留为兼容镜像
-- 飞书通知统一走公共发送器，卡片优先、失败回退文本
-- 面板展示真实运行状态，而不是手工维护的静态数据
+### Operating Principles
+
+- `OpenClaw cron` is the only scheduling control plane
+- SQLite is the primary system of record
+- JSON exists as a compatibility layer, not as the canonical source
+- Feishu messages are sent by the business scripts themselves
+- The dashboard reflects live system state, not hand-maintained status
+- Trading stays in simulation mode unless you explicitly add a real broker path
+
+### End-to-End Flow
+
+```mermaid
+flowchart LR
+    A["Market News & Signals"] --> B["Prediction Generation"]
+    B --> C["Intraday Event Tracking"]
+    C --> D["Paper Execution Engine"]
+    D --> E["Portfolio & Trade Ledger"]
+    B --> F["Expiry Review"]
+    F --> G["Rule Validation & Promotion"]
+    G --> H["Learning Memory"]
+    E --> I["Dashboard & Operator Checks"]
+    G --> I
+    H --> I
+```
 
 ## Quick Start
 
-### 1. 常用命令
+### 1. Clone and bootstrap
 
 ```bash
-cd ~/.openclaw/workspace/china-stock-team
+git clone https://github.com/jjjojoj/stock-team.git
+cd stock-team
+bash scripts/bootstrap_openclaw.sh
+```
 
-# 动态选股
-python3 scripts/selector.py top 5
+### 2. Start the dashboard
 
-# 生成早盘预测
-python3 scripts/ai_predictor.py generate
-
-# 查看规则验证报告
-python3 scripts/rule_validator.py report
-
-# 启动监控面板
+```bash
 python3 web/dashboard_v3.py
 ```
 
-### 2. 面板地址
+Open the dashboard at:
 
 - `http://127.0.0.1:8082`
 - `http://127.0.0.1:8082/cron`
 
-### 3. 测试
+### 3. Run core tasks manually
+
+```bash
+# Dynamic stock selection
+python3 scripts/selector.py top 5
+
+# Morning prediction generation
+python3 scripts/ai_predictor.py generate
+
+# Rule validation report
+python3 scripts/rule_validator.py report
+
+# Expiry review
+python3 scripts/daily_review_closed_loop.py report
+```
+
+## OpenClaw Deployment
+
+If you want another OpenClaw user to deploy this project end-to-end, use the turnkey prompt in [OPENCLAW_DEPLOY.md](OPENCLAW_DEPLOY.md).
+
+The shortest usable instruction is:
+
+```text
+请把 jjjojoj/stock-team 部署到本地 ~/.openclaw/workspace/china-stock-team：如果目录不存在就 clone，进入项目后执行 bash scripts/bootstrap_openclaw.sh，不要把任何 webhook 或 API key 写进 git 跟踪文件；如需飞书通知就引导我把 webhook 写到 config/feishu_config.local.json 或 FEISHU_WEBHOOK_URL，最后启动 python3 web/dashboard_v3.py 并验证 http://127.0.0.1:8082 可访问。
+```
+
+## What Runs in Production-Like Mode
+
+The current mainline is designed for long-running simulation, not direct brokerage execution.
+
+Enabled by default:
+
+- research and news monitoring
+- prediction generation and review
+- rule validation and learning
+- paper-trading execution ledger
+- dashboard-based operational monitoring
+- Feishu notification pipeline
+
+Not enabled by default:
+
+- real broker connectivity
+- live order routing
+- unattended real-money execution
+
+## Configuration and Security
+
+### Feishu notifications
+
+Webhook values must stay local.
+
+Supported configuration order:
+
+1. `FEISHU_WEBHOOK_URL`
+2. `config/feishu_config.local.json`
+3. tracked defaults in `config/feishu_config.json`
+
+Quick setup:
+
+```bash
+cp config/feishu_config.local.example.json config/feishu_config.local.json
+```
+
+Then put your webhook in the local file or export:
+
+```bash
+export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook"
+```
+
+Validate delivery:
+
+```bash
+python3 scripts/feishu_notifier.py --test
+```
+
+### Runtime safety
+
+The system includes runtime protection via:
+
+- [config/runtime_guardrails.json](config/runtime_guardrails.json)
+- [core/runtime_guardrails.py](core/runtime_guardrails.py)
+
+These guardrails control:
+
+- auto read-only mode
+- task locks
+- upstream dependency blocking
+- retry and recovery tracking
+- datasource fallback recording
+
+## Project Structure
+
+```text
+china-stock-team/
+├── adapters/        # market/search data adapters
+├── agents/          # team roles and character files
+├── config/          # tracked config and local templates
+├── core/            # shared storage, execution, guardrails, fundamentals
+├── data/            # runtime outputs and caches
+├── database/        # SQLite databases
+├── docs/            # architecture, operator docs, design notes
+├── learning/        # rules, validation pool, knowledge artifacts
+├── research/        # research outputs and references
+├── scripts/         # main business workflows
+├── tests/           # regression and unit tests
+└── web/             # dashboard and cron status endpoints
+```
+
+## Key Entry Points
+
+| Path | Purpose |
+| --- | --- |
+| `scripts/daily_web_search.py` | market and watchlist research input |
+| `scripts/ai_predictor.py` | prediction generation |
+| `scripts/news_trigger.py` | intraday event-triggered updates |
+| `scripts/selector.py` | dynamic stock selection |
+| `scripts/auto_trader_v3.py` | paper execution and sell/buy logic |
+| `scripts/daily_review_closed_loop.py` | expiry review and feedback loop |
+| `scripts/rule_validator.py` | rule validation and promotion |
+| `core/simulated_execution.py` | realistic paper-trading order engine |
+| `core/runtime_guardrails.py` | autopilot safety and self-healing |
+| `web/dashboard_v3.py` | operations dashboard |
+
+## Testing
+
+Core regression command:
 
 ```bash
 python3 -m unittest \
@@ -78,94 +221,53 @@ python3 -m unittest \
   tests.test_dashboard_v3
 ```
 
-## Deploy With OpenClaw
-
-项目已经提供给 OpenClaw 使用的部署入口：
-
-- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
-- `bash scripts/bootstrap_openclaw.sh`
-- `requirements-openclaw.txt`
-
-如果你希望别人直接把仓库交给 OpenClaw 开箱即用，最短可用提示词是：
-
-```text
-请把 jjjojoj/stock-team 部署到本地 ~/.openclaw/workspace/china-stock-team：如果目录不存在就 clone，进入项目后执行 bash scripts/bootstrap_openclaw.sh，不要把任何 webhook 或 API key 写进 git 跟踪文件；如需飞书通知就引导我把 webhook 写到 config/feishu_config.local.json 或 FEISHU_WEBHOOK_URL，最后启动 python3 web/dashboard_v3.py 并验证 http://127.0.0.1:8082 可访问。
-```
-
-## Repository Structure
-
-```text
-china-stock-team/
-├── adapters/        # 数据源适配层
-├── agents/          # 团队角色与行为定义
-├── config/          # 配置文件与本地模板
-├── core/            # 统一存储与预测状态工具
-├── data/            # 运行时输出与中间数据
-├── database/        # SQLite 数据库
-├── docs/            # 架构、重构与设计文档
-├── learning/        # 规则、验证池与学习资产
-├── research/        # 个股研究资料
-├── scripts/         # 核心业务脚本
-├── tests/           # 单元测试
-└── web/             # 监控面板与 cron 状态接口
-```
-
-## Key Components
-
-| 组件 | 作用 |
-| --- | --- |
-| `scripts/ai_predictor.py` | 预测生成与早盘摘要 |
-| `scripts/news_trigger.py` | 盘中新闻触发器 |
-| `scripts/selector.py` | 动态标准选股 |
-| `scripts/auto_trader_v3.py` | 自动交易逻辑 |
-| `scripts/daily_review_closed_loop.py` | 到期预测复盘 |
-| `scripts/rule_validator.py` | 规则验证与晋升/淘汰 |
-| `scripts/daily_book_learning.py` | 书籍知识学习与规则沉淀 |
-| `scripts/feishu_notifier.py` | 飞书发送器 |
-| `web/dashboard_v3.py` | 监控面板 |
-
-## Feishu Notification Setup
-
-项目默认不在仓库中保存 webhook。启用飞书通知时，请使用以下任一方式：
-
-1. 在飞书群中创建“自定义机器人”并复制 webhook
-2. 设置环境变量 `FEISHU_WEBHOOK_URL`
-3. 或复制 `config/feishu_config.local.example.json` 为 `config/feishu_config.local.json`
-4. 将 webhook 写入本地私有配置，不要提交到仓库
-5. 使用 `python3 scripts/feishu_notifier.py --test` 做连通性验证
-
-环境变量示例：
+Execution and guardrail coverage:
 
 ```bash
-export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook"
+python3 -m unittest \
+  tests.test_simulated_execution \
+  tests.test_runtime_guardrails \
+  tests.test_real_data_paths
 ```
 
-本地配置示例：
+## Documentation
 
-```bash
-cp config/feishu_config.local.example.json config/feishu_config.local.json
-```
+### Operator and deployment
 
-## Documentation Index
+- [Operations Manual](README_v3.md)
+- [Deploy With OpenClaw](OPENCLAW_DEPLOY.md)
+- [OpenClaw Operator Checklist](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
 
-### 核心文档
+### Architecture and standards
 
-- [运行手册](README_v3.md)
-- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
-- [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
-- [数据标准](DATA_STANDARD.md)
-- [实盘环境说明](REAL_TRADING_ENV.md)
-- [团队章程](TEAM_CHARTER.md)
-- [版本记录](VERSION.md)
+- [Data Standard](DATA_STANDARD.md)
+- [Architecture Overview](docs/architecture_v3.md)
+- [Cron Task Design](docs/CRON_TASKS.md)
+- [Complete Loop Overview](docs/COMPLETE_LOOP_v3.md)
+- [Rule System Explained](docs/RULE_SYSTEM_EXPLAINED.md)
 
-### 架构与设计
+### Governance and environment
 
-- [架构总览](docs/architecture_v3.md)
-- [Cron 任务设计](docs/CRON_TASKS.md)
-- [规则系统说明](docs/RULE_SYSTEM_EXPLAINED.md)
-- [完整闭环说明](docs/COMPLETE_LOOP_v3.md)
+- [Team Charter](TEAM_CHARTER.md)
+- [Real Trading Environment Notes](REAL_TRADING_ENV.md)
+- [Version Log](VERSION.md)
+
+## Current Scope
+
+This repository is already suitable for:
+
+- long-running simulation
+- rule-learning validation
+- OpenClaw-managed daily operation
+- operator-in-the-loop supervision
+
+It is not yet positioned as:
+
+- a retail one-click brokerage bot
+- a guaranteed profitable strategy package
+- a fully autonomous real-money trading system
 
 ## Notes
 
-- 当前仓库中的运行态数据、日志、学习记录可能会持续变化，不应直接作为代码版本状态判断依据
-- 如果需要彻底清理历史里曾出现过的敏感 webhook，需要额外执行 git 历史重写
+- Runtime data, logs and learning artifacts change continuously and should not be treated as code state
+- If you need to purge previously exposed secrets from git history, that requires a separate history rewrite
