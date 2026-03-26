@@ -2,7 +2,7 @@
 
 # China Stock Team
 
-一个面向 A 股场景的 OpenClaw 托管式投研与模拟交易系统。
+**让 AI 替你盯盘、选股、复盘——24小时不休息**
 
 [简体中文](README.zh-CN.md) | [English](README.en.md)
 
@@ -13,418 +13,94 @@
 
 </div>
 
-它不是单一的选股脚本，也不是只会发日报的 Agent Demo，而是一套围绕“新闻跟踪、预测生成、规则验证、模拟交易、复盘学习、监控值守”构建的长期运行系统。
+---
 
-> 默认定位：自动化跑完整个模拟交易闭环，但真实资金决策仍保留人工监督。
+大多数「AI 炒股项目」只做到链路中的一段——选股脚本、新闻摘要或漂亮的回测图表。
 
-## 运行预览
+**China Stock Team 不一样**：它是一套能长期 24/7 自动运行的完整闭环系统，从早盘预测到收盘复盘，从规则学习到风险预警，全部自动完成。你只需要在手机上收飞书通知，决定要不要真的买。
 
-![China Stock Team Dashboard](docs/assets/dashboard-home.png)
-
-## 快速入口
-
-- [GitHub 首页入口](README.md)
-- [English README](README.en.md)
-- [运行手册](README_v3.md)
-- [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
-- [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
-
-## 目录
-
-- [核心模块](#核心模块)
-- [系统分层封面图](#系统分层封面图)
-- [当前状态](#当前状态)
-- [系统架构](#系统架构)
-- [项目概览](#项目概览)
-- [快速开始](#快速开始)
-- [配置与安全](#配置与安全)
-- [文档入口](#文档入口)
-- [当前定位](#当前定位)
-
-## 核心模块
-
-<table>
-  <tr>
-    <td width="50%">
-      <strong>研究输入层</strong><br/>
-      负责市场新闻抓取、观察池跟踪和事件驱动研究更新，构成每日投研输入。
-    </td>
-    <td width="50%">
-      <strong>预测与复盘层</strong><br/>
-      负责结构化预测生成、到期验证、准确率统计和反馈闭环。
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <strong>规则学习层</strong><br/>
-      负责规则库、验证池、晋升、淘汰和置信度更新，持续沉淀有效经验。
-    </td>
-    <td width="50%">
-      <strong>模拟执行层</strong><br/>
-      负责模拟下单、部分成交、滑点、手续费和订单补记，统一回写主账本。
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <strong>运行护栏层</strong><br/>
-      负责自动只读、任务锁、自愈补跑、备用源切换记录和异常链路收口。
-    </td>
-    <td width="50%">
-      <strong>值守驾驶舱</strong><br/>
-      负责统一展示 cron、规则、交易、数据新鲜度、自愈事件和托管状态。
-    </td>
-  </tr>
-</table>
-
-## 系统分层封面图
-
-![China Stock Team System Cover](docs/assets/system-cover.svg)
-
-## 当前状态
-
-<table>
-  <tr>
-    <td width="50%">
-      <strong>Current Status</strong><br/><br/>
-      ✅ OpenClaw cron 下的端到端模拟闭环已经跑通<br/>
-      ✅ SQLite 已成为组合、预测、规则和模拟执行的主账本<br/>
-      ✅ 模拟执行已支持挂单、部分成交、滑点、手续费与补记<br/>
-      ✅ Dashboard 已展示 cron 健康、自愈状态、护栏与执行状态<br/>
-      ⏳ 真实券商接入仍保持默认关闭
-    </td>
-    <td width="50%">
-      <strong>Roadmap</strong><br/><br/>
-      <strong>近期</strong>：补强模拟交易分析和操作员信号提示<br/>
-      <strong>中期</strong>：增强备用源调度和研究输入稳定性<br/>
-      <strong>长期</strong>：在明确人工审批门槛下开放受控实盘模式
-    </td>
-  </tr>
-</table>
-
-## 系统架构
-
-```mermaid
-flowchart TB
-    subgraph CP["控制面"]
-        OC["OpenClaw Cron"]
-        DB["Dashboard / 操作员"]
-    end
-
-    subgraph RP["研究与预测层"]
-        WS["Daily Web Search"]
-        NT["News Trigger"]
-        AP["AI Predictor"]
-        SL["Stock Selector"]
-    end
-
-    subgraph EX["执行与账本层"]
-        PE["Paper Execution Engine"]
-        SQ["SQLite Ledger"]
-        FS["Feishu Notifications"]
-    end
-
-    subgraph LG["学习与治理层"]
-        CR["Closed-loop Review"]
-        RV["Rule Validator"]
-        RG["Runtime Guardrails"]
-    end
-
-    OC --> WS
-    OC --> AP
-    OC --> NT
-    OC --> SL
-    OC --> PE
-    OC --> CR
-    OC --> RV
-
-    WS --> AP
-    NT --> AP
-    AP --> PE
-    SL --> PE
-
-    PE --> SQ
-    AP --> SQ
-    CR --> SQ
-    RV --> SQ
-
-    SQ --> CR
-    CR --> RV
-    RV --> AP
-    RG --> AP
-    RG --> PE
-
-    PE --> FS
-    CR --> FS
-    RV --> FS
-    SQ --> DB
-    RG --> DB
-    OC --> DB
+```
+开盘前  →  新闻扫描 + AI 预测生成
+盘中    →  事件跟踪 + 风险监控
+收盘后  →  动态选股 + 闭环复盘
+夜间    →  规则验证 + 经验沉淀
+全天候  →  飞书推送 + Dashboard 监控
 ```
 
-## 项目概览
+---
 
-| 项目 | 说明 |
-| --- | --- |
-| 主要用途 | A 股投研与模拟交易 |
-| 调度方式 | `OpenClaw cron` |
-| 主真源 | `database/stock_team.db` |
-| 执行模式 | 默认模拟交易 |
-| 通知方式 | 飞书 webhook，由业务脚本自行发送 |
-| 面板入口 | `web/dashboard_v3.py`，默认端口 `8082` |
-| 运行形态 | OpenClaw 主对话 + cron 管理工作流 |
+## 核心特性
 
-## 为什么有这个项目
+- **新闻驱动研究** — 跟踪市场、观察池与持仓相关资讯，识别催化剂
+- **AI 预测流水线** — 生成方向判断、置信度和风险说明，可复盘可验证
+- **规则引擎** — 从历史交易中自动提炼规则，持续迭代，有晋升有淘汰
+- **模拟交易执行** — 支持模拟下单、成交、部分成交、手续费、滑点
+- **闭环复盘** — 到期预测自动验证、准确率更新、规则调权
+- **运维驾驶舱** — 实时展示 cron、风险、规则、观察池、交易状态
+- **运行护栏** — 任务锁、只读模式、自愈补跑、数据新鲜度检查
 
-很多“股票 AI 项目”只做到链路中的一段，比如选股、新闻总结或回测展示。China Stock Team 的目标不是做一个单点能力，而是把一条能长期跑起来的完整链路真正落到系统里：
-
-- 开盘前收集市场信息并生成预测
-- 盘中跟踪新闻、事件和风险变化
-- 收盘后执行动态选股、到期复盘和规则验证
-- 夜间把知识和经验沉淀进规则系统
-- 用统一面板持续监控 cron、账本、规则和运行护栏
-
-## 核心能力
-
-- `新闻驱动研究`：跟踪市场、观察池与持仓相关资讯
-- `预测流水线`：生成方向判断、置信度和风险说明，并进入可复盘状态
-- `规则引擎`：维护规则库、验证池、晋升与淘汰流程
-- `模拟交易执行`：支持模拟下单、成交、部分成交、手续费、滑点和剩余挂单
-- `闭环复盘`：到期预测验证、准确率更新、规则调权和经验沉淀
-- `运维驾驶舱`：展示 cron、风险、规则、观察池、交易和托管状态
-- `运行护栏`：自动只读、任务锁、自愈补跑、备用源切换、链路收口
-
-## 系统设计
-
-### 运行原则
-
-- `OpenClaw cron` 是唯一调度控制面
-- SQLite 是系统主账本
-- JSON 仅作为兼容层，不再是唯一真源
-- 飞书消息由业务脚本自己发送
-- Dashboard 展示的是实时系统状态，而不是手工维护的静态状态
-- 在未接入真实券商前，交易默认保持在模拟模式
-
-### 端到端链路
-
-```mermaid
-flowchart LR
-    A["市场新闻与信号"] --> B["预测生成"]
-    B --> C["盘中事件跟踪"]
-    C --> D["模拟交易执行引擎"]
-    D --> E["组合与交易账本"]
-    B --> F["到期复盘"]
-    F --> G["规则验证与晋升"]
-    G --> H["学习记忆"]
-    E --> I["Dashboard 与操作员检查"]
-    G --> I
-    H --> I
-```
+---
 
 ## 快速开始
-
-### 1. 克隆并初始化
 
 ```bash
 git clone https://github.com/jjjojoj/stock-team.git
 cd stock-team
 bash scripts/bootstrap_openclaw.sh
-```
-
-### 2. 启动监控面板
-
-```bash
 python3 web/dashboard_v3.py
 ```
 
-访问地址：
+打开浏览器：
+- 主面板：`http://127.0.0.1:8082`
+- Cron 监控：`http://127.0.0.1:8082/cron`
 
-- `http://127.0.0.1:8082`
-- `http://127.0.0.1:8082/cron`
+> 需要预先安装 [OpenClaw](https://github.com/openclaw/openclaw) 并配置飞书 webhook。
 
-### 3. 手动运行核心任务
+---
 
-```bash
-# 动态选股
-python3 scripts/selector.py top 5
+## 系统概览
 
-# 生成早盘预测
-python3 scripts/ai_predictor.py generate
+| 项目 | 说明 |
+|---|---|
+| 调度方式 | OpenClaw cron（唯一控制面） |
+| 数据主真源 | database/stock_team.db（SQLite） |
+| 执行模式 | 默认模拟交易，支持切换真实模式 |
+| 通知方式 | 飞书 webhook，卡片式推送 |
+| 面板入口 | web/dashboard_v3.py，端口 8082 |
 
-# 查看规则验证报告
-python3 scripts/rule_validator.py report
+---
 
-# 执行到期复盘
-python3 scripts/daily_review_closed_loop.py report
-```
+## 核心模块
 
-## 用 OpenClaw 部署
+| 模块 | 文件 | 说明 |
+|---|---|---|
+| 存储层 | core/storage.py | 统一账本读写 |
+| AI 预测 | scripts/ai_predictor.py | 方向预测生成 |
+| 动态选股 | scripts/selector.py | 综合评分选股 |
+| 闭环复盘 | scripts/daily_review_closed_loop.py | 收盘复盘 |
+| 规则验证 | scripts/rule_validator.py | 规则迭代 |
+| 飞书通知 | scripts/feishu_notifier.py | 推送服务 |
+| 监控面板 | web/dashboard_v3.py | 实时 Dashboard |
 
-如果你要把这个项目交给另一个 OpenClaw 用户完整部署，直接使用 [OPENCLAW_DEPLOY.md](OPENCLAW_DEPLOY.md) 里的开箱即用提示词。
+---
 
-最短可用的一句话是：
+## 文档
 
-```text
-请把 jjjojoj/stock-team 部署到本地 ~/.openclaw/workspace/china-stock-team：如果目录不存在就 clone，进入项目后执行 bash scripts/bootstrap_openclaw.sh，不要把任何 webhook 或 API key 写进 git 跟踪文件；如需飞书通知就引导我把 webhook 写到 config/feishu_config.local.json 或 FEISHU_WEBHOOK_URL，最后启动 python3 web/dashboard_v3.py 并验证 http://127.0.0.1:8082 可访问。
-```
-
-## 当前默认运行范围
-
-当前主线面向的是长期运行的模拟托管，不是直接接券商下单。
-
-默认启用：
-
-- 研究与新闻监控
-- 预测生成与复盘
-- 规则验证与学习
-- 模拟交易执行账本
-- 基于 Dashboard 的运维监控
-- 飞书通知链路
-
-默认不启用：
-
-- 实盘券商连接
-- 真实订单路由
-- 无人值守的真实资金执行
-
-## 配置与安全
-
-### 飞书通知
-
-Webhook 只应保存在本地，不应进入仓库。
-
-配置优先级：
-
-1. `FEISHU_WEBHOOK_URL`
-2. `config/feishu_config.local.json`
-3. `config/feishu_config.json` 中的共享默认项
-
-快速配置：
-
-```bash
-cp config/feishu_config.local.example.json config/feishu_config.local.json
-```
-
-然后把 webhook 写入本地文件，或直接设置环境变量：
-
-```bash
-export FEISHU_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-local-webhook"
-```
-
-测试连通性：
-
-```bash
-python3 scripts/feishu_notifier.py --test
-```
-
-### 运行护栏
-
-系统的运行安全由下面两部分提供：
-
-- [config/runtime_guardrails.json](config/runtime_guardrails.json)
-- [core/runtime_guardrails.py](core/runtime_guardrails.py)
-
-它们负责：
-
-- 自动只读
-- 任务锁
-- 上游依赖阻断
-- 补跑与恢复跟踪
-- 备用数据源切换记录
-
-## 项目结构
-
-```text
-china-stock-team/
-├── adapters/        # 市场/搜索数据适配层
-├── agents/          # 团队角色与行为定义
-├── config/          # 跟踪配置与本地模板
-├── core/            # 存储、执行、护栏、基本面共享层
-├── data/            # 运行时输出与缓存
-├── database/        # SQLite 数据库
-├── docs/            # 架构、值守、设计文档
-├── learning/        # 规则、验证池与学习资产
-├── research/        # 研究输出与参考资料
-├── scripts/         # 核心业务脚本
-├── tests/           # 回归与单元测试
-└── web/             # Dashboard 与 cron 状态接口
-```
-
-## 关键入口
-
-| 路径 | 作用 |
-| --- | --- |
-| `scripts/daily_web_search.py` | 市场与观察池研究输入 |
-| `scripts/ai_predictor.py` | 预测生成 |
-| `scripts/news_trigger.py` | 盘中事件触发更新 |
-| `scripts/selector.py` | 动态标准选股 |
-| `scripts/auto_trader_v3.py` | 模拟交易执行与买卖逻辑 |
-| `scripts/daily_review_closed_loop.py` | 到期复盘与反馈闭环 |
-| `scripts/rule_validator.py` | 规则验证与晋升 |
-| `core/simulated_execution.py` | 更真实的模拟交易引擎 |
-| `core/runtime_guardrails.py` | 托管安全与自愈逻辑 |
-| `web/dashboard_v3.py` | 运维监控面板 |
-
-## 测试
-
-核心回归命令：
-
-```bash
-python3 -m unittest \
-  tests.test_feishu_notifier \
-  tests.test_enhanced_cron_handler \
-  tests.test_prediction_utils \
-  tests.test_storage_sync \
-  tests.test_rule_storage \
-  tests.test_dashboard_v3
-```
-
-执行层与护栏覆盖：
-
-```bash
-python3 -m unittest \
-  tests.test_simulated_execution \
-  tests.test_runtime_guardrails \
-  tests.test_real_data_paths
-```
-
-## 文档入口
-
-### 运维与部署
-
+- [English README](README.en.md)
 - [运行手册](README_v3.md)
 - [OpenClaw 部署说明](OPENCLAW_DEPLOY.md)
-- [OpenClaw 操作员巡检清单](docs/OPENCLAW_OPERATOR_CHECKLIST_2026-03-26.md)
+- [数据统一标准](DATA_STANDARD.md)
 
-### 架构与标准
+---
 
-- [数据标准](DATA_STANDARD.md)
-- [架构总览](docs/architecture_v3.md)
-- [Cron 任务设计](docs/CRON_TASKS.md)
-- [完整闭环说明](docs/COMPLETE_LOOP_v3.md)
-- [规则系统说明](docs/RULE_SYSTEM_EXPLAINED.md)
+## 免责声明
 
-### 治理与环境
+本项目仅用于技术研究和模拟交易学习，不构成任何投资建议。股市有风险，入市需谨慎。
 
-- [团队章程](TEAM_CHARTER.md)
-- [实盘环境说明](REAL_TRADING_ENV.md)
-- [版本记录](VERSION.md)
+---
 
-## 当前定位
+<div align="center">
 
-这个仓库已经适合：
+如果这个项目对你有帮助，欢迎 Star 支持一下！
 
-- 长期运行的模拟盘
-- 规则学习与验证
-- OpenClaw 管理下的日常自动运行
-- 有操作员监督的半自动托管
-
-它目前还不是：
-
-- 零配置的散户券商机器人
-- 保证盈利的策略产品
-- 完全自治的真实资金交易系统
-
-## 说明
-
-- 运行时数据、日志和学习资产会持续变化，不应把它们当作代码版本状态
-- 如果要彻底清理 Git 历史里曾出现过的敏感信息，需要额外做历史重写
+</div>
