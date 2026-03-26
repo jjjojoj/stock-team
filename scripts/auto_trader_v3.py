@@ -42,7 +42,7 @@ from core.storage import (
     save_json,
     sync_positions_and_account_to_db,
 )
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 
 # 配置目录
 CONFIG_DIR = PROJECT_ROOT / "config"
@@ -861,6 +861,7 @@ def main():
                         logger.info("\n💡 提示: 使用 --execute 参数自动执行买入")
                 else:
                     logger.info("\n✅ 无买入信号")
+                record_guardrail_success("auto_trader_v3_buy", f"买入检查完成，信号 {len(buy_signals)} 个")
                 return 0
 
         if args.sell or (not args.buy and not args.sell):
@@ -871,7 +872,8 @@ def main():
                     record_guardrail_event("auto_trader_v3_sell", "warning", warning)
                 auto_execute = args.execute and not args.dry_run
                 signals = trader.run(auto_execute=auto_execute)
-                return 0 if signals else 1
+                record_guardrail_success("auto_trader_v3_sell", f"卖出检查完成，信号 {len(signals)} 个")
+                return 0
     except TaskLockedError as exc:
         logger.warning("⚠️ %s", exc)
         record_guardrail_event("auto_trader_v3", "warning", str(exc))

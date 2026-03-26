@@ -30,7 +30,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 from core.fundamentals import get_fundamental_bundles
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 
 # 导入新适配器
 ADAPTER_IMPORT_ERROR = None
@@ -503,6 +503,7 @@ def main():
 
             if args.action == "scan":
                 selector.scan(filter_controller=not args.all)
+                record_guardrail_success("selector", "选股扫描完成")
             elif args.action == "top":
                 n = int(args.arg) if args.arg else 5
                 top_stocks = selector.top(n, filter_controller=not args.all)
@@ -518,11 +519,13 @@ def main():
                     print("✅ 飞书通知已发送")
                 except Exception as exc:
                     print(f"⚠️ 飞书通知发送失败: {exc}")
+                record_guardrail_success("selector", f"Top 选股完成，共 {len(top_stocks)} 只")
             elif args.action == "detail":
                 if not args.arg:
                     print("❌ 请指定股票代码")
                     return
                 selector.detail(args.arg)
+                record_guardrail_success("selector", f"个股详情完成: {args.arg}")
     except TaskLockedError as exc:
         print(f"⚠️ {exc}")
         record_guardrail_event("selector", "warning", str(exc))

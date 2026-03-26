@@ -229,3 +229,4 @@ bash scripts/bootstrap_openclaw.sh
 - [Phase 10](docs/REFACTOR_PHASE10_2026-03-26.md)
 - [Phase 11](docs/REFACTOR_PHASE11_2026-03-26.md)
 - [Phase 12](docs/REFACTOR_PHASE12_2026-03-26.md)
+- [Phase 13](docs/REFACTOR_PHASE13_2026-03-26.md)

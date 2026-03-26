@@ -132,6 +132,10 @@ python3 scripts/ai_predictor.py brief
 - 新闻流、预测流、持仓流出现明显错位
 - 飞书通知内容与 Dashboard / DB 状态长期不一致
 
+补充：
+
+- 当前系统也可能因为关键任务连续失败而自动进入只读，这时优先先查 `data/runtime_guardrails_state.json`
+
 ## 五、出现这些情况时，可以继续自动运行
 
 - 只有单个非关键任务短时 warning
@@ -214,6 +218,8 @@ python3 scripts/ai_predictor.py brief
 - `docs/STOCK_TEAM_HANDOFF_2026-03-25.md`
 - `docs/REFACTOR_PHASE10_2026-03-26.md`
 - `docs/REFACTOR_PHASE11_2026-03-26.md`
+- `docs/REFACTOR_PHASE12_2026-03-26.md`
+- `docs/REFACTOR_PHASE13_2026-03-26.md`
 - `config/runtime_guardrails.json`
 - `core/runtime_guardrails.py`
 - `core/fundamentals.py`

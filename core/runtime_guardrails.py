@@ -23,6 +23,20 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "enabled": True,
     "force_read_only": False,
     "lock_stale_seconds": 7200,
+    "autopilot": {
+        "auto_read_only_enabled": True,
+        "critical_tasks": [
+            "ai_predictor",
+            "selector",
+            "daily_stock_research",
+            "midday_review",
+            "auto_trader_v3_buy",
+            "auto_trader_v3_sell",
+        ],
+        "consecutive_error_threshold": 2,
+        "auto_read_only_minutes": 180,
+        "recovery_success_threshold": 2,
+    },
     "freshness": {
         "daily_search_hours": 18,
         "predictions_hours": 36,
@@ -63,6 +77,10 @@ def load_guardrail_config() -> Dict[str, Any]:
     payload = _load_json(CONFIG_FILE, {})
     config = dict(DEFAULT_CONFIG)
     config.update(payload if isinstance(payload, dict) else {})
+    config["autopilot"] = {
+        **DEFAULT_CONFIG["autopilot"],
+        **(payload.get("autopilot", {}) if isinstance(payload, dict) else {}),
+    }
     config["freshness"] = {
         **DEFAULT_CONFIG["freshness"],
         **(payload.get("freshness", {}) if isinstance(payload, dict) else {}),
@@ -80,6 +98,34 @@ def load_guardrail_state() -> Dict[str, Any]:
         payload = {}
     payload.setdefault("events", [])
     payload.setdefault("midday_learning", {"history": [], "adjustments": []})
+    payload.setdefault(
+        "autopilot",
+        {
+            "auto_read_only": {
+                "active": False,
+                "reason": "",
+                "triggered_by": "",
+                "triggered_at": None,
+                "expires_at": None,
+                "recovered_successes": 0,
+            },
+            "task_health": {},
+            "last_transition": None,
+        },
+    )
+    payload["autopilot"].setdefault(
+        "auto_read_only",
+        {
+            "active": False,
+            "reason": "",
+            "triggered_by": "",
+            "triggered_at": None,
+            "expires_at": None,
+            "recovered_successes": 0,
+        },
+    )
+    payload["autopilot"].setdefault("task_health", {})
+    payload["autopilot"].setdefault("last_transition", None)
     return payload
 
 
@@ -87,8 +133,7 @@ def save_guardrail_state(state: Dict[str, Any]) -> None:
     _save_json(STATE_FILE, state)
 
 
-def record_guardrail_event(task: str, level: str, message: str) -> None:
-    state = load_guardrail_state()
+def _append_event(state: Dict[str, Any], task: str, level: str, message: str) -> None:
     events = state.setdefault("events", [])
     events.append(
         {
@@ -99,7 +144,201 @@ def record_guardrail_event(task: str, level: str, message: str) -> None:
         }
     )
     state["events"] = events[-200:]
-    save_guardrail_state(state)
+
+
+def _expire_auto_read_only_if_needed(state: Dict[str, Any]) -> bool:
+    auto = state.setdefault("autopilot", {}).setdefault("auto_read_only", {})
+    if not auto.get("active"):
+        return False
+
+    expires_at = auto.get("expires_at")
+    if not expires_at:
+        return False
+
+    try:
+        expires = datetime.fromisoformat(str(expires_at))
+    except ValueError:
+        expires = None
+
+    if expires and datetime.now() >= expires:
+        auto["active"] = False
+        auto["expired_at"] = datetime.now().isoformat()
+        auto["recovered_successes"] = 0
+        state["autopilot"]["last_transition"] = {
+            "status": "expired",
+            "time": datetime.now().isoformat(),
+            "reason": auto.get("reason", ""),
+            "triggered_by": auto.get("triggered_by", ""),
+        }
+        _append_event(state, "autopilot", "info", "自动只读已到期，恢复普通模式")
+        return True
+    return False
+
+
+def _set_auto_read_only(state: Dict[str, Any], task: str, message: str, config: Dict[str, Any]) -> None:
+    autopilot = state["autopilot"]
+    auto = autopilot.setdefault("auto_read_only", {})
+    duration = int(config["autopilot"].get("auto_read_only_minutes", 180))
+    now = datetime.now()
+    expires_at = (now + timedelta(minutes=duration)).isoformat()
+    already_active = bool(auto.get("active"))
+
+    auto.update(
+        {
+            "active": True,
+            "reason": message,
+            "triggered_by": task,
+            "triggered_at": auto.get("triggered_at") if already_active else now.isoformat(),
+            "last_extended_at": now.isoformat() if already_active else None,
+            "expires_at": expires_at,
+            "recovered_successes": 0,
+        }
+    )
+    autopilot["last_transition"] = {
+        "status": "activated" if not already_active else "extended",
+        "time": now.isoformat(),
+        "reason": message,
+        "triggered_by": task,
+        "expires_at": expires_at,
+    }
+    event_message = (
+        f"自动切换只读: {task} 连续异常，暂停自动买入/预测生成 {duration} 分钟"
+        if not already_active
+        else f"自动只读续期: {task} 再次异常，延长保护到 {expires_at}"
+    )
+    _append_event(state, "autopilot", "warning", event_message)
+
+
+def _clear_auto_read_only(state: Dict[str, Any], task: str, reason: str) -> None:
+    autopilot = state["autopilot"]
+    auto = autopilot.setdefault("auto_read_only", {})
+    if not auto.get("active"):
+        return
+
+    auto.update(
+        {
+            "active": False,
+            "cleared_at": datetime.now().isoformat(),
+            "cleared_by": task,
+            "clear_reason": reason,
+            "recovered_successes": 0,
+        }
+    )
+    autopilot["last_transition"] = {
+        "status": "recovered",
+        "time": datetime.now().isoformat(),
+        "reason": reason,
+        "triggered_by": task,
+    }
+    _append_event(state, "autopilot", "info", f"退出自动只读: {reason}")
+
+
+def get_guardrail_control_state(
+    config: Optional[Dict[str, Any]] = None,
+    state: Optional[Dict[str, Any]] = None,
+    *,
+    persist: bool = True,
+) -> Dict[str, Any]:
+    config = config or load_guardrail_config()
+    state = state or load_guardrail_state()
+    changed = _expire_auto_read_only_if_needed(state)
+    if changed and persist:
+        save_guardrail_state(state)
+
+    auto = state.get("autopilot", {}).get("auto_read_only", {})
+    manual = bool(config.get("force_read_only"))
+    automatic = bool(auto.get("active"))
+    active = manual or automatic
+    source = "manual" if manual else ("automatic" if automatic else "none")
+
+    return {
+        "active": active,
+        "manual": manual,
+        "automatic": automatic,
+        "source": source,
+        "reason": "配置强制只读" if manual else auto.get("reason", ""),
+        "triggered_by": auto.get("triggered_by"),
+        "triggered_at": auto.get("triggered_at"),
+        "expires_at": auto.get("expires_at"),
+        "recovered_successes": int(auto.get("recovered_successes", 0) or 0),
+    }
+
+
+def _update_task_health(
+    task: str,
+    level: str,
+    message: str,
+    *,
+    emit_event: bool,
+) -> None:
+    config = load_guardrail_config()
+    state = load_guardrail_state()
+    changed = _expire_auto_read_only_if_needed(state)
+    autopilot = state.setdefault("autopilot", {})
+    task_health = autopilot.setdefault("task_health", {})
+    health = task_health.setdefault(
+        task,
+        {
+            "consecutive_errors": 0,
+            "consecutive_successes": 0,
+            "last_level": None,
+            "last_message": "",
+            "last_time": None,
+        },
+    )
+    now = datetime.now().isoformat()
+
+    if emit_event:
+        _append_event(state, task, level, message)
+
+    if level == "error":
+        health["consecutive_errors"] = int(health.get("consecutive_errors", 0) or 0) + 1
+        health["consecutive_successes"] = 0
+    elif level == "success":
+        health["consecutive_successes"] = int(health.get("consecutive_successes", 0) or 0) + 1
+        health["consecutive_errors"] = 0
+    elif level == "warning":
+        health["consecutive_successes"] = 0
+
+    health["last_level"] = level
+    health["last_message"] = message
+    health["last_time"] = now
+
+    critical_tasks = set(config["autopilot"].get("critical_tasks", []))
+    auto_cfg = config["autopilot"]
+    auto = autopilot.setdefault("auto_read_only", {})
+    if task in critical_tasks and auto_cfg.get("auto_read_only_enabled", True):
+        if level == "error" and int(health.get("consecutive_errors", 0) or 0) >= int(
+            auto_cfg.get("consecutive_error_threshold", 2)
+        ):
+            if not config.get("force_read_only"):
+                _set_auto_read_only(state, task, message, config)
+        elif level == "success":
+            if auto.get("active") and auto.get("triggered_by") == task:
+                auto["recovered_successes"] = int(auto.get("recovered_successes", 0) or 0) + 1
+                if int(auto.get("recovered_successes", 0) or 0) >= int(
+                    auto_cfg.get("recovery_success_threshold", 2)
+                ):
+                    _clear_auto_read_only(
+                        state,
+                        task,
+                        f"{task} 连续恢复 {auto_cfg.get('recovery_success_threshold', 2)} 次",
+                    )
+            elif auto.get("active") and auto.get("triggered_by") != task:
+                auto["recovered_successes"] = int(auto.get("recovered_successes", 0) or 0)
+        elif level in {"warning", "error"} and auto.get("active") and auto.get("triggered_by") == task:
+            auto["recovered_successes"] = 0
+
+    if changed or True:
+        save_guardrail_state(state)
+
+
+def record_guardrail_event(task: str, level: str, message: str) -> None:
+    _update_task_health(task, level, message, emit_event=True)
+
+
+def record_guardrail_success(task: str, message: str = "任务执行完成") -> None:
+    _update_task_health(task, "success", message, emit_event=False)
 
 
 def _file_age_hours(path: Path) -> Optional[float]:
@@ -144,12 +383,16 @@ def evaluate_runtime_mode(
     available_cash: Optional[float] = None,
 ) -> GuardrailResult:
     config = load_guardrail_config()
+    control = get_guardrail_control_state(config=config)
     snapshot = get_runtime_snapshot()
     reasons: List[str] = []
     warnings: List[str] = []
 
-    if config.get("force_read_only") and mode in {"trade_buy", "prediction_generate"}:
-        reasons.append("系统当前处于只读模式")
+    if control.get("active") and mode in {"trade_buy", "prediction_generate"}:
+        if control.get("source") == "automatic":
+            reasons.append("系统当前处于只读模式（自动保护）")
+        else:
+            reasons.append("系统当前处于只读模式")
 
     freshness = config["freshness"]
     daily_search_age = snapshot.get("daily_search_age_hours")

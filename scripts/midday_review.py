@@ -30,6 +30,7 @@ from core.runtime_guardrails import (
     load_guardrail_config,
     load_guardrail_state,
     record_guardrail_event,
+    record_guardrail_success,
     save_guardrail_state,
     task_lock,
 )
@@ -409,6 +410,7 @@ def main():
                 )
             print(f"\n📄 报告已保存：{report_file}")
             print("\n" + "=" * 60)
+            record_guardrail_success("midday_review", f"午盘学习完成，验证 {results['verified']} 条")
     except TaskLockedError as exc:
         print(f"⚠️ {exc}")
         record_guardrail_event("midday_review", "warning", str(exc))

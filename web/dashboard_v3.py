@@ -34,6 +34,7 @@ from core.storage import (
 )
 from core.runtime_guardrails import (
     evaluate_runtime_mode,
+    get_guardrail_control_state,
     get_runtime_snapshot,
     load_guardrail_config,
     load_guardrail_state,
@@ -672,12 +673,12 @@ def _format_age(age_hours: Optional[float]) -> str:
     return f"{age_hours / 24:.1f}d"
 
 
-def _freshness_item(label: str, age_hours: Optional[float], limit_hours: float) -> Dict[str, Any]:
+def _freshness_item(label: str, age_hours: Optional[float], limit_hours: float, *, critical: bool = True) -> Dict[str, Any]:
     if age_hours is None:
         status = "error"
         summary = "缺失"
     elif age_hours > limit_hours:
-        status = "error"
+        status = "error" if critical else "warning"
         summary = "已过期"
     elif age_hours > limit_hours * 0.7:
         status = "warning"
@@ -730,6 +731,7 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
     cron_tasks = cron_tasks if cron_tasks is not None else get_openclaw_cron_status()
     config = load_guardrail_config()
     state = load_guardrail_state()
+    control = get_guardrail_control_state(config=config, state=state, persist=False)
     runtime = get_runtime_snapshot()
     prediction_config = load_json(PROJECT_ROOT / "config" / "prediction_config.json", {})
     execution_mode = _get_execution_mode_snapshot()
@@ -766,8 +768,9 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
             "fundamental_snapshot",
             runtime.get("fundamental_snapshot_age_hours"),
             config["freshness"]["fundamental_snapshot_hours"],
+            critical=False,
         ),
-        _freshness_item("stock_pool", runtime.get("stock_pool_age_hours"), config["freshness"]["stock_pool_hours"]),
+        _freshness_item("stock_pool", runtime.get("stock_pool_age_hours"), config["freshness"]["stock_pool_hours"], critical=False),
     ]
 
     critical_errors = [
@@ -815,10 +818,14 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
     freshness_errors = sum(1 for item in freshness if item["status"] == "error")
     freshness_warnings = sum(1 for item in freshness if item["status"] == "warning")
 
-    if config.get("force_read_only"):
+    if control.get("active"):
         readiness_status = "warning"
         readiness_label = "只读托管"
-        readiness_detail = "已开启只读模式，自动买入和预测生成将被主动收敛。"
+        readiness_detail = (
+            "已开启只读模式，自动买入和预测生成将被主动收敛。"
+            if control.get("source") == "manual"
+            else f"自动保护已接管：{control.get('reason') or '关键任务连续异常'}"
+        )
     elif blocking_items or freshness_errors > 0 or recent_error_count > 0:
         readiness_status = "error"
         readiness_label = "需人工介入"
@@ -839,7 +846,10 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
             "label": readiness_label,
             "detail": readiness_detail,
         },
-        "force_read_only": bool(config.get("force_read_only")),
+        "force_read_only": bool(control.get("active")),
+        "read_only_source": control.get("source"),
+        "read_only_reason": control.get("reason"),
+        "read_only_expires_at": control.get("expires_at"),
         "confidence_threshold": float(prediction_config.get("confidence_threshold", 0.8) or 0.8),
         "freshness": freshness,
         "mode_checks": mode_checks,
@@ -1732,14 +1742,14 @@ HTML_CONTENT = '''<!DOCTYPE html>
             document.getElementById('monitor-autopilot-title').textContent = (executionMode.label || '托管状态未知') + ' · ' + (readiness.label || '待评估');
             document.getElementById('monitor-autopilot-desc').textContent = readiness.detail || executionMode.detail || '暂无托管建议';
             const readonlyBadge = document.getElementById('monitor-readonly-badge');
-            readonlyBadge.textContent = autopilot.force_read_only ? '只读模式' : '自动模式';
+            readonlyBadge.textContent = autopilot.force_read_only ? ((autopilot.read_only_source === 'automatic') ? '自动只读' : '手动只读') : '自动模式';
             readonlyBadge.className = 'badge ' + (autopilot.force_read_only ? 'badge-warning' : 'badge-success');
 
             const guardrailBadge = document.getElementById('monitor-guardrail-badge');
             guardrailBadge.textContent = autopilot.force_read_only ? '只读中' : ((autopilot.active_adjustments || 0) > 0 ? '调参中' : '已启用');
             guardrailBadge.className = 'badge ' + (autopilot.force_read_only ? 'badge-warning' : 'badge-success');
             document.getElementById('monitor-guardrails').innerHTML = [
-                '<div class="status-row"><div class="status-dot ' + (autopilot.force_read_only ? 'error' : 'running') + '"></div><div class="status-info"><div class="status-name">执行模式</div><div class="status-meta">' + (executionMode.detail || '--') + '</div></div></div>',
+                '<div class="status-row"><div class="status-dot ' + (autopilot.force_read_only ? 'error' : 'running') + '"></div><div class="status-info"><div class="status-name">执行模式</div><div class="status-meta">' + (executionMode.detail || '--') + (autopilot.read_only_reason ? (' | 只读原因: ' + autopilot.read_only_reason) : '') + '</div></div></div>',
                 '<div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">预测阈值</div><div class="status-meta">confidence_threshold = ' + ((autopilot.confidence_threshold || 0).toFixed ? autopilot.confidence_threshold.toFixed(2) : autopilot.confidence_threshold) + '</div></div></div>',
                 '<div class="status-row"><div class="status-dot ' + ((autopilot.active_adjustments || 0) > 0 ? 'running' : 'idle') + '"></div><div class="status-info"><div class="status-name">学习调参</div><div class="status-meta">活跃调整 ' + (autopilot.active_adjustments || 0) + ' 次' + (autopilot.latest_rollback ? (' | 最近回滚: ' + (autopilot.latest_rollback.rollback_reason || autopilot.latest_rollback.reason || '已回滚')) : '') + '</div></div></div>',
                 '<div class="status-row"><div class="status-dot ' + ((eventCounts.errors || 0) > 0 ? 'error' : ((eventCounts.warnings || 0) > 0 ? 'idle' : 'running')) + '"></div><div class="status-info"><div class="status-name">最近事件</div><div class="status-meta">错误 ' + (eventCounts.errors || 0) + ' | 告警 ' + (eventCounts.warnings || 0) + '</div></div></div>'

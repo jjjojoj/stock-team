@@ -29,7 +29,7 @@ LOG_DIR = PROJECT_ROOT / "logs"
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.fundamentals import get_fundamental_bundle
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 from core.storage import load_positions, load_watchlist, save_watchlist
 
 
@@ -382,6 +382,7 @@ def main():
             with open(report_file, 'w', encoding='utf-8') as f:
                 json.dump(analysis, f, ensure_ascii=False, indent=2)
             print(f"\n📄 报告已保存：{report_file}")
+            record_guardrail_success("daily_stock_research", f"研究完成: {code}")
     except TaskLockedError as exc:
         print(f"⚠️ {exc}")
         record_guardrail_event("daily_stock_research", "warning", str(exc))

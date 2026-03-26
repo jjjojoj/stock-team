@@ -54,6 +54,18 @@ class DashboardSnapshotTests(unittest.TestCase):
                 "evaluate_runtime_mode",
                 side_effect=lambda *args, **kwargs: SimpleNamespace(ok=True, warnings=[], reasons=[]),
             ),
+            patch.object(
+                dashboard,
+                "get_guardrail_control_state",
+                return_value={
+                    "active": False,
+                    "automatic": False,
+                    "manual": False,
+                    "source": "none",
+                    "reason": "",
+                    "expires_at": None,
+                },
+            ),
             patch.dict(dashboard.os.environ, {}, clear=True),
         ):
             snapshot = dashboard.get_monitoring_snapshot()

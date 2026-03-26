@@ -2,6 +2,20 @@
   "enabled": true,
   "force_read_only": false,
   "lock_stale_seconds": 7200,
+  "autopilot": {
+    "auto_read_only_enabled": true,
+    "critical_tasks": [
+      "ai_predictor",
+      "selector",
+      "daily_stock_research",
+      "midday_review",
+      "auto_trader_v3_buy",
+      "auto_trader_v3_sell"
+    ],
+    "consecutive_error_threshold": 2,
+    "auto_read_only_minutes": 180,
+    "recovery_success_threshold": 2
+  },
   "freshness": {
     "daily_search_hours": 18,
     "predictions_hours": 36,

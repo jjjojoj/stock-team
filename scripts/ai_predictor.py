@@ -31,7 +31,7 @@ except ImportError:
     PredictionSystem = prediction_module.PredictionSystem
 from news_fetcher import NewsFetcher
 from news_trigger import NewsMonitor
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, task_lock, TaskLockedError
+from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 from core.storage import load_positions, load_rules, load_watchlist
 
 # 尝试导入 akshare 用于计算真实技术指标
@@ -681,6 +681,7 @@ def main():
                     print("✅ 飞书通知已发送")
                 except Exception as e:
                     print(f"⚠️ 飞书通知发送失败: {e}")
+                record_guardrail_success("ai_predictor", f"预测生成完成，共 {len(predictions)} 条")
 
             elif command == "brief":
                 brief = predictor.generate_daily_brief()
@@ -695,6 +696,7 @@ def main():
                         print("✅ 飞书通知已发送")
                     except Exception as e:
                         print(f"⚠️ 飞书通知发送失败: {e}")
+                record_guardrail_success("ai_predictor", "预测简报生成完成")
 
             elif command == "single":
                 if len(sys.argv) < 3:
@@ -708,6 +710,7 @@ def main():
                     print(f"  方向: {pred['direction']}")
                     print(f"  目标价: ¥{pred['target_price']}")
                     print(f"  置信度: {pred['confidence']}%")
+                record_guardrail_success("ai_predictor", f"单股预测完成: {code}")
     except TaskLockedError as exc:
         print(f"⚠️ {exc}")
         record_guardrail_event("ai_predictor", "warning", str(exc))
