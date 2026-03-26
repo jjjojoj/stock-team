@@ -165,17 +165,6 @@ cp config/feishu_config.local.example.json config/feishu_config.local.json
 - [规则系统说明](docs/RULE_SYSTEM_EXPLAINED.md)
 - [完整闭环说明](docs/COMPLETE_LOOP_v3.md)
 
-### 近期重构记录
-
-- [Phase 9: 通知质量与真实日报修复](docs/REFACTOR_PHASE9_2026-03-26.md)
-- [Phase 10: 真实数据清理与闭环复核](docs/REFACTOR_PHASE10_2026-03-26.md)
-- [Phase 11: 半自动托管稳定版](docs/REFACTOR_PHASE11_2026-03-26.md)
-- [Phase 12: Dashboard 托管驾驶舱升级](docs/REFACTOR_PHASE12_2026-03-26.md)
-- [Phase 13: 自动降级与只读保护](docs/REFACTOR_PHASE13_2026-03-26.md)
-- [Phase 6: Webhook 收口](docs/REFACTOR_PHASE6_2026-03-25.md)
-- [Phase 7: 面板清理与仓库瘦身](docs/REFACTOR_PHASE7_2026-03-25.md)
-- [Phase 8: Webhook 去明文](docs/REFACTOR_PHASE8_2026-03-25.md)
-
 ## Notes
 
 - 当前仓库中的运行态数据、日志、学习记录可能会持续变化，不应直接作为代码版本状态判断依据
