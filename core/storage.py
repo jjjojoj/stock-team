@@ -6,7 +6,7 @@ import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .predictions import normalize_prediction_collection, prediction_result_status
 
@@ -102,6 +102,86 @@ def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     with get_db(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                symbol TEXT,
+                name TEXT,
+                direction TEXT,
+                current_price REAL,
+                target_price REAL,
+                confidence INTEGER,
+                timeframe TEXT,
+                reasons TEXT,
+                risks TEXT,
+                source_agent TEXT,
+                status TEXT,
+                result TEXT,
+                actual_end_price REAL,
+                created_at TIMESTAMP,
+                updated_at TIMESTAMP,
+                verified_at TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS positions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                symbol TEXT NOT NULL UNIQUE,
+                name TEXT,
+                shares INTEGER,
+                cost_price REAL,
+                current_price REAL,
+                market_value REAL,
+                profit_loss REAL,
+                profit_loss_pct REAL,
+                position_pct REAL,
+                stop_loss REAL,
+                take_profit REAL,
+                status TEXT DEFAULT 'holding',
+                bought_at TIMESTAMP,
+                sold_at TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS trades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                symbol TEXT NOT NULL,
+                name TEXT,
+                direction TEXT NOT NULL,
+                shares INTEGER,
+                price REAL,
+                amount REAL,
+                commission REAL,
+                reason TEXT,
+                proposal_id INTEGER,
+                executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS account (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL UNIQUE,
+                total_asset REAL,
+                cash REAL,
+                market_value REAL,
+                total_profit REAL,
+                total_profit_pct REAL,
+                daily_profit REAL,
+                daily_profit_pct REAL,
+                position_count INTEGER,
+                max_drawdown REAL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS watchlist (
@@ -210,6 +290,82 @@ def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
             ON rejected_rules(category)
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS simulated_orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id TEXT NOT NULL UNIQUE,
+                symbol TEXT NOT NULL,
+                name TEXT,
+                direction TEXT NOT NULL,
+                order_type TEXT DEFAULT 'market',
+                requested_shares INTEGER NOT NULL,
+                filled_shares INTEGER DEFAULT 0,
+                remaining_shares INTEGER DEFAULT 0,
+                requested_price REAL,
+                avg_fill_price REAL,
+                fill_ratio REAL DEFAULT 0,
+                status TEXT DEFAULT 'pending',
+                cash_effect REAL DEFAULT 0,
+                commission REAL DEFAULT 0,
+                slippage_cost REAL DEFAULT 0,
+                slippage_bps REAL DEFAULT 0,
+                reference_price REAL,
+                price_source TEXT,
+                market_cap REAL,
+                reason TEXT,
+                prediction_id TEXT,
+                metadata_json TEXT,
+                created_at TIMESTAMP,
+                updated_at TIMESTAMP,
+                last_fill_at TIMESTAMP,
+                closed_at TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS simulated_fills (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                direction TEXT NOT NULL,
+                shares INTEGER NOT NULL,
+                price REAL NOT NULL,
+                amount REAL NOT NULL,
+                commission REAL DEFAULT 0,
+                slippage_cost REAL DEFAULT 0,
+                reference_price REAL,
+                price_source TEXT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_simulated_orders_status
+            ON simulated_orders(status)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_simulated_orders_symbol
+            ON simulated_orders(symbol)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_simulated_fills_order
+            ON simulated_fills(order_id)
+            """
+        )
+        conn.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_simulated_fills_created
+            ON simulated_fills(created_at)
+            """
+        )
 
         watchlist_columns = _get_table_columns(conn, "watchlist")
         extra_watchlist_columns = {
@@ -223,6 +379,24 @@ def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
         for column_name, column_sql in extra_watchlist_columns.items():
             if column_name not in watchlist_columns:
                 conn.execute(f"ALTER TABLE watchlist ADD COLUMN {column_name} {column_sql}")
+
+        trade_columns = _get_table_columns(conn, "trades")
+        extra_trade_columns = {
+            "execution_order_id": "TEXT",
+            "execution_status": "TEXT",
+            "requested_shares": "INTEGER",
+            "remaining_shares": "INTEGER",
+            "price_source": "TEXT",
+            "slippage_bps": "REAL",
+            "slippage_cost": "REAL",
+            "fill_ratio": "REAL",
+            "simulated": "INTEGER DEFAULT 0",
+            "pnl_amount": "REAL",
+            "pnl_pct": "REAL",
+        }
+        for column_name, column_sql in extra_trade_columns.items():
+            if column_name not in trade_columns:
+                conn.execute(f"ALTER TABLE trades ADD COLUMN {column_name} {column_sql}")
 
 
 def sync_watchlist_to_db(
@@ -1162,4 +1336,96 @@ def sync_positions_and_account_to_db(
         "total_profit": total_profit,
         "total_profit_pct": total_profit_pct,
         "position_count": float(len(positions)),
+    }
+
+
+def load_recent_simulated_orders(limit: int = 20, db_path: Path = DB_PATH) -> List[Dict[str, Any]]:
+    """Return recent simulated paper-trading orders from SQLite."""
+    ensure_storage_tables(db_path)
+    try:
+        with get_db(db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT *
+                FROM simulated_orders
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+    except sqlite3.Error:
+        rows = []
+    return [dict(row) for row in rows]
+
+
+def load_open_simulated_orders(db_path: Path = DB_PATH) -> List[Dict[str, Any]]:
+    """Return pending or partially-filled paper-trading orders."""
+    ensure_storage_tables(db_path)
+    try:
+        with get_db(db_path) as conn:
+            rows = conn.execute(
+                """
+                SELECT *
+                FROM simulated_orders
+                WHERE status IN ('pending', 'partial_filled')
+                ORDER BY created_at ASC
+                """
+            ).fetchall()
+    except sqlite3.Error:
+        rows = []
+    return [dict(row) for row in rows]
+
+
+def get_simulated_order_metrics(db_path: Path = DB_PATH) -> Dict[str, Any]:
+    """Summarize the current paper-trading execution ledger."""
+    ensure_storage_tables(db_path)
+    today = datetime.now().strftime("%Y-%m-%d")
+    default = {
+        "today_order_count": 0,
+        "today_filled_count": 0,
+        "open_order_count": 0,
+        "partial_fill_count": 0,
+        "today_commission": 0.0,
+        "today_slippage_cost": 0.0,
+        "recent_orders": [],
+    }
+    try:
+        with get_db(db_path) as conn:
+            summary = conn.execute(
+                """
+                SELECT
+                    COUNT(*) AS today_order_count,
+                    SUM(CASE WHEN status IN ('filled', 'partial_filled') THEN 1 ELSE 0 END) AS today_filled_count,
+                    SUM(CASE WHEN status IN ('pending', 'partial_filled') THEN 1 ELSE 0 END) AS open_order_count,
+                    SUM(CASE WHEN status = 'partial_filled' THEN 1 ELSE 0 END) AS partial_fill_count,
+                    SUM(CASE WHEN commission IS NOT NULL THEN commission ELSE 0 END) AS today_commission,
+                    SUM(CASE WHEN slippage_cost IS NOT NULL THEN slippage_cost ELSE 0 END) AS today_slippage_cost
+                FROM simulated_orders
+                WHERE substr(created_at, 1, 10) = ?
+                """,
+                (today,),
+            ).fetchone()
+            recent_orders = conn.execute(
+                """
+                SELECT *
+                FROM simulated_orders
+                ORDER BY created_at DESC
+                LIMIT 10
+                """
+            ).fetchall()
+    except sqlite3.Error:
+        return default
+
+    payload = dict(summary or {})
+    return {
+        **default,
+        **{
+            "today_order_count": int(payload.get("today_order_count") or 0),
+            "today_filled_count": int(payload.get("today_filled_count") or 0),
+            "open_order_count": int(payload.get("open_order_count") or 0),
+            "partial_fill_count": int(payload.get("partial_fill_count") or 0),
+            "today_commission": float(payload.get("today_commission") or 0.0),
+            "today_slippage_cost": float(payload.get("today_slippage_cost") or 0.0),
+            "recent_orders": [dict(row) for row in recent_orders],
+        },
     }

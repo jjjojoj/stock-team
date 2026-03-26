@@ -186,6 +186,32 @@ class DashboardSnapshotTests(unittest.TestCase):
         self.assertEqual(results[0]["max_drawdown"], "4.10%")
         self.assertEqual(results[0]["sharpe_ratio"], "1.32")
 
+    def test_get_trading_snapshot_includes_simulated_order_metrics(self):
+        with (
+            patch.object(dashboard, "get_account_latest", return_value={"cash": 100000, "market_value": 12000}),
+            patch.object(dashboard, "get_positions", return_value=[]),
+            patch.object(dashboard, "get_trades", return_value=[]),
+            patch.object(
+                dashboard,
+                "get_simulated_order_metrics",
+                return_value={
+                    "today_order_count": 2,
+                    "today_filled_count": 1,
+                    "open_order_count": 1,
+                    "partial_fill_count": 1,
+                    "today_commission": 12.5,
+                    "today_slippage_cost": 18.2,
+                    "recent_orders": [{"order_id": "sim_1", "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}],
+                },
+            ),
+            patch.object(dashboard, "load_recent_simulated_orders", return_value=[{"order_id": "sim_1"}]),
+            patch.object(dashboard, "query_sql", return_value=[]),
+        ):
+            snapshot = dashboard.get_trading_snapshot()
+
+        self.assertEqual(snapshot["order_metrics"]["open_order_count"], 1)
+        self.assertEqual(snapshot["recent_orders"][0]["order_id"], "sim_1")
+
     def test_get_news_snapshot_filters_low_quality_rows_and_normalizes_direction(self):
         today = datetime.now().strftime("%Y-%m-%d")
         rows = [

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -54,6 +56,49 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "rollback_window_runs": 3,
         "rollback_drop_pct": 8.0,
     },
+    "self_healing": {
+        "enabled": True,
+        "upstream_error_ttl_minutes": 240,
+        "retry_tasks": {
+            "selector": {
+                "args": ["scripts/selector.py", "top", "10"],
+                "cooldown_seconds": 900,
+                "max_attempts": 1,
+                "timeout_seconds": 900,
+            },
+            "daily_stock_research": {
+                "args": ["scripts/daily_stock_research.py"],
+                "cooldown_seconds": 900,
+                "max_attempts": 1,
+                "timeout_seconds": 900,
+            },
+            "ai_predictor": {
+                "args": ["scripts/ai_predictor.py"],
+                "cooldown_seconds": 900,
+                "max_attempts": 1,
+                "timeout_seconds": 900,
+            },
+            "midday_review": {
+                "args": ["scripts/midday_review.py"],
+                "cooldown_seconds": 900,
+                "max_attempts": 1,
+                "timeout_seconds": 900,
+            },
+            "auto_trader_v3_sell": {
+                "args": ["scripts/auto_trader_v3.py", "--sell", "--execute"],
+                "cooldown_seconds": 900,
+                "max_attempts": 1,
+                "timeout_seconds": 900,
+            },
+        },
+        "pipeline_dependencies": {
+            "prediction_generate": ["selector", "daily_stock_research"],
+            "trade_buy": ["selector", "ai_predictor"],
+            "trade_sell": [],
+        },
+        "fallback_retention": 40,
+        "recovery_retention": 40,
+    },
 }
 
 
@@ -89,6 +134,27 @@ def load_guardrail_config() -> Dict[str, Any]:
         **DEFAULT_CONFIG["midday_learning"],
         **(payload.get("midday_learning", {}) if isinstance(payload, dict) else {}),
     }
+    payload_self_healing = payload.get("self_healing", {}) if isinstance(payload, dict) else {}
+    config["self_healing"] = {
+        **DEFAULT_CONFIG["self_healing"],
+        **(payload_self_healing if isinstance(payload_self_healing, dict) else {}),
+    }
+    config["self_healing"]["retry_tasks"] = {
+        **DEFAULT_CONFIG["self_healing"]["retry_tasks"],
+        **(
+            payload_self_healing.get("retry_tasks", {})
+            if isinstance(payload_self_healing, dict)
+            else {}
+        ),
+    }
+    config["self_healing"]["pipeline_dependencies"] = {
+        **DEFAULT_CONFIG["self_healing"]["pipeline_dependencies"],
+        **(
+            payload_self_healing.get("pipeline_dependencies", {})
+            if isinstance(payload_self_healing, dict)
+            else {}
+        ),
+    }
     return config
 
 
@@ -113,6 +179,14 @@ def load_guardrail_state() -> Dict[str, Any]:
             "last_transition": None,
         },
     )
+    payload.setdefault(
+        "self_healing",
+        {
+            "task_retries": {},
+            "recoveries": [],
+            "fallbacks": [],
+        },
+    )
     payload["autopilot"].setdefault(
         "auto_read_only",
         {
@@ -126,6 +200,9 @@ def load_guardrail_state() -> Dict[str, Any]:
     )
     payload["autopilot"].setdefault("task_health", {})
     payload["autopilot"].setdefault("last_transition", None)
+    payload["self_healing"].setdefault("task_retries", {})
+    payload["self_healing"].setdefault("recoveries", [])
+    payload["self_healing"].setdefault("fallbacks", [])
     return payload
 
 
@@ -144,6 +221,170 @@ def _append_event(state: Dict[str, Any], task: str, level: str, message: str) ->
         }
     )
     state["events"] = events[-200:]
+
+
+def _python_runner() -> str:
+    venv_python = PROJECT_ROOT / "venv" / "bin" / "python"
+    if venv_python.exists():
+        return str(venv_python)
+    return sys.executable or "python3"
+
+
+def _parse_iso(value: Any) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def _task_recent_failure(task: str, state: Dict[str, Any], ttl_minutes: int) -> Optional[Dict[str, Any]]:
+    health = state.get("autopilot", {}).get("task_health", {}).get(task) or {}
+    last_level = str(health.get("last_level") or "")
+    if last_level != "error":
+        return None
+    last_time = _parse_iso(health.get("last_time"))
+    if not last_time:
+        return None
+    if datetime.now() - last_time > timedelta(minutes=ttl_minutes):
+        return None
+    return {
+        "task": task,
+        "last_level": last_level,
+        "last_message": str(health.get("last_message") or ""),
+        "last_time": health.get("last_time"),
+        "consecutive_errors": int(health.get("consecutive_errors", 0) or 0),
+    }
+
+
+def _pipeline_dependency_issues(mode: str, config: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, List[str]]:
+    self_healing = config.get("self_healing", {})
+    dependencies = self_healing.get("pipeline_dependencies", {}).get(mode, [])
+    ttl_minutes = int(self_healing.get("upstream_error_ttl_minutes", 240) or 240)
+    blocking: List[str] = []
+    warnings: List[str] = []
+    for task in dependencies:
+        failure = _task_recent_failure(str(task), state, ttl_minutes)
+        if failure:
+            blocking.append(
+                f"上游任务 {task} 最近失败，自动收口当前链路: {failure['last_message'] or '等待恢复'}"
+            )
+            continue
+        health = state.get("autopilot", {}).get("task_health", {}).get(task) or {}
+        if str(health.get("last_level") or "") == "warning":
+            warnings.append(f"上游任务 {task} 最近存在告警，建议关注后再放手运行")
+    return {"blocking": blocking, "warnings": warnings}
+
+
+def _attempt_task_recovery(task: str, message: str, config: Dict[str, Any], state: Dict[str, Any]) -> None:
+    if os.environ.get("STOCK_TEAM_RECOVERY_CONTEXT") == "1":
+        return
+
+    self_healing = config.get("self_healing", {})
+    if not self_healing.get("enabled", True):
+        return
+
+    task_spec = self_healing.get("retry_tasks", {}).get(task)
+    if not isinstance(task_spec, dict):
+        return
+    lowered_message = str(message or "")
+    non_retryable_patterns = (
+        "只读模式",
+        "观察池为空",
+        "预测股票池为空",
+        "没有可用的活跃预测",
+        "可用现金不足",
+        "预测数据缺失",
+    )
+    if any(pattern in lowered_message for pattern in non_retryable_patterns):
+        return
+
+    healing_state = state.setdefault("self_healing", {})
+    task_retries = healing_state.setdefault("task_retries", {})
+    retry_state = task_retries.setdefault(
+        task,
+        {
+            "attempts": 0,
+            "last_attempt_at": None,
+            "last_status": None,
+            "last_reason": "",
+            "last_exit_code": None,
+        },
+    )
+
+    cooldown_seconds = int(task_spec.get("cooldown_seconds", 900) or 900)
+    max_attempts = int(task_spec.get("max_attempts", 1) or 1)
+    timeout_seconds = int(task_spec.get("timeout_seconds", 900) or 900)
+    attempts = int(retry_state.get("attempts", 0) or 0)
+    last_attempt_at = _parse_iso(retry_state.get("last_attempt_at"))
+    if last_attempt_at and datetime.now() - last_attempt_at < timedelta(seconds=cooldown_seconds):
+        return
+    if attempts >= max_attempts:
+        return
+
+    args = list(task_spec.get("args", []))
+    if not args:
+        return
+
+    command = [_python_runner(), *args]
+    env = os.environ.copy()
+    env["STOCK_TEAM_RECOVERY_CONTEXT"] = "1"
+    started_at = datetime.now().isoformat()
+    retry_state.update(
+        {
+            "attempts": attempts + 1,
+            "last_attempt_at": started_at,
+            "last_status": "running",
+            "last_reason": message,
+        }
+    )
+
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=str(PROJECT_ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+        exit_code = int(completed.returncode)
+        status = "success" if exit_code == 0 else "failed"
+        output = ((completed.stdout or "") + "\n" + (completed.stderr or "")).strip()
+    except Exception as exc:
+        exit_code = -1
+        status = "failed"
+        output = str(exc)
+
+    retry_state.update(
+        {
+            "last_status": status,
+            "last_exit_code": exit_code,
+        }
+    )
+    recoveries = healing_state.setdefault("recoveries", [])
+    recoveries.append(
+        {
+            "time": datetime.now().isoformat(),
+            "task": task,
+            "status": status,
+            "attempt": retry_state.get("attempts"),
+            "command": command,
+            "reason": message,
+            "exit_code": exit_code,
+            "output_excerpt": output[:400],
+        }
+    )
+    retention = int(self_healing.get("recovery_retention", 40) or 40)
+    healing_state["recoveries"] = recoveries[-retention:]
+    event_level = "info" if status == "success" else "warning"
+    event_msg = (
+        f"任务自愈补跑成功: {task} -> {' '.join(args)}"
+        if status == "success"
+        else f"任务自愈补跑失败: {task} (exit={exit_code})"
+    )
+    _append_event(state, "self_healing", event_level, event_msg)
 
 
 def _expire_auto_read_only_if_needed(state: Dict[str, Any]) -> bool:
@@ -297,6 +538,18 @@ def _update_task_health(
     elif level == "success":
         health["consecutive_successes"] = int(health.get("consecutive_successes", 0) or 0) + 1
         health["consecutive_errors"] = 0
+        healing_retry = state.setdefault("self_healing", {}).setdefault("task_retries", {}).setdefault(
+            task,
+            {
+                "attempts": 0,
+                "last_attempt_at": None,
+                "last_status": None,
+                "last_reason": "",
+                "last_exit_code": None,
+            },
+        )
+        healing_retry["attempts"] = 0
+        healing_retry["last_status"] = "success"
     elif level == "warning":
         health["consecutive_successes"] = 0
 
@@ -329,6 +582,9 @@ def _update_task_health(
         elif level in {"warning", "error"} and auto.get("active") and auto.get("triggered_by") == task:
             auto["recovered_successes"] = 0
 
+    if level == "error":
+        _attempt_task_recovery(task, message, config, state)
+
     if changed or True:
         save_guardrail_state(state)
 
@@ -339,6 +595,65 @@ def record_guardrail_event(task: str, level: str, message: str) -> None:
 
 def record_guardrail_success(task: str, message: str = "任务执行完成") -> None:
     _update_task_health(task, "success", message, emit_event=False)
+
+
+def record_datasource_fallback(
+    task: str,
+    domain: str,
+    source: str,
+    reason: str,
+    *,
+    level: str = "warning",
+) -> None:
+    """Persist datasource fallback switches for operator visibility."""
+    config = load_guardrail_config()
+    state = load_guardrail_state()
+    healing_state = state.setdefault("self_healing", {})
+    fallbacks = healing_state.setdefault("fallbacks", [])
+    entry = {
+        "time": datetime.now().isoformat(),
+        "task": task,
+        "domain": domain,
+        "source": source,
+        "reason": reason,
+        "level": level,
+    }
+    if not fallbacks or any(
+        fallbacks[-1].get(key) != entry.get(key) for key in ("task", "domain", "source", "reason")
+    ):
+        fallbacks.append(entry)
+    retention = int(config.get("self_healing", {}).get("fallback_retention", 40) or 40)
+    healing_state["fallbacks"] = fallbacks[-retention:]
+    _append_event(state, task, level, f"{domain} 已切换备用源 {source}: {reason}")
+    save_guardrail_state(state)
+
+
+def get_self_healing_snapshot(
+    *,
+    config: Optional[Dict[str, Any]] = None,
+    state: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    config = config or load_guardrail_config()
+    state = state or load_guardrail_state()
+    healing_state = state.get("self_healing", {})
+    retries = healing_state.get("task_retries", {})
+    recoveries = list(healing_state.get("recoveries", []))
+    recoveries.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+    fallbacks = list(healing_state.get("fallbacks", []))
+    fallbacks.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+    mode_blocks = {
+        mode: _pipeline_dependency_issues(mode, config, state)
+        for mode in config.get("self_healing", {}).get("pipeline_dependencies", {}).keys()
+    }
+    return {
+        "enabled": bool(config.get("self_healing", {}).get("enabled", True)),
+        "task_retries": retries,
+        "recent_recoveries": recoveries[:8],
+        "recent_fallbacks": fallbacks[:8],
+        "recovery_count": len(recoveries),
+        "fallback_count": len(fallbacks),
+        "mode_blocks": mode_blocks,
+    }
 
 
 def _file_age_hours(path: Path) -> Optional[float]:
@@ -383,6 +698,7 @@ def evaluate_runtime_mode(
     available_cash: Optional[float] = None,
 ) -> GuardrailResult:
     config = load_guardrail_config()
+    state = load_guardrail_state()
     control = get_guardrail_control_state(config=config)
     snapshot = get_runtime_snapshot()
     reasons: List[str] = []
@@ -393,6 +709,10 @@ def evaluate_runtime_mode(
             reasons.append("系统当前处于只读模式（自动保护）")
         else:
             reasons.append("系统当前处于只读模式")
+
+    dependency_issues = _pipeline_dependency_issues(mode, config, state)
+    reasons.extend(dependency_issues["blocking"])
+    warnings.extend(dependency_issues["warnings"])
 
     freshness = config["freshness"]
     daily_search_age = snapshot.get("daily_search_age_hours")

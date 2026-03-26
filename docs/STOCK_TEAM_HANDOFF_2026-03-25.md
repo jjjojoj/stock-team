@@ -192,6 +192,7 @@ openclaw cron list --json
 ### 核心系统
 
 - `core/storage.py`
+- `core/simulated_execution.py`
 - `scripts/feishu_notifier.py`
 - `scripts/ai_predictor.py`
 - `scripts/selector.py`
@@ -215,6 +216,7 @@ openclaw cron list --json
 - `docs/REFACTOR_PHASE11_2026-03-26.md`
 - `docs/REFACTOR_PHASE12_2026-03-26.md`
 - `docs/REFACTOR_PHASE13_2026-03-26.md`
+- `docs/REFACTOR_PHASE14_2026-03-26.md`
 
 ## 五、后续 OpenClaw 需要记住的判断
 
@@ -224,3 +226,5 @@ openclaw cron list --json
 4. 用户主对话模型和股票 cron 模型是分开的，不能因为主会话用 Claude 就推断 cron 也在用 Claude。
 5. 当前仓库已经具备 OpenClaw 开箱部署能力，优先使用 `bash scripts/bootstrap_openclaw.sh`，不要再沿用旧 `start.sh` 时代的假设。
 6. 当前主链已经接近真闭环，但午盘学习和运行安全现在由 `runtime_guardrails` 统一托底；后续任何“自动调参/自动交易”改动都不应绕过这一层。
+7. 当前交易执行层已经升级为“模拟订单 -> 成交/部分成交 -> 账本回写 -> 自动补记”，不要再把 `auto_trader_v3.py` 当作“信号直接改仓位”的脚本来理解。
+8. 当前值守不仅要看 guardrails 事件，还要看 `self_healing` 和 `simulated_orders`，因为这两者已经决定系统是否真的处于可托管状态。

@@ -204,6 +204,22 @@ python3 scripts/ai_predictor.py brief
 - 是否是连续同向偏差
 - 是否已进入自动回滚窗口
 
+### 5. 模拟交易看起来在“执行”，但账本没有闭环
+
+先查：
+
+- `core/simulated_execution.py`
+- `database/stock_team.db`
+- `scripts/auto_trader_v3.py`
+- Dashboard 交易执行页
+
+重点看：
+
+- `simulated_orders` 是否存在 `partial_filled / pending`
+- 是否已经触发自动补记或超时撤单
+- `trades.execution_order_id` 是否和订单账本对得上
+- 当前现金和持仓是否已经按成交结果回写
+
 ## 七、OpenClaw 应记住的升级规则
 
 - 任务失败不等于系统崩溃，先区分“通知失败”和“业务失败”
@@ -220,13 +236,15 @@ python3 scripts/ai_predictor.py brief
 - `docs/REFACTOR_PHASE11_2026-03-26.md`
 - `docs/REFACTOR_PHASE12_2026-03-26.md`
 - `docs/REFACTOR_PHASE13_2026-03-26.md`
+- `docs/REFACTOR_PHASE14_2026-03-26.md`
 - `config/runtime_guardrails.json`
 - `core/runtime_guardrails.py`
 - `core/fundamentals.py`
+- `core/simulated_execution.py`
 
 一句话总结：
 
 - 先看 cron
 - 再看 Dashboard
-- 再看 guardrails
+- 再看 guardrails / self_healing / simulated_orders
 - 异常时优先保守，不要硬跑自动买入

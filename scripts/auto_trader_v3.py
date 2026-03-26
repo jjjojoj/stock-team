@@ -18,7 +18,7 @@ import sqlite3
 import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import logging
 
 # 项目路径
@@ -42,7 +42,16 @@ from core.storage import (
     save_json,
     sync_positions_and_account_to_db,
 )
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
+from core.fundamentals import get_fundamental_bundles
+from core.runtime_guardrails import (
+    evaluate_runtime_mode,
+    record_datasource_fallback,
+    record_guardrail_event,
+    record_guardrail_success,
+    task_lock,
+    TaskLockedError,
+)
+from core.simulated_execution import PaperExecutionEngine
 
 # 配置目录
 CONFIG_DIR = PROJECT_ROOT / "config"
@@ -126,6 +135,7 @@ class AutoTraderV3:
         self.trade_history = []
         self.high_water_marks = {}  # 记录最高价（用于移动止盈）
         self.cash = 0  # 现金余额
+        self.execution_engine = PaperExecutionEngine(DATABASE_FILE)
         
         # 数据管理器
         if HAS_ADAPTERS:
@@ -215,21 +225,55 @@ class AutoTraderV3:
         except Exception as e:
             logger.error(f"同步到数据库失败: {e}")
     
-    def get_realtime_price(self, code: str) -> Optional[float]:
-        """获取实时价格"""
+    def get_trade_quote(self, code: str) -> Dict[str, Any]:
+        """获取交易报价，并记录是否切换到备用源。"""
+        watchlist = load_json(WATCHLIST_FILE, {})
+        bundle = get_fundamental_bundles([code], watchlist_data=watchlist).get(code, {})
+        price_value: Optional[float] = None
+        source = "unavailable"
+
         if self.dm:
             try:
                 price = self.dm.get_realtime_price(code)
                 if price:
-                    return float(price.price)
+                    price_value = float(price.price)
+                    source = "live_api"
             except Exception as e:
                 logger.warning(f"获取实时价格失败 {code}: {e}")
 
-        fallback_price = self._get_fallback_quote_price(code)
-        if fallback_price is not None:
-            return fallback_price
+        if price_value is None:
+            fallback_price = self._get_fallback_quote_price(code)
+            if fallback_price is not None:
+                price_value = fallback_price
+                source = "tencent_quote"
+                record_datasource_fallback("auto_trader_quotes", "quote", source, f"{code} 改用腾讯行情兜底")
 
-        return self._get_simulated_price(code)
+        if price_value is None and bundle.get("price"):
+            price_value = float(bundle.get("price") or 0.0)
+            if price_value > 0:
+                source = str(bundle.get("source") or "fundamentals")
+                record_datasource_fallback("auto_trader_quotes", "quote", source, f"{code} 价格改用基本面/缓存数据")
+
+        if price_value is None:
+            simulated = self._get_simulated_price(code)
+            if simulated is not None:
+                price_value = simulated
+                source = "simulated_price"
+                record_datasource_fallback("auto_trader_quotes", "quote", source, f"{code} 仅能使用模拟价格")
+
+        return {
+            "code": code,
+            "price": price_value,
+            "source": source,
+            "market_cap": bundle.get("market_cap"),
+            "fundamental_source": bundle.get("source", "unavailable"),
+            "name": bundle.get("name"),
+            "cost_basis_price": self.positions.get(code, {}).get("cost_price"),
+        }
+
+    def get_realtime_price(self, code: str) -> Optional[float]:
+        """兼容旧接口，仅返回价格。"""
+        return self.get_trade_quote(code).get("price")
 
     def _get_fallback_quote_price(self, code: str) -> Optional[float]:
         """使用腾讯行情接口兜底，避免交易链路依赖模拟价格。"""
@@ -259,6 +303,116 @@ class AutoTraderV3:
             change = random.uniform(-0.03, 0.05)
             return cost_price * (1 + change)
         return None
+
+    def _legacy_trade_record(self, execution: Dict[str, Any], *, position: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        record = {
+            "type": execution["direction"],
+            "code": execution["symbol"],
+            "name": execution["name"],
+            "price": execution.get("fill_price") or execution.get("reference_price") or 0.0,
+            "shares": execution.get("filled_shares", 0),
+            "requested_shares": execution.get("requested_shares", 0),
+            "remaining_shares": execution.get("remaining_shares", 0),
+            "amount": execution.get("fill_amount", 0.0),
+            "commission": execution.get("commission", 0.0),
+            "slippage_bps": execution.get("slippage_bps", 0.0),
+            "slippage_cost": execution.get("slippage_cost", 0.0),
+            "reason": execution.get("reason", ""),
+            "order_id": execution.get("order_id"),
+            "order_status": execution.get("status"),
+            "price_source": execution.get("price_source"),
+            "prediction_id": execution.get("prediction_id"),
+            "timestamp": execution.get("created_at") or datetime.now().isoformat(),
+        }
+        if execution["direction"] == "sell":
+            record["sold_shares"] = execution.get("filled_shares", 0)
+            record["pnl_pct"] = execution.get("pnl_pct", 0.0) or 0.0
+            record["pnl_amount"] = execution.get("pnl_amount", 0.0) or 0.0
+        elif position:
+            record["buy_reason"] = position.get("buy_reason", "")
+        return record
+
+    def _apply_execution_result(
+        self,
+        execution: Dict[str, Any],
+        *,
+        trade_context: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """把模拟订单结果回写到持仓、现金和旧 trade_history。"""
+        filled_shares = int(execution.get("filled_shares", 0) or 0)
+        if filled_shares <= 0:
+            return False
+
+        code = execution["symbol"]
+        fill_price = float(execution.get("fill_price") or execution.get("reference_price") or 0.0)
+        cash_delta = float(execution.get("cash_effect") or 0.0)
+        direction = execution["direction"]
+        existing = dict(self.positions.get(code, {}))
+
+        if direction == "buy":
+            previous_shares = int(existing.get("shares", 0) or 0)
+            previous_cost = float(existing.get("cost_price", 0.0) or 0.0)
+            trade_cost = abs(cash_delta)
+            total_shares = previous_shares + filled_shares
+            if previous_shares > 0:
+                total_cost = previous_cost * previous_shares + trade_cost
+                avg_cost = total_cost / max(total_shares, 1)
+            else:
+                avg_cost = trade_cost / max(filled_shares, 1)
+
+            position = {
+                **existing,
+                "name": execution["name"],
+                "shares": total_shares,
+                "cost_price": round(avg_cost, 4),
+                "current_price": round(fill_price, 4),
+                "buy_date": existing.get("buy_date") or datetime.now().strftime("%Y-%m-%d"),
+                "buy_reason": execution.get("reason") or existing.get("buy_reason", ""),
+                "stop_loss": existing.get("stop_loss", round(avg_cost * 0.92, 2)),
+                "take_profit": existing.get("take_profit", round(avg_cost * 1.2, 2)),
+                "industry": (trade_context or {}).get("industry", existing.get("industry", "unknown")),
+            }
+            self.positions[code] = position
+        else:
+            if code not in self.positions:
+                return False
+            remaining = int(existing.get("shares", 0) or 0) - filled_shares
+            if remaining <= 0:
+                self.positions.pop(code, None)
+            else:
+                existing["shares"] = remaining
+                existing["current_price"] = round(fill_price, 4)
+                self.positions[code] = existing
+
+        self.cash += cash_delta
+        self.trade_history.append(self._legacy_trade_record(execution, position=self.positions.get(code)))
+        self._save_data()
+        return True
+
+    def reconcile_open_orders(self) -> List[Dict[str, Any]]:
+        """补跑未完成订单，让部分成交和超时撤单真正落到账本。"""
+        results = self.execution_engine.reconcile_open_orders(
+            self.get_trade_quote,
+            cash_available=self.cash,
+            available_shares_provider=lambda code: int(self.positions.get(code, {}).get("shares", 0) or 0),
+        )
+        applied: List[Dict[str, Any]] = []
+        for result in results:
+            status = result.get("status")
+            if status == "cancelled":
+                logger.warning("⏱️ 订单超时撤单: %s %s", result.get("symbol"), result.get("order_id"))
+                continue
+            if self._apply_execution_result(result):
+                applied.append(result)
+                logger.info(
+                    "📘 补记订单成交: %s %s %s股 @ ¥%.2f (%s)",
+                    result.get("direction"),
+                    result.get("symbol"),
+                    result.get("filled_shares"),
+                    float(result.get("fill_price") or 0.0),
+                    result.get("status"),
+                )
+        return applied
     
     def check_stop_loss(self, code: str, position: Dict, current_price: float) -> Optional[Dict]:
         """
@@ -605,6 +759,62 @@ class AutoTraderV3:
         except Exception as e:
             logger.error(f"保存风控评估失败: {e}")
 
+    def execute_buy(self, signal: Dict) -> bool:
+        """执行模拟买入，下单后按成交结果回写主账本。"""
+        budget = min(
+            50000.0,
+            max(0.0, self.cash * 0.25),
+            max(0.0, self.cash - 1000),
+        )
+        requested_shares = int(budget / max(float(signal["price"]), 0.01))
+        requested_shares = (requested_shares // 100) * 100
+        if requested_shares <= 0:
+            logger.warning("买入预算不足: %s", signal["code"])
+            return False
+
+        signal = dict(signal)
+        signal["shares"] = requested_shares
+
+        passed, risk_msg, risk_level = self.check_risk_assessment(signal["code"], signal)
+        if not passed:
+            logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
+            self.save_risk_assessment(signal["code"], risk_level, risk_msg)
+            return False
+
+        self.save_risk_assessment(signal["code"], risk_level, risk_msg)
+        prediction_id = self._find_latest_prediction(signal["code"])
+        execution = self.execution_engine.submit_order(
+            symbol=signal["code"],
+            name=signal["name"],
+            direction="buy",
+            requested_shares=requested_shares,
+            reference_price=float(signal["price"]),
+            price_source=str(signal.get("price_source") or "unknown"),
+            reason=str(signal.get("reasons") or ""),
+            cash_available=self.cash,
+            prediction_id=prediction_id,
+            market_cap=signal.get("market_cap"),
+            metadata={
+                "confidence": signal.get("confidence"),
+                "risk_level": risk_level,
+                "risk_message": risk_msg,
+                "fundamental_source": signal.get("fundamental_source"),
+            },
+        )
+        if not self._apply_execution_result(execution, trade_context=signal):
+            logger.warning("买入未成交: %s (%s)", signal["code"], execution.get("status"))
+            return False
+
+        logger.info(
+            "买入成交: %s %s股 @ ¥%.2f | 手续费 ¥%.2f | 状态 %s",
+            signal["name"],
+            execution.get("filled_shares", 0),
+            float(execution.get("fill_price") or signal["price"]),
+            float(execution.get("commission") or 0.0),
+            execution.get("status"),
+        )
+        return True
+
     def execute_sell(self, signal: Dict) -> bool:
         """执行卖出"""
         code = signal["code"]
@@ -614,54 +824,67 @@ class AutoTraderV3:
             return False
 
         position = self.positions[code]
-        sell_ratio = signal["sell_ratio"]
+        sell_ratio = float(signal["sell_ratio"] or 0.0)
+        requested_shares = int(position.get("shares", 0) * sell_ratio)
+        if requested_shares <= 0:
+            logger.warning("卖出股数为 0: %s", code)
+            return False
 
         # 查找关联的预测ID
         prediction_id = self._find_latest_prediction(code)
+        execution = self.execution_engine.submit_order(
+            symbol=code,
+            name=signal["name"],
+            direction="sell",
+            requested_shares=requested_shares,
+            reference_price=float(signal["price"]),
+            price_source=str(signal.get("price_source") or "unknown"),
+            reason=str(signal["reason"]),
+            available_shares=int(position.get("shares", 0) or 0),
+            prediction_id=prediction_id,
+            market_cap=signal.get("market_cap"),
+            metadata={
+                "signal_reason": signal.get("reason"),
+                "sell_ratio": sell_ratio,
+                "message": signal.get("message"),
+            },
+            cost_basis_price=float(position.get("cost_price", signal["price"]) or signal["price"]),
+        )
+        if not self._apply_execution_result(execution, trade_context=position):
+            logger.warning("卖出未成交: %s (%s)", code, execution.get("status"))
+            return False
 
-        # 记录交易
-        trade_record = {
-            "type": "sell",
-            "code": code,
-            "name": signal["name"],
-            "price": signal["price"],
-            "pnl_pct": signal["pnl_pct"],
-            "reason": signal["reason"],
-            "sell_ratio": sell_ratio,
-            "shares": position.get("shares", 0),
-            "sold_shares": int(position.get("shares", 0) * sell_ratio),
-            "prediction_id": prediction_id,  # 添加预测ID关联
-            "timestamp": datetime.now().isoformat(),
-        }
-        
-        self.trade_history.append(trade_record)
-        
-        # 更新持仓
-        if sell_ratio >= 1.0:
-            del self.positions[code]
+        if execution.get("remaining_shares", 0) > 0:
+            logger.info(
+                "部分卖出: %s (%s) 成交 %s/%s 股，剩余挂单 %s 股",
+                signal["name"],
+                code,
+                execution.get("filled_shares"),
+                execution.get("requested_shares"),
+                execution.get("remaining_shares"),
+            )
+        elif sell_ratio >= 1.0:
             logger.info(f"清仓: {signal['name']} ({code})")
         else:
-            self.positions[code]["shares"] = int(position.get("shares", 0) * (1 - sell_ratio))
             logger.info(f"减仓: {signal['name']} ({code})，卖出 {sell_ratio*100:.0f}%")
 
-        # 更新现金
-        sell_amount = trade_record["sold_shares"] * signal["price"]
-        self.cash += sell_amount
-        logger.info(f"卖出金额: ¥{sell_amount:,.0f}，现金余额: ¥{self.cash:,.0f}")
-        
-        # 保存数据
-        self._save_data()
+        logger.info(
+            "卖出成交金额: ¥%s，手续费 ¥%s，现金余额: ¥%s",
+            f"{execution.get('fill_amount', 0.0):,.0f}",
+            f"{execution.get('commission', 0.0):,.0f}",
+            f"{self.cash:,.0f}",
+        )
         
         # 发送飞书通知
         if HAS_FEISHU:
             try:
-                profit = signal["pnl_pct"] * position.get("shares", 0) * signal["price"]
+                profit = execution.get("pnl_amount")
                 send_trade_notification(
                     action="SELL",
                     code=code,
                     name=signal["name"],
-                    shares=trade_record["sold_shares"],
-                    price=signal["price"],
+                    shares=execution.get("filled_shares", 0),
+                    price=execution.get("fill_price") or signal["price"],
                     profit=profit
                 )
             except Exception as e:
@@ -678,7 +901,8 @@ class AutoTraderV3:
         signals = []
         
         for code, position in self.positions.items():
-            current_price = self.get_realtime_price(code)
+            quote = self.get_trade_quote(code)
+            current_price = quote.get("price")
             if not current_price:
                 logger.warning(f"无法获取价格: {code}")
                 continue
@@ -686,30 +910,40 @@ class AutoTraderV3:
             # 1. 止损检查（最高优先级）
             signal = self.check_stop_loss(code, position, current_price)
             if signal:
+                signal["price_source"] = quote.get("source", "unknown")
+                signal["market_cap"] = quote.get("market_cap")
                 signals.append(signal)
                 continue  # 触发止损后不再检查其他条件
             
             # 2. 止盈检查
             signal = self.check_take_profit(code, position, current_price)
             if signal:
+                signal["price_source"] = quote.get("source", "unknown")
+                signal["market_cap"] = quote.get("market_cap")
                 signals.append(signal)
                 continue
             
             # 3. 移动止盈检查
             signal = self.check_trailing_stop(code, position, current_price)
             if signal:
+                signal["price_source"] = quote.get("source", "unknown")
+                signal["market_cap"] = quote.get("market_cap")
                 signals.append(signal)
                 continue
             
             # 4. 预测转空检查
             signal = self.check_prediction_reversal(code, position, current_price)
             if signal:
+                signal["price_source"] = quote.get("source", "unknown")
+                signal["market_cap"] = quote.get("market_cap")
                 signals.append(signal)
                 continue
             
             # 5. 时间止损检查
             signal = self.check_time_stop(code, position, current_price)
             if signal:
+                signal["price_source"] = quote.get("source", "unknown")
+                signal["market_cap"] = quote.get("market_cap")
                 signals.append(signal)
         
         # 按优先级排序
@@ -729,7 +963,7 @@ class AutoTraderV3:
         
         if not signals:
             logger.info("\n✅ 无卖出信号")
-            return
+            return []
         
         # 显示信号
         logger.info(f"\n发现 {len(signals)} 个卖出信号:")
@@ -788,6 +1022,10 @@ def main():
                         record_guardrail_event("auto_trader_v3_buy", "error", reason)
                     return 1
 
+                reconciled = trader.reconcile_open_orders()
+                if reconciled:
+                    logger.info("🧾 已补记 %s 笔未完成订单成交", len(reconciled))
+
                 logger.info("执行买入逻辑...")
                 buy_signals = []
                 watchlist = load_json(WATCHLIST_FILE, {})
@@ -797,7 +1035,8 @@ def main():
                         if pred.get("code") == code:
                             confidence = pred.get("confidence", 0)
                             if confidence >= 80 and code not in trader.positions:
-                                price = trader.get_realtime_price(code)
+                                quote = trader.get_trade_quote(code)
+                                price = quote.get("price")
                                 if price:
                                     buy_signals.append({
                                         "code": code,
@@ -805,6 +1044,10 @@ def main():
                                         "price": price,
                                         "confidence": confidence,
                                         "reasons": stock.get("reason", stock.get("added_reason", "")),
+                                        "price_source": quote.get("source", "unknown"),
+                                        "market_cap": quote.get("market_cap"),
+                                        "fundamental_source": quote.get("fundamental_source"),
+                                        "industry": stock.get("industry", "unknown"),
                                     })
 
                 buy_signals.sort(key=lambda x: x["confidence"], reverse=True)
@@ -820,42 +1063,7 @@ def main():
                     if args.execute and not args.dry_run:
                         logger.info("\n执行买入...")
                         for signal in buy_signals[:2]:
-                            passed, risk_msg, risk_level = trader.check_risk_assessment(signal['code'], signal)
-
-                            if not passed:
-                                logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
-                                trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
-                                continue
-
-                            logger.info(f"✅ {signal['name']}: 风控检查通过 - {risk_level}")
-
-                            buy_amount = 50000
-                            shares = int(buy_amount / signal['price'])
-                            if shares > 0:
-                                trader.positions[signal['code']] = {
-                                    "name": signal['name'],
-                                    "cost_price": signal['price'],
-                                    "shares": shares,
-                                    "buy_date": datetime.now().strftime("%Y-%m-%d"),
-                                    "buy_reason": signal['reasons'],
-                                }
-                                trader.cash -= shares * signal['price']
-                                trader.save_risk_assessment(signal['code'], risk_level, risk_msg)
-                                prediction_id = trader._find_latest_prediction(signal['code'])
-                                trader.trade_history.append({
-                                    "type": "buy",
-                                    "code": signal['code'],
-                                    "name": signal['name'],
-                                    "price": signal['price'],
-                                    "shares": shares,
-                                    "reason": signal['reasons'],
-                                    "prediction_id": prediction_id,
-                                    "timestamp": datetime.now().isoformat(),
-                                })
-
-                                logger.info(f"买入: {signal['name']} {shares}股 @¥{signal['price']:.2f}")
-
-                        trader._save_data()
+                            trader.execute_buy(signal)
                         logger.info("✅ 买入执行完成")
                     else:
                         logger.info("\n💡 提示: 使用 --execute 参数自动执行买入")
@@ -870,6 +1078,9 @@ def main():
                 for warning in guard.warnings:
                     logger.warning("⚠️ %s", warning)
                     record_guardrail_event("auto_trader_v3_sell", "warning", warning)
+                reconciled = trader.reconcile_open_orders()
+                if reconciled:
+                    logger.info("🧾 已补记 %s 笔未完成订单成交", len(reconciled))
                 auto_execute = args.execute and not args.dry_run
                 signals = trader.run(auto_execute=auto_execute)
                 record_guardrail_success("auto_trader_v3_sell", f"卖出检查完成，信号 {len(signals)} 个")

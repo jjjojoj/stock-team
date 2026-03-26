@@ -258,6 +258,18 @@ def get_fundamental_bundles(
         merged.setdefault("roe", 0.0)
         merged.setdefault("net_profit_growth", 0.0)
         merged.setdefault("dividend_yield", 0.0)
+        if merged.get("source") in {"cache", "snapshot", "watchlist", "legacy"}:
+            try:
+                from .runtime_guardrails import record_datasource_fallback
+
+                record_datasource_fallback(
+                    "fundamentals",
+                    "fundamentals",
+                    str(merged.get("source")),
+                    f"{code} 基本面改用 {merged.get('source')} 数据",
+                )
+            except Exception:
+                pass
         bundles[code] = merged
 
     return bundles

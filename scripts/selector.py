@@ -30,7 +30,14 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 from core.fundamentals import get_fundamental_bundles
-from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
+from core.runtime_guardrails import (
+    evaluate_runtime_mode,
+    record_datasource_fallback,
+    record_guardrail_event,
+    record_guardrail_success,
+    task_lock,
+    TaskLockedError,
+)
 
 # 导入新适配器
 ADAPTER_IMPORT_ERROR = None
@@ -174,6 +181,8 @@ class StockSelector:
             price = self.dm.get_realtime_price(code) if self.dm else None
             if not price:
                 price = self._get_fallback_price(code)
+                if price:
+                    record_datasource_fallback("selector", "quote", "tencent_quote", f"{code} 选股行情改用腾讯接口")
             if not price:
                 return None
             

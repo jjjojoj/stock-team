@@ -28,7 +28,9 @@ import logging
 from core.storage import (
     DB_PATH,
     LEARNING_DIR,
+    get_simulated_order_metrics,
     load_json,
+    load_recent_simulated_orders,
     load_rule_state,
     load_watchlist,
 )
@@ -36,6 +38,7 @@ from core.runtime_guardrails import (
     evaluate_runtime_mode,
     get_guardrail_control_state,
     get_runtime_snapshot,
+    get_self_healing_snapshot,
     load_guardrail_config,
     load_guardrail_state,
 )
@@ -805,6 +808,7 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
     recent_events = _recent_guardrail_events()
     recent_error_count = sum(1 for item in recent_events if item.get("level") == "error")
     recent_warning_count = sum(1 for item in recent_events if item.get("level") == "warning")
+    self_healing = get_self_healing_snapshot(config=config, state=state)
 
     learning_state = state.get("midday_learning", {})
     adjustments = list(learning_state.get("adjustments", []))
@@ -863,6 +867,7 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
         "active_adjustments": len(active_adjustments),
         "latest_rollback": latest_rollback,
         "simulation_ready": execution_mode["mode"] == "simulation" and readiness_status == "success",
+        "self_healing": self_healing,
     }
 
 
@@ -871,8 +876,13 @@ def get_trading_snapshot() -> Dict[str, Any]:
     account = get_account_latest() or {}
     positions = get_positions()
     trades = get_trades(20)
+    order_metrics = get_simulated_order_metrics()
     today = datetime.now().strftime("%Y-%m-%d")
     today_trades = [trade for trade in trades if str(trade.get("executed_at", "")).startswith(today)]
+    today_orders = [
+        order for order in order_metrics.get("recent_orders", [])
+        if str(order.get("created_at", "")).startswith(today)
+    ]
     proposals = query_sql(
         """
         SELECT id, symbol, name, direction, status, created_at
@@ -887,6 +897,9 @@ def get_trading_snapshot() -> Dict[str, Any]:
         "positions": positions,
         "today_trades": today_trades,
         "recent_trades": trades,
+        "today_orders": today_orders,
+        "recent_orders": load_recent_simulated_orders(20),
+        "order_metrics": order_metrics,
         "proposals": proposals,
     }
 
@@ -1534,6 +1547,7 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 <div class="card"><div class="card-title"><span>持仓汇总</span><span class="badge" id="trading-positions-count">--</span></div><div class="card-content">
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">总市值</div><div class="status-meta" id="trading-market-value">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">今日盈亏</div><div class="status-meta" id="trading-today-profit">--</div></div></div>
+                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">模拟订单</div><div class="status-meta" id="trading-open-orders">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">熔断状态</div><div class="status-meta"><span class="risk-badge risk-low">🟢 正常</span></div></div></div>
                 </div></div>
                 <div class="card"><div class="card-title"><span>今日交易记录</span><span class="badge" id="trading-today-count">--</span></div><table class="data-table"><thead><tr><th>时间</th><th>代码</th><th>方向</th><th>数量</th><th>价格</th><th>金额</th><th>原因</th></tr></thead><tbody id="trading-today-body"><tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无今日交易</td></tr></tbody></table></div>
@@ -1729,6 +1743,7 @@ HTML_CONTENT = '''<!DOCTYPE html>
             const readiness = autopilot.readiness || {};
             const executionMode = autopilot.execution_mode || {};
             const eventCounts = autopilot.event_counts || {};
+            const selfHealing = autopilot.self_healing || {};
             const freshness = Array.isArray(autopilot.freshness) ? autopilot.freshness : [];
             const freshnessHealthy = freshness.filter(item => item.status === 'success').length;
             const freshnessTotal = freshness.length || 0;
@@ -1752,6 +1767,7 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 '<div class="status-row"><div class="status-dot ' + (autopilot.force_read_only ? 'error' : 'running') + '"></div><div class="status-info"><div class="status-name">执行模式</div><div class="status-meta">' + (executionMode.detail || '--') + (autopilot.read_only_reason ? (' | 只读原因: ' + autopilot.read_only_reason) : '') + '</div></div></div>',
                 '<div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">预测阈值</div><div class="status-meta">confidence_threshold = ' + ((autopilot.confidence_threshold || 0).toFixed ? autopilot.confidence_threshold.toFixed(2) : autopilot.confidence_threshold) + '</div></div></div>',
                 '<div class="status-row"><div class="status-dot ' + ((autopilot.active_adjustments || 0) > 0 ? 'running' : 'idle') + '"></div><div class="status-info"><div class="status-name">学习调参</div><div class="status-meta">活跃调整 ' + (autopilot.active_adjustments || 0) + ' 次' + (autopilot.latest_rollback ? (' | 最近回滚: ' + (autopilot.latest_rollback.rollback_reason || autopilot.latest_rollback.reason || '已回滚')) : '') + '</div></div></div>',
+                '<div class="status-row"><div class="status-dot ' + ((((selfHealing.recovery_count || 0) > 0) || ((selfHealing.fallback_count || 0) > 0)) ? 'idle' : 'running') + '"></div><div class="status-info"><div class="status-name">任务自愈</div><div class="status-meta">补跑 ' + (selfHealing.recovery_count || 0) + ' 次 | 备用源切换 ' + (selfHealing.fallback_count || 0) + ' 次</div></div></div>',
                 '<div class="status-row"><div class="status-dot ' + ((eventCounts.errors || 0) > 0 ? 'error' : ((eventCounts.warnings || 0) > 0 ? 'idle' : 'running')) + '"></div><div class="status-info"><div class="status-name">最近事件</div><div class="status-meta">错误 ' + (eventCounts.errors || 0) + ' | 告警 ' + (eventCounts.warnings || 0) + '</div></div></div>'
             ].join('');
 
@@ -1773,7 +1789,10 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 const reasons = (item.reasons || []).concat(item.warnings || []);
                 const meta = reasons.length ? reasons.join(' | ') : '当前未发现阻断项';
                 return '<div class="status-row"><div class="status-dot ' + dot + '"></div><div class="status-info"><div class="status-name">' + item.label + '</div><div class="status-meta">' + meta + '</div></div></div>';
-            }).join('') || '<p class="empty-tip">暂无自动托管检查结果</p>';
+            }).join('') + ((selfHealing.recent_recoveries || []).slice(0, 2).map(item => {
+                const dot = item.status === 'success' ? 'running' : 'idle';
+                return '<div class="status-row"><div class="status-dot ' + dot + '"></div><div class="status-info"><div class="status-name">自动补跑 · ' + (item.task || '--') + '</div><div class="status-meta">' + (item.status === 'success' ? '补跑成功' : '补跑失败') + ' | ' + (item.reason || '--') + '</div></div></div>';
+            }).join('')) || '<p class="empty-tip">暂无自动托管检查结果</p>';
 
             const recentEvents = Array.isArray(autopilot.recent_events) ? autopilot.recent_events : [];
             const eventsBadge = document.getElementById('monitor-events-badge');
@@ -1899,11 +1918,17 @@ HTML_CONTENT = '''<!DOCTYPE html>
             const data = await fetchAPI('/trading-summary', {});
             const acc = data.account || {};
             const todayTrades = Array.isArray(data.today_trades) ? data.today_trades : [];
+            const orderMetrics = data.order_metrics || {};
             document.getElementById('trading-market-value').textContent = '¥' + (acc.market_value || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
             document.getElementById('trading-today-profit').textContent = (acc.daily_profit || 0).toFixed(2);
             document.getElementById('trading-positions-count').textContent = data.positions?.length || 0;
             document.getElementById('trading-today-count').textContent = todayTrades.length;
-            document.getElementById('trading-today-body').innerHTML = todayTrades.map(trade => '<tr><td>' + (trade.executed_at || '--') + '</td><td>' + (trade.symbol || '--') + '</td><td>' + (trade.direction || '--') + '</td><td>' + (trade.shares || 0) + '</td><td>' + (trade.price || 0).toFixed(2) + '</td><td>' + (trade.amount || 0).toFixed(2) + '</td><td>' + (trade.reason || '--') + '</td></tr>').join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无今日交易</td></tr>';
+            document.getElementById('trading-open-orders').textContent = '未完成 ' + (orderMetrics.open_order_count || 0) + ' 笔 | 部分成交 ' + (orderMetrics.partial_fill_count || 0) + ' 笔';
+            document.getElementById('trading-today-body').innerHTML = todayTrades.map(trade => {
+                const fillRatio = trade.fill_ratio ? (' | 成交率 ' + Math.round((trade.fill_ratio || 0) * 100) + '%') : '';
+                const status = trade.execution_status ? (' | ' + trade.execution_status) : '';
+                return '<tr><td>' + (trade.executed_at || '--') + '</td><td>' + (trade.symbol || '--') + '</td><td>' + (trade.direction || '--') + '</td><td>' + (trade.shares || 0) + '</td><td>' + (trade.price || 0).toFixed(2) + '</td><td>' + (trade.amount || 0).toFixed(2) + '</td><td>' + (trade.reason || '--') + status + fillRatio + '</td></tr>';
+            }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无今日交易</td></tr>';
         }
 
         async function loadPositionsData() {

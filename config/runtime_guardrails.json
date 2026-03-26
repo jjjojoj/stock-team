@@ -32,5 +32,48 @@
     "max_confidence_threshold": 0.9,
     "rollback_window_runs": 3,
     "rollback_drop_pct": 8.0
+  },
+  "self_healing": {
+    "enabled": true,
+    "upstream_error_ttl_minutes": 240,
+    "retry_tasks": {
+      "selector": {
+        "args": ["scripts/selector.py", "top", "10"],
+        "cooldown_seconds": 900,
+        "max_attempts": 1,
+        "timeout_seconds": 900
+      },
+      "daily_stock_research": {
+        "args": ["scripts/daily_stock_research.py"],
+        "cooldown_seconds": 900,
+        "max_attempts": 1,
+        "timeout_seconds": 900
+      },
+      "ai_predictor": {
+        "args": ["scripts/ai_predictor.py"],
+        "cooldown_seconds": 900,
+        "max_attempts": 1,
+        "timeout_seconds": 900
+      },
+      "midday_review": {
+        "args": ["scripts/midday_review.py"],
+        "cooldown_seconds": 900,
+        "max_attempts": 1,
+        "timeout_seconds": 900
+      },
+      "auto_trader_v3_sell": {
+        "args": ["scripts/auto_trader_v3.py", "--sell", "--execute"],
+        "cooldown_seconds": 900,
+        "max_attempts": 1,
+        "timeout_seconds": 900
+      }
+    },
+    "pipeline_dependencies": {
+      "prediction_generate": ["selector", "daily_stock_research"],
+      "trade_buy": ["selector", "ai_predictor"],
+      "trade_sell": []
+    },
+    "fallback_retention": 40,
+    "recovery_retention": 40
   }
 }

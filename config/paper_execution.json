@@ -1,0 +1,15 @@
+{
+  "board_lot": 100,
+  "min_commission": 5.0,
+  "commission_rate": 0.0003,
+  "transfer_fee_rate": 0.00001,
+  "stamp_duty_rate": 0.0005,
+  "buy_slippage_bps": 6.0,
+  "sell_slippage_bps": 8.0,
+  "fallback_slippage_bps": 14.0,
+  "simulated_price_slippage_bps": 35.0,
+  "min_capacity_value": 150000.0,
+  "capacity_value_per_yi_market_cap": 6000.0,
+  "partial_fill_min_ratio": 0.2,
+  "stale_order_minutes": 120
+}

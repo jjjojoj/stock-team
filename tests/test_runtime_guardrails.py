@@ -1,5 +1,7 @@
 import tempfile
 import unittest
+from types import SimpleNamespace
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -134,6 +136,86 @@ class RuntimeGuardrailTests(unittest.TestCase):
                     with self.assertRaises(guardrails.TaskLockedError):
                         with guardrails.task_lock("selector"):
                             pass
+
+    def test_self_healing_records_retry_attempt(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            state_file = Path(temp_dir) / "runtime_guardrails_state.json"
+            config = {
+                **guardrails.DEFAULT_CONFIG,
+                "self_healing": {
+                    **guardrails.DEFAULT_CONFIG["self_healing"],
+                    "retry_tasks": {
+                        "selector": {
+                            "args": ["scripts/selector.py", "top", "10"],
+                            "cooldown_seconds": 0,
+                            "max_attempts": 1,
+                            "timeout_seconds": 30,
+                        }
+                    },
+                },
+            }
+
+            with (
+                patch.object(guardrails, "STATE_FILE", state_file),
+                patch.object(guardrails, "load_guardrail_config", return_value=config),
+                patch.object(
+                    guardrails.subprocess,
+                    "run",
+                    return_value=SimpleNamespace(returncode=0, stdout="ok", stderr=""),
+                ),
+            ):
+                guardrails.record_guardrail_event("selector", "error", "选股失败")
+                snapshot = guardrails.get_self_healing_snapshot(config=config, state=guardrails.load_guardrail_state())
+
+        self.assertEqual(snapshot["recovery_count"], 1)
+        self.assertEqual(snapshot["recent_recoveries"][0]["status"], "success")
+
+    def test_trade_buy_mode_blocks_when_upstream_task_recently_failed(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            state_file = Path(temp_dir) / "runtime_guardrails_state.json"
+            with patch.object(guardrails, "STATE_FILE", state_file):
+                state = guardrails.load_guardrail_state()
+                state["autopilot"]["task_health"]["ai_predictor"] = {
+                    "consecutive_errors": 1,
+                    "consecutive_successes": 0,
+                    "last_level": "error",
+                    "last_message": "预测生成失败",
+                    "last_time": datetime.now().isoformat(),
+                }
+                guardrails.save_guardrail_state(state)
+
+            config = {
+                **guardrails.DEFAULT_CONFIG,
+                "self_healing": {
+                    **guardrails.DEFAULT_CONFIG["self_healing"],
+                    "upstream_error_ttl_minutes": 600,
+                    "pipeline_dependencies": {
+                        **guardrails.DEFAULT_CONFIG["self_healing"]["pipeline_dependencies"],
+                        "trade_buy": ["ai_predictor"],
+                    },
+                },
+                "freshness": dict(guardrails.DEFAULT_CONFIG["freshness"]),
+            }
+            snapshot = {
+                "daily_search_age_hours": 2.0,
+                "predictions_age_hours": 2.0,
+                "fundamental_snapshot_age_hours": 2.0,
+                "stock_pool_age_hours": 2.0,
+            }
+            with (
+                patch.object(guardrails, "STATE_FILE", state_file),
+                patch.object(guardrails, "load_guardrail_config", return_value=config),
+                patch.object(guardrails, "get_runtime_snapshot", return_value=snapshot),
+            ):
+                result = guardrails.evaluate_runtime_mode(
+                    "trade_buy",
+                    universe_count=3,
+                    active_prediction_count=2,
+                    available_cash=10000,
+                )
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("上游任务 ai_predictor 最近失败" in reason for reason in result.reasons))
 
 
 if __name__ == "__main__":
