@@ -4,7 +4,7 @@
 
 一个面向 A 股场景的 OpenClaw 托管式投研与模拟交易系统。
 
-[默认中文](README.md) | [中文镜像](README.zh-CN.md) | [English](README.en.md)
+[中文](README.md) | [English](README.en.md)
 
 ![Python](https://img.shields.io/badge/Python-3-blue)
 ![OpenClaw](https://img.shields.io/badge/OpenClaw-cron%20managed-black)

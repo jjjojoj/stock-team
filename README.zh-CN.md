@@ -4,7 +4,7 @@
 
 **让 AI 替你盯盘、选股、复盘——24小时不休息**
 
-[简体中文](README.zh-CN.md) | [English](README.en.md)
+[中文](README.md) | [English](README.en.md)
 
 ![Python](https://img.shields.io/badge/Python-3-blue)
 ![OpenClaw](https://img.shields.io/badge/OpenClaw-cron%20managed-black)

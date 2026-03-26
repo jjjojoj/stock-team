@@ -4,7 +4,7 @@
 
 An OpenClaw-managed research, prediction, and paper-trading system for the China A-share market.
 
-[简体中文](README.zh-CN.md) | [English](README.en.md)
+[中文](README.md) | [English](README.en.md)
 
 ![Python](https://img.shields.io/badge/Python-3-blue)
 ![OpenClaw](https://img.shields.io/badge/OpenClaw-cron%20managed-black)
