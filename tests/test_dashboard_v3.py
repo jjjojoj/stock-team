@@ -2,12 +2,67 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import web.dashboard_v3 as dashboard
 
 
 class DashboardSnapshotTests(unittest.TestCase):
+    def test_get_monitoring_snapshot_includes_autopilot_guardrails(self):
+        config = {
+            **dashboard.load_guardrail_config(),
+            "force_read_only": False,
+            "freshness": {
+                "daily_search_hours": 18,
+                "predictions_hours": 36,
+                "fundamental_snapshot_hours": 240,
+                "stock_pool_hours": 240,
+            },
+        }
+
+        with (
+            patch.object(dashboard, "get_api_health_snapshot", return_value={"services": [], "healthy_count": 0, "total_count": 0}),
+            patch.object(
+                dashboard,
+                "get_openclaw_cron_status",
+                return_value=[
+                    {"script_key": "ai_predictor", "status": "ok", "name": "AI预测生成"},
+                    {"script_key": "selector", "status": "ok", "name": "动态选股"},
+                ],
+            ),
+            patch.object(dashboard, "get_risk_level", return_value={"level": "low", "notes": "稳定"}),
+            patch.object(dashboard, "load_guardrail_config", return_value=config),
+            patch.object(dashboard, "load_guardrail_state", return_value={"events": [], "midday_learning": {"history": [], "adjustments": []}}),
+            patch.object(
+                dashboard,
+                "get_runtime_snapshot",
+                return_value={
+                    "daily_search_age_hours": 2.0,
+                    "predictions_age_hours": 1.5,
+                    "fundamental_snapshot_age_hours": 12.0,
+                    "stock_pool_age_hours": 4.0,
+                },
+            ),
+            patch.object(dashboard, "load_watchlist", return_value={"sh.600459": {"name": "贵研铂业"}}),
+            patch.object(dashboard, "get_positions", return_value=[]),
+            patch.object(dashboard, "get_account_latest", return_value={"cash": 100000}),
+            patch.object(dashboard, "query_one", return_value={"count": 3}),
+            patch.object(dashboard, "load_json", return_value={"confidence_threshold": 0.82}),
+            patch.object(
+                dashboard,
+                "evaluate_runtime_mode",
+                side_effect=lambda *args, **kwargs: SimpleNamespace(ok=True, warnings=[], reasons=[]),
+            ),
+            patch.dict(dashboard.os.environ, {}, clear=True),
+        ):
+            snapshot = dashboard.get_monitoring_snapshot()
+
+        self.assertEqual(snapshot["autopilot"]["execution_mode"]["mode"], "simulation")
+        self.assertEqual(snapshot["autopilot"]["readiness"]["status"], "success")
+        self.assertEqual(snapshot["autopilot"]["confidence_threshold"], 0.82)
+        self.assertEqual(len(snapshot["autopilot"]["freshness"]), 4)
+
     def test_get_api_health_snapshot_flattens_nested_status(self):
         api_status = {
             "market": {

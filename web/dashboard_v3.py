@@ -32,11 +32,28 @@ from core.storage import (
     load_rule_state,
     load_watchlist,
 )
+from core.runtime_guardrails import (
+    evaluate_runtime_mode,
+    get_runtime_snapshot,
+    load_guardrail_config,
+    load_guardrail_state,
+)
 
 PORT = 8082
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+CRITICAL_AUTOPILOT_TASKS = {
+    "daily_web_search",
+    "ai_predictor",
+    "news_trigger",
+    "midday_review",
+    "selector",
+    "auto_trader_v3",
+    "daily_review_closed_loop",
+    "rule_validator",
+}
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -643,6 +660,199 @@ def get_monitoring_snapshot() -> Dict[str, Any]:
         "search_api": search_api,
         "circuit_breaker": circuit_breaker,
         "api_health": health,
+        "autopilot": get_autopilot_snapshot(cron_tasks=cron_tasks),
+    }
+
+
+def _format_age(age_hours: Optional[float]) -> str:
+    if age_hours is None:
+        return "缺失"
+    if age_hours < 24:
+        return f"{age_hours:.1f}h"
+    return f"{age_hours / 24:.1f}d"
+
+
+def _freshness_item(label: str, age_hours: Optional[float], limit_hours: float) -> Dict[str, Any]:
+    if age_hours is None:
+        status = "error"
+        summary = "缺失"
+    elif age_hours > limit_hours:
+        status = "error"
+        summary = "已过期"
+    elif age_hours > limit_hours * 0.7:
+        status = "warning"
+        summary = "接近过期"
+    else:
+        status = "success"
+        summary = "新鲜"
+
+    return {
+        "label": label,
+        "age_hours": age_hours,
+        "age_display": _format_age(age_hours),
+        "limit_hours": limit_hours,
+        "status": status,
+        "summary": summary,
+    }
+
+
+def _get_execution_mode_snapshot() -> Dict[str, Any]:
+    broker_config = PROJECT_ROOT / "config" / "broker_config.json"
+    broker_enabled = broker_config.exists() or str(os.environ.get("BROKER_ENABLED", "")).lower() in {"1", "true", "yes"}
+    if broker_enabled:
+        return {
+            "mode": "live_ready",
+            "label": "实盘接口已配置",
+            "detail": "检测到 broker 配置，接入前仍建议保留人工复核。",
+            "status": "warning",
+        }
+    return {
+        "mode": "simulation",
+        "label": "模拟托管",
+        "detail": "未检测到实盘 broker 配置，交易执行仅记录到账本、报告和看板。",
+        "status": "success",
+    }
+
+
+def _get_active_prediction_count() -> int:
+    row = query_one("SELECT COUNT(*) AS count FROM predictions WHERE status = 'active'")
+    return int((row or {}).get("count", 0) or 0)
+
+
+def _recent_guardrail_events(limit: int = 8) -> List[Dict[str, Any]]:
+    state = load_guardrail_state()
+    events = list(state.get("events", []))
+    events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+    return events[:limit]
+
+
+def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    cron_tasks = cron_tasks if cron_tasks is not None else get_openclaw_cron_status()
+    config = load_guardrail_config()
+    state = load_guardrail_state()
+    runtime = get_runtime_snapshot()
+    prediction_config = load_json(PROJECT_ROOT / "config" / "prediction_config.json", {})
+    execution_mode = _get_execution_mode_snapshot()
+    account = get_account_latest() or {}
+    watchlist_count = len(load_watchlist({}))
+    active_prediction_count = _get_active_prediction_count()
+    available_cash = account.get("cash", account.get("available_cash", 0))
+
+    checks = [
+        ("selection", "动态选股", evaluate_runtime_mode("selection", universe_count=max(watchlist_count, 1))),
+        ("research", "深度研究", evaluate_runtime_mode("research", universe_count=max(watchlist_count, 1))),
+        (
+            "prediction_generate",
+            "预测生成",
+            evaluate_runtime_mode("prediction_generate", universe_count=watchlist_count + len(get_positions())),
+        ),
+        (
+            "trade_buy",
+            "自动买入",
+            evaluate_runtime_mode(
+                "trade_buy",
+                universe_count=watchlist_count,
+                active_prediction_count=active_prediction_count,
+                available_cash=available_cash,
+            ),
+        ),
+        ("trade_sell", "自动卖出", evaluate_runtime_mode("trade_sell")),
+    ]
+
+    freshness = [
+        _freshness_item("daily_search", runtime.get("daily_search_age_hours"), config["freshness"]["daily_search_hours"]),
+        _freshness_item("predictions", runtime.get("predictions_age_hours"), config["freshness"]["predictions_hours"]),
+        _freshness_item(
+            "fundamental_snapshot",
+            runtime.get("fundamental_snapshot_age_hours"),
+            config["freshness"]["fundamental_snapshot_hours"],
+        ),
+        _freshness_item("stock_pool", runtime.get("stock_pool_age_hours"), config["freshness"]["stock_pool_hours"]),
+    ]
+
+    critical_errors = [
+        task for task in cron_tasks
+        if task.get("script_key") in CRITICAL_AUTOPILOT_TASKS and task.get("status") == "error"
+    ]
+    critical_warnings = [
+        task for task in cron_tasks
+        if task.get("script_key") in CRITICAL_AUTOPILOT_TASKS and task.get("status") == "warning"
+    ]
+
+    blocking_items: List[str] = []
+    warning_items: List[str] = []
+    mode_checks: List[Dict[str, Any]] = []
+    for mode, label, result in checks:
+        mode_checks.append(
+            {
+                "mode": mode,
+                "label": label,
+                "ok": result.ok,
+                "warnings": result.warnings,
+                "reasons": result.reasons,
+                "status": "error" if result.reasons else ("warning" if result.warnings else "success"),
+            }
+        )
+        blocking_items.extend(f"{label}: {reason}" for reason in result.reasons)
+        warning_items.extend(f"{label}: {warning}" for warning in result.warnings)
+
+    blocking_items.extend(f"Cron异常: {task.get('name', task.get('script_key', '未知任务'))}" for task in critical_errors)
+    warning_items.extend(f"Cron告警: {task.get('name', task.get('script_key', '未知任务'))}" for task in critical_warnings)
+
+    recent_events = _recent_guardrail_events()
+    recent_error_count = sum(1 for item in recent_events if item.get("level") == "error")
+    recent_warning_count = sum(1 for item in recent_events if item.get("level") == "warning")
+
+    learning_state = state.get("midday_learning", {})
+    adjustments = list(learning_state.get("adjustments", []))
+    active_adjustments = [item for item in adjustments if item.get("status") == "active"]
+    rolled_back = [item for item in adjustments if item.get("status") == "rolled_back"]
+    latest_rollback = None
+    if rolled_back:
+        rolled_back.sort(key=lambda item: str(item.get("rolled_back_at") or item.get("applied_at") or ""), reverse=True)
+        latest_rollback = rolled_back[0]
+
+    freshness_errors = sum(1 for item in freshness if item["status"] == "error")
+    freshness_warnings = sum(1 for item in freshness if item["status"] == "warning")
+
+    if config.get("force_read_only"):
+        readiness_status = "warning"
+        readiness_label = "只读托管"
+        readiness_detail = "已开启只读模式，自动买入和预测生成将被主动收敛。"
+    elif blocking_items or freshness_errors > 0 or recent_error_count > 0:
+        readiness_status = "error"
+        readiness_label = "需人工介入"
+        readiness_detail = "当前存在阻断项或关键输入过期，不建议完全放手自动运行。"
+    elif warning_items or freshness_warnings > 0 or active_adjustments:
+        readiness_status = "warning"
+        readiness_label = "受控自动"
+        readiness_detail = "主链可以继续自动运行，但建议关注 warnings、学习调参和输入新鲜度。"
+    else:
+        readiness_status = "success"
+        readiness_label = "全自动模拟"
+        readiness_detail = "当前更适合以模拟交易模式全托管运行。"
+
+    return {
+        "execution_mode": execution_mode,
+        "readiness": {
+            "status": readiness_status,
+            "label": readiness_label,
+            "detail": readiness_detail,
+        },
+        "force_read_only": bool(config.get("force_read_only")),
+        "confidence_threshold": float(prediction_config.get("confidence_threshold", 0.8) or 0.8),
+        "freshness": freshness,
+        "mode_checks": mode_checks,
+        "blocking_items": blocking_items[:8],
+        "warning_items": warning_items[:8],
+        "recent_events": recent_events,
+        "event_counts": {
+            "errors": recent_error_count,
+            "warnings": recent_warning_count,
+        },
+        "active_adjustments": len(active_adjustments),
+        "latest_rollback": latest_rollback,
+        "simulation_ready": execution_mode["mode"] == "simulation" and readiness_status == "success",
     }
 
 
@@ -1137,6 +1347,13 @@ HTML_CONTENT = '''<!DOCTYPE html>
         .risk-low { background: rgba(0,204,102,0.2); color: var(--success); }
         .risk-medium { background: rgba(255,204,0,0.2); color: var(--warning); }
         .risk-high { background: rgba(255,51,51,0.2); color: var(--error); }
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .banner-card { border-left: 4px solid var(--accent); }
+        .banner-card.success { border-left-color: var(--success); }
+        .banner-card.warning { border-left-color: var(--warning); }
+        .banner-card.error { border-left-color: var(--error); }
+        .banner-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .banner-desc { color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
         .empty-tip { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 14px; }
     </style>
 </head>
@@ -1210,13 +1427,32 @@ HTML_CONTENT = '''<!DOCTYPE html>
 
             <div class="page" id="page-monitoring">
                 <div class="page-header"><h1 class="page-title">监控面板</h1><p class="page-subtitle">市场监控与风险预警</p></div>
+                <div class="card banner-card" id="monitor-autopilot-banner">
+                    <div class="card-title"><span>托管驾驶舱</span><span class="badge" id="monitor-readonly-badge">加载中</span></div>
+                    <div class="card-content">
+                        <div class="banner-title" id="monitor-autopilot-title">加载托管状态...</div>
+                        <div class="banner-desc" id="monitor-autopilot-desc">系统将根据 guardrails、数据新鲜度和关键 cron 状态生成托管建议。</div>
+                    </div>
+                </div>
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-label">A股风险等级</div><div class="stat-value"><span id="monitor-risk-level" class="risk-badge risk-low">🟢 低风险</span></div></div>
                     <div class="stat-card"><div class="stat-label">市场数据 API</div><div class="stat-value" id="monitor-market-api">--</div></div>
                     <div class="stat-card"><div class="stat-label">搜索 API</div><div class="stat-value" id="monitor-search-api">--</div></div>
                     <div class="stat-card"><div class="stat-label">熔断状态</div><div class="stat-value"><span id="monitor-circuit-status" class="risk-badge risk-low">🟢 正常</span></div></div>
+                    <div class="stat-card"><div class="stat-label">托管模式</div><div class="stat-value" id="monitor-execution-mode">--</div><div class="stat-sub">模拟 / 实盘</div></div>
+                    <div class="stat-card"><div class="stat-label">自动运行评级</div><div class="stat-value" id="monitor-readiness">--</div><div class="stat-sub">当前托管等级</div></div>
+                    <div class="stat-card"><div class="stat-label">Guardrail 事件</div><div class="stat-value" id="monitor-guardrail-events">--</div><div class="stat-sub">最近事件</div></div>
+                    <div class="stat-card"><div class="stat-label">数据新鲜度</div><div class="stat-value" id="monitor-freshness-score">--</div><div class="stat-sub">关键输入状态</div></div>
                 </div>
                 <div class="card"><div class="card-title"><span>API 健康状态</span><span class="badge" id="monitor-api-badge">--</span></div><div class="card-content" id="monitor-api-health"><p class="empty-tip">API状态数据待加载</p></div></div>
+                <div class="content-grid">
+                    <div class="card"><div class="card-title"><span>运行护栏</span><span class="badge" id="monitor-guardrail-badge">--</span></div><div class="card-content" id="monitor-guardrails"><p class="empty-tip">Guardrails 数据待加载</p></div></div>
+                    <div class="card"><div class="card-title"><span>数据新鲜度</span><span class="badge" id="monitor-freshness-badge">--</span></div><div class="card-content" id="monitor-freshness"><p class="empty-tip">Freshness 数据待加载</p></div></div>
+                </div>
+                <div class="content-grid">
+                    <div class="card"><div class="card-title"><span>自动托管检查</span><span class="badge" id="monitor-autopilot-badge">--</span></div><div class="card-content" id="monitor-mode-checks"><p class="empty-tip">自动托管检查结果待加载</p></div></div>
+                    <div class="card"><div class="card-title"><span>最近 Guardrail 事件</span><span class="badge" id="monitor-events-badge">--</span></div><div class="card-content" id="monitor-events"><p class="empty-tip">暂无 Guardrail 事件</p></div></div>
+                </div>
             </div>
 
             <div class="page" id="page-cron">
@@ -1452,6 +1688,7 @@ HTML_CONTENT = '''<!DOCTYPE html>
         async function loadMonitoringData() {
             const data = await fetchAPI('/monitoring-summary', {});
             const risk = data.risk || {level: 'low', notes: '无风险记录'};
+            const autopilot = data.autopilot || {};
             const riskEl = document.getElementById('monitor-risk-level');
             riskEl.textContent = risk.level === 'low' ? '🟢 低风险' : (risk.level === 'medium' ? '🟡 中风险' : '🔴 高风险');
             riskEl.className = 'risk-badge ' + (risk.level === 'low' ? 'risk-low' : (risk.level === 'medium' ? 'risk-medium' : 'risk-high'));
@@ -1478,6 +1715,65 @@ HTML_CONTENT = '''<!DOCTYPE html>
                 const meta = service.last_error ? ('最近错误: ' + service.last_error) : ('最近检查: ' + (service.last_check || '--'));
                 return '<div class="status-row"><div class="status-dot ' + statusClass + '"></div><div class="status-info"><div class="status-name">' + service.domain + ' / ' + service.channel + ' <span class="badge ' + (healthy ? 'badge-success' : 'badge-error') + '">' + statusText + '</span></div><div class="status-meta">响应 ' + response + ' | 连续失败 ' + (service.consecutive_failures || 0) + ' | ' + meta + '</div></div></div>';
             }).join('') + '<div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">风险备注</div><div class="status-meta">' + (risk.notes || '无补充说明') + '</div></div></div>' || '<p class="empty-tip">暂无 API 健康数据</p>';
+
+            const readiness = autopilot.readiness || {};
+            const executionMode = autopilot.execution_mode || {};
+            const eventCounts = autopilot.event_counts || {};
+            const freshness = Array.isArray(autopilot.freshness) ? autopilot.freshness : [];
+            const freshnessHealthy = freshness.filter(item => item.status === 'success').length;
+            const freshnessTotal = freshness.length || 0;
+            document.getElementById('monitor-execution-mode').textContent = executionMode.mode === 'simulation' ? '模拟' : '实盘';
+            document.getElementById('monitor-readiness').textContent = readiness.label || '--';
+            document.getElementById('monitor-guardrail-events').textContent = (eventCounts.errors || 0) + ' / ' + (eventCounts.warnings || 0);
+            document.getElementById('monitor-freshness-score').textContent = freshnessTotal ? (freshnessHealthy + '/' + freshnessTotal) : '--';
+
+            const banner = document.getElementById('monitor-autopilot-banner');
+            banner.className = 'card banner-card ' + ((readiness.status === 'success') ? 'success' : (readiness.status === 'error' ? 'error' : 'warning'));
+            document.getElementById('monitor-autopilot-title').textContent = (executionMode.label || '托管状态未知') + ' · ' + (readiness.label || '待评估');
+            document.getElementById('monitor-autopilot-desc').textContent = readiness.detail || executionMode.detail || '暂无托管建议';
+            const readonlyBadge = document.getElementById('monitor-readonly-badge');
+            readonlyBadge.textContent = autopilot.force_read_only ? '只读模式' : '自动模式';
+            readonlyBadge.className = 'badge ' + (autopilot.force_read_only ? 'badge-warning' : 'badge-success');
+
+            const guardrailBadge = document.getElementById('monitor-guardrail-badge');
+            guardrailBadge.textContent = autopilot.force_read_only ? '只读中' : ((autopilot.active_adjustments || 0) > 0 ? '调参中' : '已启用');
+            guardrailBadge.className = 'badge ' + (autopilot.force_read_only ? 'badge-warning' : 'badge-success');
+            document.getElementById('monitor-guardrails').innerHTML = [
+                '<div class="status-row"><div class="status-dot ' + (autopilot.force_read_only ? 'error' : 'running') + '"></div><div class="status-info"><div class="status-name">执行模式</div><div class="status-meta">' + (executionMode.detail || '--') + '</div></div></div>',
+                '<div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">预测阈值</div><div class="status-meta">confidence_threshold = ' + ((autopilot.confidence_threshold || 0).toFixed ? autopilot.confidence_threshold.toFixed(2) : autopilot.confidence_threshold) + '</div></div></div>',
+                '<div class="status-row"><div class="status-dot ' + ((autopilot.active_adjustments || 0) > 0 ? 'running' : 'idle') + '"></div><div class="status-info"><div class="status-name">学习调参</div><div class="status-meta">活跃调整 ' + (autopilot.active_adjustments || 0) + ' 次' + (autopilot.latest_rollback ? (' | 最近回滚: ' + (autopilot.latest_rollback.rollback_reason || autopilot.latest_rollback.reason || '已回滚')) : '') + '</div></div></div>',
+                '<div class="status-row"><div class="status-dot ' + ((eventCounts.errors || 0) > 0 ? 'error' : ((eventCounts.warnings || 0) > 0 ? 'idle' : 'running')) + '"></div><div class="status-info"><div class="status-name">最近事件</div><div class="status-meta">错误 ' + (eventCounts.errors || 0) + ' | 告警 ' + (eventCounts.warnings || 0) + '</div></div></div>'
+            ].join('');
+
+            const freshnessBadge = document.getElementById('monitor-freshness-badge');
+            freshnessBadge.textContent = freshnessTotal ? (freshnessHealthy + '/' + freshnessTotal + ' 新鲜') : '无数据';
+            freshnessBadge.className = 'badge ' + (freshness.some(item => item.status === 'error') ? 'badge-error' : (freshness.some(item => item.status === 'warning') ? 'badge-warning' : 'badge-success'));
+            document.getElementById('monitor-freshness').innerHTML = freshness.map(item => {
+                const dot = item.status === 'success' ? 'running' : (item.status === 'warning' ? 'idle' : 'error');
+                const badge = item.status === 'success' ? 'badge-success' : (item.status === 'warning' ? 'badge-warning' : 'badge-error');
+                return '<div class="status-row"><div class="status-dot ' + dot + '"></div><div class="status-info"><div class="status-name">' + item.label + ' <span class="badge ' + badge + '">' + item.summary + '</span></div><div class="status-meta">当前 ' + (item.age_display || '--') + ' | 阈值 ' + (item.limit_hours || '--') + 'h</div></div></div>';
+            }).join('') || '<p class="empty-tip">暂无新鲜度数据</p>';
+
+            const modeChecks = Array.isArray(autopilot.mode_checks) ? autopilot.mode_checks : [];
+            const autopilotBadge = document.getElementById('monitor-autopilot-badge');
+            autopilotBadge.textContent = modeChecks.length + ' 项';
+            autopilotBadge.className = 'badge ' + (readiness.status === 'success' ? 'badge-success' : (readiness.status === 'error' ? 'badge-error' : 'badge-warning'));
+            document.getElementById('monitor-mode-checks').innerHTML = modeChecks.map(item => {
+                const dot = item.status === 'success' ? 'running' : (item.status === 'warning' ? 'idle' : 'error');
+                const reasons = (item.reasons || []).concat(item.warnings || []);
+                const meta = reasons.length ? reasons.join(' | ') : '当前未发现阻断项';
+                return '<div class="status-row"><div class="status-dot ' + dot + '"></div><div class="status-info"><div class="status-name">' + item.label + '</div><div class="status-meta">' + meta + '</div></div></div>';
+            }).join('') || '<p class="empty-tip">暂无自动托管检查结果</p>';
+
+            const recentEvents = Array.isArray(autopilot.recent_events) ? autopilot.recent_events : [];
+            const eventsBadge = document.getElementById('monitor-events-badge');
+            eventsBadge.textContent = recentEvents.length + ' 条';
+            eventsBadge.className = 'badge ' + ((eventCounts.errors || 0) > 0 ? 'badge-error' : ((eventCounts.warnings || 0) > 0 ? 'badge-warning' : 'badge-success'));
+            document.getElementById('monitor-events').innerHTML = recentEvents.map(item => {
+                const level = item.level || 'info';
+                const dot = level === 'error' ? 'error' : (level === 'warning' ? 'idle' : 'running');
+                return '<div class="status-row"><div class="status-dot ' + dot + '"></div><div class="status-info"><div class="status-name">' + (item.task || 'system') + ' · ' + level + '</div><div class="status-meta">' + (item.time || '--') + ' | ' + (item.message || '--') + '</div></div></div>';
+            }).join('') || '<p class="empty-tip">暂无近期 Guardrail 事件</p>';
         }
 
         async function loadCronData() {

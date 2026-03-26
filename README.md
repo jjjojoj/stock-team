@@ -170,6 +170,7 @@ cp config/feishu_config.local.example.json config/feishu_config.local.json
 - [Phase 9: 通知质量与真实日报修复](docs/REFACTOR_PHASE9_2026-03-26.md)
 - [Phase 10: 真实数据清理与闭环复核](docs/REFACTOR_PHASE10_2026-03-26.md)
 - [Phase 11: 半自动托管稳定版](docs/REFACTOR_PHASE11_2026-03-26.md)
+- [Phase 12: Dashboard 托管驾驶舱升级](docs/REFACTOR_PHASE12_2026-03-26.md)
 - [Phase 6: Webhook 收口](docs/REFACTOR_PHASE6_2026-03-25.md)
 - [Phase 7: 面板清理与仓库瘦身](docs/REFACTOR_PHASE7_2026-03-25.md)
 - [Phase 8: Webhook 去明文](docs/REFACTOR_PHASE8_2026-03-25.md)

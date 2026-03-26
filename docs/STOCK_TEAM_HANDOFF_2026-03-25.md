@@ -213,6 +213,7 @@ openclaw cron list --json
 - `docs/REFACTOR_PHASE9_2026-03-26.md`
 - `docs/REFACTOR_PHASE10_2026-03-26.md`
 - `docs/REFACTOR_PHASE11_2026-03-26.md`
+- `docs/REFACTOR_PHASE12_2026-03-26.md`
 
 ## 五、后续 OpenClaw 需要记住的判断
 
