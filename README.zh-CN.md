@@ -27,11 +27,108 @@
 
 ## 目录
 
+- [核心模块](#核心模块)
+- [系统架构](#系统架构)
 - [项目概览](#项目概览)
 - [快速开始](#快速开始)
 - [配置与安全](#配置与安全)
 - [文档入口](#文档入口)
 - [当前定位](#当前定位)
+
+## 核心模块
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>研究输入层</strong><br/>
+      负责市场新闻抓取、观察池跟踪和事件驱动研究更新，构成每日投研输入。
+    </td>
+    <td width="50%">
+      <strong>预测与复盘层</strong><br/>
+      负责结构化预测生成、到期验证、准确率统计和反馈闭环。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>规则学习层</strong><br/>
+      负责规则库、验证池、晋升、淘汰和置信度更新，持续沉淀有效经验。
+    </td>
+    <td width="50%">
+      <strong>模拟执行层</strong><br/>
+      负责模拟下单、部分成交、滑点、手续费和订单补记，统一回写主账本。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>运行护栏层</strong><br/>
+      负责自动只读、任务锁、自愈补跑、备用源切换记录和异常链路收口。
+    </td>
+    <td width="50%">
+      <strong>值守驾驶舱</strong><br/>
+      负责统一展示 cron、规则、交易、数据新鲜度、自愈事件和托管状态。
+    </td>
+  </tr>
+</table>
+
+## 系统架构
+
+```mermaid
+flowchart TB
+    subgraph CP["控制面"]
+        OC["OpenClaw Cron"]
+        DB["Dashboard / 操作员"]
+    end
+
+    subgraph RP["研究与预测层"]
+        WS["Daily Web Search"]
+        NT["News Trigger"]
+        AP["AI Predictor"]
+        SL["Stock Selector"]
+    end
+
+    subgraph EX["执行与账本层"]
+        PE["Paper Execution Engine"]
+        SQ["SQLite Ledger"]
+        FS["Feishu Notifications"]
+    end
+
+    subgraph LG["学习与治理层"]
+        CR["Closed-loop Review"]
+        RV["Rule Validator"]
+        RG["Runtime Guardrails"]
+    end
+
+    OC --> WS
+    OC --> AP
+    OC --> NT
+    OC --> SL
+    OC --> PE
+    OC --> CR
+    OC --> RV
+
+    WS --> AP
+    NT --> AP
+    AP --> PE
+    SL --> PE
+
+    PE --> SQ
+    AP --> SQ
+    CR --> SQ
+    RV --> SQ
+
+    SQ --> CR
+    CR --> RV
+    RV --> AP
+    RG --> AP
+    RG --> PE
+
+    PE --> FS
+    CR --> FS
+    RV --> FS
+    SQ --> DB
+    RG --> DB
+    OC --> DB
+```
 
 ## 项目概览
 

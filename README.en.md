@@ -27,11 +27,108 @@ This repository is not a single stock screener and not just an agent demo that s
 
 ## Contents
 
+- [Features](#features)
+- [Architecture](#architecture)
 - [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Configuration and Security](#configuration-and-security)
 - [Documentation](#documentation)
 - [Current Scope](#current-scope)
+
+## Features
+
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Research Input Layer</strong><br/>
+      Collects market news, tracks the watchlist, and updates event-driven research throughout the trading day.
+    </td>
+    <td width="50%">
+      <strong>Prediction & Review Layer</strong><br/>
+      Generates structured predictions and feeds verified results back into the accuracy and learning loop.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Rule Learning Layer</strong><br/>
+      Maintains the rule library, validation pool, promotion path, rejection path, and confidence updates.
+    </td>
+    <td width="50%">
+      <strong>Paper Execution Layer</strong><br/>
+      Handles simulated orders, partial fills, slippage, fees, and reconciliation into the core ledger.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Runtime Guardrails</strong><br/>
+      Provides auto read-only mode, task locks, retry tracking, fallback recording, and failure containment.
+    </td>
+    <td width="50%">
+      <strong>Operator Cockpit</strong><br/>
+      Shows cron status, rules, trades, freshness checks, self-healing events, and autopilot readiness in one place.
+    </td>
+  </tr>
+</table>
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane"]
+        OC["OpenClaw Cron"]
+        DB["Dashboard / Operator"]
+    end
+
+    subgraph RP["Research & Prediction"]
+        WS["Daily Web Search"]
+        NT["News Trigger"]
+        AP["AI Predictor"]
+        SL["Stock Selector"]
+    end
+
+    subgraph EX["Execution & Ledger"]
+        PE["Paper Execution Engine"]
+        SQ["SQLite Ledger"]
+        FS["Feishu Notifications"]
+    end
+
+    subgraph LG["Learning & Governance"]
+        CR["Closed-loop Review"]
+        RV["Rule Validator"]
+        RG["Runtime Guardrails"]
+    end
+
+    OC --> WS
+    OC --> AP
+    OC --> NT
+    OC --> SL
+    OC --> PE
+    OC --> CR
+    OC --> RV
+
+    WS --> AP
+    NT --> AP
+    AP --> PE
+    SL --> PE
+
+    PE --> SQ
+    AP --> SQ
+    CR --> SQ
+    RV --> SQ
+
+    SQ --> CR
+    CR --> RV
+    RV --> AP
+    RG --> AP
+    RG --> PE
+
+    PE --> FS
+    CR --> FS
+    RV --> FS
+    SQ --> DB
+    RG --> DB
+    OC --> DB
+```
 
 ## Overview
 

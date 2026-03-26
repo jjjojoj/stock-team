@@ -27,15 +27,107 @@ China Stock Team is designed as a long-running operating system rather than a si
 
 ## Contents
 
+- [Features](#features)
+- [Architecture](#architecture)
 - [Quick Facts](#quick-facts)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
 - [Scope](#scope)
 
-## Choose Your Language
+## Features
 
-- [简体中文文档](README.zh-CN.md)
-- [English Documentation](README.en.md)
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Research Pipeline</strong><br/>
+      Market news collection, watchlist tracking, and event-driven research updates for the A-share universe.
+    </td>
+    <td width="50%">
+      <strong>Prediction & Review</strong><br/>
+      Structured prediction generation with expiry review, accuracy tracking, and feedback into the learning loop.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Rule Learning System</strong><br/>
+      Rule library, validation pool, promotion, rejection, and confidence updates driven by observed outcomes.
+    </td>
+    <td width="50%">
+      <strong>Paper Execution Engine</strong><br/>
+      Simulated orders, partial fills, slippage, fees, and order reconciliation backed by SQLite.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Runtime Guardrails</strong><br/>
+      Auto read-only mode, task locks, retry tracking, datasource fallback recording, and pipeline closure.
+    </td>
+    <td width="50%">
+      <strong>Operator Dashboard</strong><br/>
+      A single cockpit for cron status, rules, trades, freshness checks, self-healing events, and autopilot state.
+    </td>
+  </tr>
+</table>
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane"]
+        OC["OpenClaw Cron"]
+        DB["Dashboard / Operator"]
+    end
+
+    subgraph RP["Research & Prediction"]
+        WS["Daily Web Search"]
+        NT["News Trigger"]
+        AP["AI Predictor"]
+        SL["Stock Selector"]
+    end
+
+    subgraph EX["Execution & Ledger"]
+        PE["Paper Execution Engine"]
+        SQ["SQLite Ledger"]
+        FS["Feishu Notifications"]
+    end
+
+    subgraph LG["Learning & Governance"]
+        CR["Closed-loop Review"]
+        RV["Rule Validator"]
+        RG["Runtime Guardrails"]
+    end
+
+    OC --> WS
+    OC --> AP
+    OC --> NT
+    OC --> SL
+    OC --> PE
+    OC --> CR
+    OC --> RV
+
+    WS --> AP
+    NT --> AP
+    AP --> PE
+    SL --> PE
+
+    PE --> SQ
+    AP --> SQ
+    CR --> SQ
+    RV --> SQ
+
+    SQ --> CR
+    CR --> RV
+    RV --> AP
+    RG --> AP
+    RG --> PE
+
+    PE --> FS
+    CR --> FS
+    RV --> FS
+    SQ --> DB
+    RG --> DB
+    OC --> DB
+```
 
 ## Quick Facts
 
