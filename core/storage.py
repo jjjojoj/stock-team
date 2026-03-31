@@ -649,6 +649,22 @@ def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
     total_assets = available_cash + total_value
     current_total_profit = total_assets - total_capital
     total_profit_pct = (current_total_profit / total_capital * 100) if total_capital else 0.0
+    override_present = raw_portfolio.get("available_cash") is not None or raw_portfolio.get("total_capital") is not None
+    snapshot_date = datetime.now().strftime("%Y-%m-%d") if override_present else (latest_account.get("date") if latest_account else None)
+    snapshot_updated_at = datetime.now().isoformat() if override_present else (latest_account.get("updated_at") if latest_account else None)
+    account_snapshot = dict(latest_account or {})
+    account_snapshot.update(
+        {
+            "date": snapshot_date or account_snapshot.get("date") or datetime.now().strftime("%Y-%m-%d"),
+            "total_asset": total_assets,
+            "cash": available_cash,
+            "market_value": total_value,
+            "total_profit": current_total_profit,
+            "total_profit_pct": total_profit_pct,
+            "position_count": len(position_details),
+            "updated_at": snapshot_updated_at or account_snapshot.get("updated_at") or datetime.now().isoformat(),
+        }
+    )
 
     return {
         "total_capital": total_capital,
@@ -658,7 +674,7 @@ def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
         "total_profit_pct": total_profit_pct,
         "total_assets": total_assets,
         "positions": sorted(position_details, key=lambda item: item.get("profit_pct", 0.0), reverse=True),
-        "account": latest_account,
+        "account": account_snapshot,
     }
 
 

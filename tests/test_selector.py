@@ -31,6 +31,27 @@ class SelectorTests(unittest.TestCase):
         self.assertIn("综合评分达到", report)
         self.assertIn(str(selector.MIN_TOP_CANDIDATE_SCORE), report)
 
+    def test_format_top_report_uses_bulleted_layout(self):
+        report = selector.format_top_report(
+            [
+                {
+                    "name": "宝地矿业",
+                    "code": "sh.601121",
+                    "sector": "有色金属",
+                    "sub_sector": "其他",
+                    "price": 7.43,
+                    "change_pct": -0.13,
+                    "market_cap": 65.4,
+                    "score": {"total": 27, "details": "PB=2.05(+9)"},
+                    "technical": {"macd": "死叉", "kdj": "正常", "technical_score": 20},
+                }
+            ]
+        )
+
+        self.assertIn("- 评分：27/100", report)
+        self.assertIn("- 亮点：PB=2.05(+9)", report)
+        self.assertIn("- 技术面：MACD=死叉", report)
+
 
 if __name__ == "__main__":
     unittest.main()

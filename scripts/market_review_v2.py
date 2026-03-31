@@ -276,7 +276,7 @@ class MarketReview:
             f"",
             f"---",
             f"",
-            f"### 📈 预测准确率",
+            f"### 📈 到期预测闭环验证",
             f"",
             f"- 验证预测: {total} 个",
             f"- ✅ 正确: {results['correct']} ({correct_rate:.1f}%)",
@@ -309,7 +309,7 @@ class MarketReview:
             f"",
             f"---",
             f"",
-            f"### 📈 预测准确率",
+            f"### 📈 到期预测闭环验证",
             f"",
         ]
         
@@ -333,7 +333,7 @@ class MarketReview:
                 emoji = "✅" if r['result'] == 'correct' else ("⚠️" if r['result'] == 'partial' else "❌")
                 lines.append(f"{emoji} {r['name']}: {r['price_change']:+.1f}% ({r['result']})")
         else:
-            lines.append("暂无预测验证结果")
+            lines.append("今日暂无到期预测，闭环验证结果为空")
         
         lines.extend([
             f"",

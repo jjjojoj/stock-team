@@ -474,12 +474,12 @@ def format_top_report(stocks: List[Dict]) -> str:
     for index, stock in enumerate(stocks, 1):
         score = stock["score"]
         lines.append(f"{index}. {stock['name']} ({stock['code']})")
-        lines.append(f"   评分: {score['total']}/100 | 行业: {stock['sector']} > {stock['sub_sector']}")
-        lines.append(f"   价格: ¥{stock['price']:.2f} ({stock['change_pct']:+.2f}%) | 市值: {stock['market_cap']:.1f}亿")
-        lines.append(f"   亮点: {score.get('details', '无')}")
+        lines.append(f"- 评分：{score['total']}/100 | 行业：{stock['sector']} > {stock['sub_sector']}")
+        lines.append(f"- 价格：¥{stock['price']:.2f} ({stock['change_pct']:+.2f}%) | 市值：{stock['market_cap']:.1f}亿")
+        lines.append(f"- 亮点：{score.get('details', '无')}")
         if stock.get("technical"):
             tech = stock["technical"]
-            lines.append(f"   技术面: MACD={tech['macd']} | KDJ={tech['kdj']} | 技术评分={tech['technical_score']}")
+            lines.append(f"- 技术面：MACD={tech['macd']} | KDJ={tech['kdj']} | 技术评分={tech['technical_score']}")
         lines.append("")
 
     return "\n".join(lines).strip()

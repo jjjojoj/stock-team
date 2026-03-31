@@ -487,7 +487,7 @@ class RuleValidator:
         lines.append(f"验证池规则: {len(self.validation_pool)}")
         lines.append(f"淘汰规则: {len(self.rejected)}")
 
-        lines.append("\n### 规则库 Top")
+        lines.append("\n### 规则库样本规则")
         ranked_rules: List[Tuple[str, str, Dict[str, Any]]] = []
         for category, category_rules in self.rules.items():
             for rule_id, rule in category_rules.items():
@@ -593,7 +593,7 @@ def _notify_rule_validation(validator: RuleValidator, results: Dict[str, Dict[st
 - 淘汰：{pool.get('rejected', 0)}
 - 剩余：{len(validator.validation_pool)}
 
-Top 规则
+规则库样本规则
 {validator.get_rule_report()}"""
         send_feishu_message(
             title=f"🧪 规则验证日报 - {datetime.now().strftime('%Y-%m-%d')}",

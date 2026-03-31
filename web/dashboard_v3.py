@@ -28,6 +28,7 @@ import logging
 from core.storage import (
     DB_PATH,
     LEARNING_DIR,
+    build_portfolio_snapshot,
     get_simulated_order_metrics,
     load_json,
     load_recent_simulated_orders,
@@ -127,7 +128,20 @@ CRON_SCRIPTS = {
 # =============================================================================
 
 def get_account_latest():
-    return query_one("SELECT * FROM account ORDER BY date DESC LIMIT 1")
+    snapshot = build_portfolio_snapshot()
+    account = dict(snapshot.get("account") or {})
+    account.update(
+        {
+            "date": account.get("date") or datetime.now().strftime("%Y-%m-%d"),
+            "total_asset": float(snapshot.get("total_assets", 0.0) or 0.0),
+            "cash": float(snapshot.get("available_cash", 0.0) or 0.0),
+            "market_value": float(snapshot.get("total_value", 0.0) or 0.0),
+            "total_profit": float(snapshot.get("total_profit", 0.0) or 0.0),
+            "total_profit_pct": float(snapshot.get("total_profit_pct", 0.0) or 0.0),
+            "position_count": len(snapshot.get("positions", [])),
+        }
+    )
+    return account
 
 def get_positions():
     return query_sql("SELECT * FROM positions ORDER BY profit_loss_pct DESC")

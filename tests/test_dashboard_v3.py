@@ -9,6 +9,27 @@ import web.dashboard_v3 as dashboard
 
 
 class DashboardSnapshotTests(unittest.TestCase):
+    def test_get_account_latest_prefers_unified_portfolio_snapshot(self):
+        with patch.object(
+            dashboard,
+            "build_portfolio_snapshot",
+            return_value={
+                "total_assets": 274898.0,
+                "available_cash": 274898.0,
+                "total_value": 0.0,
+                "total_profit": 74898.0,
+                "total_profit_pct": 37.449,
+                "positions": [],
+                "account": {"date": "2026-03-31", "daily_profit": 0.0},
+            },
+        ):
+            account = dashboard.get_account_latest()
+
+        self.assertEqual(account["total_asset"], 274898.0)
+        self.assertEqual(account["cash"], 274898.0)
+        self.assertEqual(account["market_value"], 0.0)
+        self.assertEqual(account["position_count"], 0)
+
     def test_get_monitoring_snapshot_includes_autopilot_guardrails(self):
         config = {
             **dashboard.load_guardrail_config(),

@@ -87,7 +87,7 @@ def build_report() -> str:
     lines = [
         f"时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
-        "午盘反思摘要",
+        "午盘即时验证摘要",
         f"- 已验证预测：{verified} 个",
         f"- 正确：{correct} | 错误：{wrong} | 准确率：{accuracy:.1f}%",
         "",

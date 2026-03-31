@@ -13,6 +13,7 @@
 import sys
 import os
 import json
+import math
 import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
@@ -46,6 +47,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _format_percent_points(value: float, digits: int = 1) -> str:
+    return f"{float(value or 0.0):.{digits}f}%"
+
+
+def _format_ratio(value: float) -> str:
+    return "∞" if isinstance(value, float) and math.isinf(value) else f"{float(value or 0.0):.2f}"
+
+
 @dataclass
 class Trade:
     """交易记录"""
@@ -58,6 +67,9 @@ class Trade:
     value: float
     commission: float = 0.0003  # 万分之三手续费
     slippage: float = 0.001  # 0.1% 滑点
+    cost_basis: float = 0.0
+    realized_pnl: float = 0.0
+    realized_pnl_pct: float = 0.0
 
 
 @dataclass
@@ -245,7 +257,8 @@ class Backverifyer:
             price=price,
             shares=shares,
             value=value,
-            commission=commission + slippage_cost
+            commission=commission + slippage_cost,
+            cost_basis=value,
         )
         self.trades.append(trade)
         
@@ -285,11 +298,10 @@ class Backverifyer:
         
         # 更新持仓
         pos.shares -= shares
+        pnl = (price - pos.avg_cost) * shares - commission - slippage_cost
+        cost_basis = pos.avg_cost * shares
+        pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0.0
         if pos.shares == 0:
-            # 计算盈亏
-            pnl = (price - pos.avg_cost) * shares - commission - slippage_cost
-            pnl_pct = (price - pos.avg_cost) / pos.avg_cost * 100
-            
             # 记录交易
             trade = Trade(
                 date=date,
@@ -299,7 +311,10 @@ class Backverifyer:
                 price=price,
                 shares=shares,
                 value=value,
-                commission=commission + slippage_cost
+                commission=commission + slippage_cost,
+                cost_basis=cost_basis,
+                realized_pnl=pnl,
+                realized_pnl_pct=pnl_pct,
             )
             self.trades.append(trade)
             
@@ -315,7 +330,10 @@ class Backverifyer:
                 price=price,
                 shares=shares,
                 value=value,
-                commission=commission + slippage_cost
+                commission=commission + slippage_cost,
+                cost_basis=cost_basis,
+                realized_pnl=pnl,
+                realized_pnl_pct=pnl_pct,
             )
             self.trades.append(trade)
             logger.info(f"部分卖出：{stock_code} {shares}股 @ {price:.2f}")
@@ -329,7 +347,7 @@ class Backverifyer:
                 pos.current_price = current_prices[code]
                 pos.market_value = pos.current_price * pos.shares
                 pos.pnl = (pos.current_price - pos.avg_cost) * pos.shares
-                pos.pnl_pct = (pos.current_price - pos.avg_cost) / pos.avg_cost * 100 * 100
+                pos.pnl_pct = (pos.current_price - pos.avg_cost) / pos.avg_cost * 100
                 total_value += pos.market_value
         
         self.portfolio_values.append(total_value)
@@ -378,20 +396,17 @@ class Backverifyer:
         else:
             sharpe_ratio = 0
         
-        # 交易统计
-        winning_trades = [t for t in self.trades if t.action == "sell" and 
-                         (t.price - next((tr.price for tr in self.trades 
-                                          if tr.stock_code == t.stock_code and tr.action == "buy" 
-                                          and tr.date < t.date), t.price)) > 0]
-        losing_trades = [t for t in self.trades if t.action == "sell" and t not in winning_trades]
-        
         sell_trades = [t for t in self.trades if t.action == "sell"]
+        winning_trades = [t for t in sell_trades if t.realized_pnl > 0]
+        losing_trades = [t for t in sell_trades if t.realized_pnl < 0]
         win_rate = len(winning_trades) / len(sell_trades) * 100 if sell_trades else 0
         
         # 盈亏比
-        avg_win = sum(t.value for t in winning_trades) / len(winning_trades) if winning_trades else 0
-        avg_loss = abs(sum(t.value for t in losing_trades) / len(losing_trades)) if losing_trades else 0
-        profit_factor = avg_win / avg_loss if avg_loss > 0 else 0
+        gross_profit = sum(t.realized_pnl for t in winning_trades)
+        gross_loss = abs(sum(t.realized_pnl for t in losing_trades))
+        avg_win = gross_profit / len(winning_trades) if winning_trades else 0
+        avg_loss = gross_loss / len(losing_trades) if losing_trades else 0
+        profit_factor = gross_profit / gross_loss if gross_loss > 0 else (float("inf") if gross_profit > 0 else 0.0)
         
         return {
             "final_value": final_value,
@@ -525,7 +540,7 @@ class Backverifyer:
 | 夏普比率 | {result.sharpe_ratio:.2f} | {"✅ >1.5" if result.sharpe_ratio > 1.5 else "⚠️ 1.0-1.5" if result.sharpe_ratio > 1 else "❌ <1"} |
 | 最大回撤 | {result.max_drawdown:.2f}% | {"✅ <15%" if result.max_drawdown < 15 else "⚠️ 15-25%" if result.max_drawdown < 25 else "❌ >25%"} |
 | 胜率 | {result.win_rate:.1f}% | {"✅ >60%" if result.win_rate > 60 else "⚠️ 50-60%" if result.win_rate > 50 else "❌ <50%"} |
-| 盈亏比 | {result.profit_factor:.2f} | {"✅ >2" if result.profit_factor > 2 else "⚠️ 1.5-2" if result.profit_factor > 1.5 else "❌ <1.5"} |
+| 盈亏比 | {_format_ratio(result.profit_factor)} | {"✅ >2" if result.profit_factor > 2 else "⚠️ 1.5-2" if result.profit_factor > 1.5 else "❌ <1.5"} |
 
 ---
 
@@ -620,21 +635,21 @@ class Backverifyer:
         }
         
         # 分析优缺点
-        if result.win_rate > 0.6:
-            log_entry["strengths"].append(f"胜率高 ({result.win_rate:.1%})")
-        if result.max_drawdown < 0.15:
-            log_entry["strengths"].append(f"回撤控制好 ({result.max_drawdown:.2%})")
+        if result.win_rate > 60:
+            log_entry["strengths"].append(f"胜率高 ({_format_percent_points(result.win_rate, 1)})")
+        if result.max_drawdown < 15:
+            log_entry["strengths"].append(f"回撤控制好 ({_format_percent_points(result.max_drawdown, 2)})")
         
-        if result.annual_return < 0.1:
-            log_entry["weaknesses"].append(f"收益率偏低 (年化 {result.annual_return:.2%})")
+        if result.annual_return < 10:
+            log_entry["weaknesses"].append(f"收益率偏低 (年化 {_format_percent_points(result.annual_return, 2)})")
         if result.sharpe_ratio < 1:
             log_entry["weaknesses"].append(f"夏普比率低 ({result.sharpe_ratio:.2f})")
         if result.profit_factor < 1.5:
-            log_entry["weaknesses"].append(f"盈亏比不足 ({result.profit_factor:.2f})")
+            log_entry["weaknesses"].append(f"盈亏比不足 ({_format_ratio(result.profit_factor)})")
         
         # 提取教训
         if result.profit_factor < 1.5:
-            log_entry["lessons"].append(f"需要提高盈亏比：当前{result.profit_factor:.2f}，目标>1.5")
+            log_entry["lessons"].append(f"需要提高盈亏比：当前{_format_ratio(result.profit_factor)}，目标>1.5")
             log_entry["lessons"].append("建议：延长止盈区间，让利润奔跑")
         if result.sharpe_ratio < 1:
             log_entry["lessons"].append(f"夏普比率低说明风险调整后收益差")
@@ -658,7 +673,7 @@ class Backverifyer:
         print(f"✅ 学习日志已更新：{learning_log}")
         
         # 2. 如指标低于阈值，更新 memory.md
-        if result.sharpe_ratio < 0.5 or result.profit_factor < 1.3 or result.annual_return < 0.05:
+        if result.sharpe_ratio < 0.5 or result.profit_factor < 1.3 or result.annual_return < 5:
             self._update_memory_with_lessons(log_entry, memory_file)
         
         # 3. 发送飞书通知
@@ -688,9 +703,9 @@ class Backverifyer:
         
         lessons_text = "\n---\n\n"
         lessons_text += f"### [{date_str}] 周回测：盈亏比不足\n\n"
-        lessons_text += f"**问题**：盈亏比仅 {log_entry['profit_loss_ratio']:.2f}（目标>1.5）\n"
-        if log_entry.get('win_rate', 0) > 0.8:
-            lessons_text += f"- 胜率 {log_entry['win_rate']:.1%} 很高，但赚得少\n"
+        lessons_text += f"**问题**：盈亏比仅 {_format_ratio(log_entry['profit_loss_ratio'])}（目标>1.5）\n"
+        if log_entry.get('win_rate', 0) > 60:
+            lessons_text += f"- 胜率 {_format_percent_points(log_entry['win_rate'], 1)} 很高，但赚得少\n"
         lessons_text += f"- 平均盈利¥{log_entry['avg_profit']:,.0f}，平均亏损¥{log_entry['avg_loss']:,.0f}\n"
         lessons_text += f"- 赚小钱太多，单笔盈利不够\n\n"
         lessons_text += f"**教训**：高胜率≠高收益，需要提高盈亏比\n\n"
@@ -736,10 +751,10 @@ class Backverifyer:
 **结论**：{log_entry['conclusion']}
 
 **关键指标**：
-- 胜率：{log_entry['win_rate']:.1%}
-- 盈亏比：{log_entry['profit_loss_ratio']:.2f}
+- 胜率：{_format_percent_points(log_entry['win_rate'], 1)}
+- 盈亏比：{_format_ratio(log_entry['profit_loss_ratio'])}
 - 夏普比率：{log_entry['sharpe_ratio']:.2f}
-- 年化收益：{log_entry['annual_return']:.2%}
+- 年化收益：{_format_percent_points(log_entry['annual_return'], 2)}
 
 **教训已写入学习系统**：
 """

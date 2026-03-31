@@ -343,11 +343,11 @@ def send_feishu_report(results: dict, lessons: list):
         sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
         from feishu_notifier import send_feishu_message
 
-        title = f"📊 午盘反思 - {datetime.now().strftime('%Y-%m-%d')}"
+        title = f"📊 午盘即时验证 - {datetime.now().strftime('%Y-%m-%d')}"
         message = f"""时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}
 
-预测验证
-- 验证预测：{results['verified']}个
+盘中即时验证（按午盘现价校验活跃预测，不计入到期闭环）
+- 校验预测：{results['verified']}个
 - 正确：{results['correct']}个
 - 错误：{results['wrong']}个
 - 准确率：{_accuracy(results):.1f}%
