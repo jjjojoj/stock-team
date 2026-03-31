@@ -24,6 +24,7 @@ data/reviews/afternoon_update_*.md
 data/reviews/review_*.md
 data/reviews/market_review_*.md
 data/weekly_reports/*.md
+data/ledger_archives/*.json
 data/stock_team.db
 learning/daily_book_learning_*.md
 learning/rule_evolution_history_fixed.json

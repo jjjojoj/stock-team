@@ -1,5 +1,10 @@
 {
-  "total_capital": 200000,
-  "available_cash": 191168.0,
-  "note": "初始资金20万，当前现金191168，市值0"
+  "total_capital": 200000.0,
+  "available_cash": 200000.0,
+  "market_value": 0.0,
+  "total_asset": 200000.0,
+  "total_return": 0.0,
+  "baseline_date": "2026-03-31",
+  "updated_at": "2026-03-31T11:31:30.999916",
+  "note": "账本已于 2026-03-31 重置，当前以 ¥200,000 作为新的模拟基线"
 }

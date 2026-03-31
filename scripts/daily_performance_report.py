@@ -19,7 +19,13 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
 
 from performance_tracker import PerformanceTracker
 from core.predictions import normalize_prediction_collection, prediction_result_status
-from core.storage import build_portfolio_snapshot, load_json, load_rule_state
+from core.storage import (
+    build_portfolio_snapshot,
+    get_portfolio_baseline_date,
+    load_json,
+    load_rule_state,
+    timestamp_on_or_after_baseline,
+)
 
 # 成员列表
 MEMBERS = ["CIO", "Quant", "Trader", "Risk", "Research", "Learning"]
@@ -57,6 +63,7 @@ class DailyPerformanceReport:
         self.learning_log_path = os.path.join(PROJECT_ROOT, "learning", "daily_learning_log.json")
         self.book_progress_path = os.path.join(PROJECT_ROOT, "learning", "book_learning_progress.json")
         self.window_start = datetime.now() - timedelta(days=30)
+        self.baseline_date = get_portfolio_baseline_date()
     
     def generate_member_report(self, member_name: str) -> Dict:
         """生成单个成员的日报"""
@@ -224,7 +231,17 @@ class DailyPerformanceReport:
 
     def _load_trade_history(self) -> List[Dict]:
         history = load_json(self.trade_history_path, [])
-        return history if isinstance(history, list) else []
+        if not isinstance(history, list):
+            return []
+        if not self.baseline_date:
+            return history
+        return [
+            item for item in history
+            if timestamp_on_or_after_baseline(
+                item.get("timestamp") or item.get("time") or item.get("executed_at"),
+                self.baseline_date,
+            )
+        ]
 
     def _load_learning_logs(self) -> List[Dict]:
         logs = load_json(self.learning_log_path, [])
@@ -240,15 +257,28 @@ class DailyPerformanceReport:
 
     def _collect_cio_metrics(self) -> Dict:
         snapshot = build_portfolio_snapshot()
-        account_rows = self._query_rows(
-            """
-            SELECT daily_profit_pct
-            FROM account
-            WHERE daily_profit_pct IS NOT NULL
-            ORDER BY date DESC
-            LIMIT 30
-            """
-        )
+        if self.baseline_date:
+            account_rows = self._query_rows(
+                """
+                SELECT daily_profit_pct
+                FROM account
+                WHERE daily_profit_pct IS NOT NULL
+                  AND date >= ?
+                ORDER BY date DESC
+                LIMIT 30
+                """,
+                (self.baseline_date,),
+            )
+        else:
+            account_rows = self._query_rows(
+                """
+                SELECT daily_profit_pct
+                FROM account
+                WHERE daily_profit_pct IS NOT NULL
+                ORDER BY date DESC
+                LIMIT 30
+                """
+            )
         returns = [float(row["daily_profit_pct"] or 0.0) / 100 for row in account_rows]
         sharpe = 0.0
         if len(returns) >= 2:
@@ -285,11 +315,37 @@ class DailyPerformanceReport:
         }
 
     def _collect_trader_metrics(self) -> Dict:
-        approved_proposals = self._query_value(
-            "SELECT COUNT(*) FROM proposals WHERE status IN ('approved', 'executed')"
-        )
-        executed_trades = self._query_value("SELECT COUNT(*) FROM trades")
-        trade_rows = self._query_rows("SELECT amount, commission FROM trades WHERE amount IS NOT NULL AND amount > 0")
+        if self.baseline_date:
+            approved_proposals = self._query_value(
+                """
+                SELECT COUNT(*)
+                FROM proposals
+                WHERE status IN ('approved', 'executed')
+                  AND substr(created_at, 1, 10) >= ?
+                """,
+                (self.baseline_date,),
+            )
+        else:
+            approved_proposals = self._query_value(
+                "SELECT COUNT(*) FROM proposals WHERE status IN ('approved', 'executed')"
+            )
+        if self.baseline_date:
+            executed_trades = self._query_value(
+                "SELECT COUNT(*) FROM trades WHERE substr(executed_at, 1, 10) >= ?",
+                (self.baseline_date,),
+            )
+            trade_rows = self._query_rows(
+                """
+                SELECT amount, commission
+                FROM trades
+                WHERE amount IS NOT NULL AND amount > 0
+                  AND substr(executed_at, 1, 10) >= ?
+                """,
+                (self.baseline_date,),
+            )
+        else:
+            executed_trades = self._query_value("SELECT COUNT(*) FROM trades")
+            trade_rows = self._query_rows("SELECT amount, commission FROM trades WHERE amount IS NOT NULL AND amount > 0")
         sell_trades = [
             trade for trade in self._load_trade_history()
             if str(trade.get("type") or trade.get("action") or "").lower() == "sell"

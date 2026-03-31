@@ -29,6 +29,7 @@ from core.storage import (
     DB_PATH,
     LEARNING_DIR,
     build_portfolio_snapshot,
+    get_portfolio_baseline_date,
     get_simulated_order_metrics,
     load_json,
     load_recent_simulated_orders,
@@ -301,6 +302,12 @@ def get_validation_summary():
     }
 
 def get_trades(limit=20):
+    baseline_date = get_portfolio_baseline_date()
+    if baseline_date:
+        return query_sql(
+            "SELECT * FROM trades WHERE substr(executed_at, 1, 10) >= ? ORDER BY executed_at DESC LIMIT ?",
+            (baseline_date, limit),
+        )
     return query_sql("SELECT * FROM trades ORDER BY executed_at DESC LIMIT ?", (limit,))
 
 def get_predictions(limit=20):
@@ -891,20 +898,33 @@ def get_trading_snapshot() -> Dict[str, Any]:
     positions = get_positions()
     trades = get_trades(20)
     order_metrics = get_simulated_order_metrics()
+    baseline_date = get_portfolio_baseline_date()
     today = datetime.now().strftime("%Y-%m-%d")
     today_trades = [trade for trade in trades if str(trade.get("executed_at", "")).startswith(today)]
     today_orders = [
         order for order in order_metrics.get("recent_orders", [])
         if str(order.get("created_at", "")).startswith(today)
     ]
-    proposals = query_sql(
-        """
-        SELECT id, symbol, name, direction, status, created_at
-        FROM proposals
-        ORDER BY created_at DESC
-        LIMIT 5
-        """
-    )
+    if baseline_date:
+        proposals = query_sql(
+            """
+            SELECT id, symbol, name, direction, status, created_at
+            FROM proposals
+            WHERE substr(created_at, 1, 10) >= ?
+            ORDER BY created_at DESC
+            LIMIT 5
+            """,
+            (baseline_date,),
+        )
+    else:
+        proposals = query_sql(
+            """
+            SELECT id, symbol, name, direction, status, created_at
+            FROM proposals
+            ORDER BY created_at DESC
+            LIMIT 5
+            """
+        )
 
     return {
         "account": account,

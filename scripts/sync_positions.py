@@ -9,7 +9,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 import sys
 sys.path.insert(0, str(BASE_DIR))
 
-from core.storage import DB_PATH, PORTFOLIO_FILE, POSITIONS_FILE, load_json, sync_positions_and_account_to_db
+from core.storage import (
+    DB_PATH,
+    PORTFOLIO_FILE,
+    POSITIONS_FILE,
+    account_snapshot_is_stale,
+    load_account,
+    load_json,
+    sync_positions_and_account_to_db,
+)
 
 
 def get_db_positions():
@@ -36,7 +44,16 @@ def sync_positions(dry_run: bool = False):
 
     json_positions = load_json(POSITIONS_FILE, {})
     portfolio = load_json(PORTFOLIO_FILE, {"total_capital": 200000, "available_cash": 0})
+    account = load_account({}, DB_PATH)
+    if account_snapshot_is_stale(account, portfolio):
+        account = {}
     db_positions = get_db_positions()
+    live_cash = float(
+        account.get("cash")
+        if isinstance(account, dict) and account.get("cash") is not None
+        else portfolio.get("available_cash", 0)
+        or 0.0
+    )
 
     print(f"📋 JSON持仓: {len(json_positions)} 只")
     print(f"📋 数据库持仓: {len(db_positions)} 只")
@@ -60,7 +77,7 @@ def sync_positions(dry_run: bool = False):
     else:
         metrics = sync_positions_and_account_to_db(
             json_positions,
-            float(portfolio.get("available_cash", 0) or 0),
+            live_cash,
             portfolio,
             DB_PATH,
         )

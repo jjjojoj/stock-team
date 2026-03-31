@@ -38,6 +38,8 @@ from core.storage import (
     PREDICTIONS_FILE,
     TRADE_HISTORY_FILE,
     WATCHLIST_FILE,
+    account_snapshot_is_stale,
+    load_account,
     load_json,
     save_json,
     sync_positions_and_account_to_db,
@@ -167,8 +169,14 @@ class AutoTraderV3:
 
         # 现金余额
         portfolio = load_json(PORTFOLIO_FILE, {})
-        if portfolio:
-            self.cash = portfolio.get("available_cash", 0)
+        account = load_account({}, DATABASE_FILE)
+        if account_snapshot_is_stale(account, portfolio):
+            account = {}
+        if account and account.get("cash") is not None:
+            self.cash = float(account.get("cash", 0) or 0)
+            logger.info(f"从账户快照加载现金: ¥{self.cash:,.0f}")
+        elif portfolio:
+            self.cash = float(portfolio.get("available_cash", 0) or 0)
             logger.info(f"加载现金: ¥{self.cash:,.0f}")
     
     def _save_data(self):

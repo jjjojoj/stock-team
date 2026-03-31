@@ -9,6 +9,19 @@ import web.dashboard_v3 as dashboard
 
 
 class DashboardSnapshotTests(unittest.TestCase):
+    def test_get_trades_respects_portfolio_baseline_date(self):
+        with (
+            patch.object(dashboard, "get_portfolio_baseline_date", return_value="2026-03-31"),
+            patch.object(dashboard, "query_sql", return_value=[{"symbol": "sh.600000"}]) as query_sql,
+        ):
+            trades = dashboard.get_trades(5)
+
+        self.assertEqual(trades, [{"symbol": "sh.600000"}])
+        query_sql.assert_called_once_with(
+            "SELECT * FROM trades WHERE substr(executed_at, 1, 10) >= ? ORDER BY executed_at DESC LIMIT ?",
+            ("2026-03-31", 5),
+        )
+
     def test_get_account_latest_prefers_unified_portfolio_snapshot(self):
         with patch.object(
             dashboard,
@@ -29,6 +42,30 @@ class DashboardSnapshotTests(unittest.TestCase):
         self.assertEqual(account["cash"], 274898.0)
         self.assertEqual(account["market_value"], 0.0)
         self.assertEqual(account["position_count"], 0)
+
+    def test_get_trading_snapshot_filters_proposals_before_baseline(self):
+        with (
+            patch.object(dashboard, "get_account_latest", return_value={"cash": 200000.0}),
+            patch.object(dashboard, "get_positions", return_value=[]),
+            patch.object(dashboard, "get_trades", return_value=[]),
+            patch.object(dashboard, "get_simulated_order_metrics", return_value={"recent_orders": []}),
+            patch.object(dashboard, "load_recent_simulated_orders", return_value=[]),
+            patch.object(dashboard, "get_portfolio_baseline_date", return_value="2026-03-31"),
+            patch.object(dashboard, "query_sql", return_value=[{"id": 9, "created_at": "2026-03-31 10:00:00"}]) as query_sql,
+        ):
+            snapshot = dashboard.get_trading_snapshot()
+
+        self.assertEqual(snapshot["proposals"], [{"id": 9, "created_at": "2026-03-31 10:00:00"}])
+        query_sql.assert_called_once_with(
+            """
+            SELECT id, symbol, name, direction, status, created_at
+            FROM proposals
+            WHERE substr(created_at, 1, 10) >= ?
+            ORDER BY created_at DESC
+            LIMIT 5
+            """,
+            ("2026-03-31",),
+        )
 
     def test_get_monitoring_snapshot_includes_autopilot_guardrails(self):
         config = {

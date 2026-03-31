@@ -32,6 +32,7 @@ RULES_FILE = LEARNING_DIR / "prediction_rules.json"
 VALIDATION_POOL_FILE = LEARNING_DIR / "rule_validation_pool.json"
 REJECTED_RULES_FILE = LEARNING_DIR / "rejected_rules.json"
 REVIEW_DIR = DATA_DIR / "reviews"
+LEDGER_ARCHIVE_DIR = DATA_DIR / "ledger_archives"
 
 
 class ManagedConnection(sqlite3.Connection):
@@ -94,6 +95,34 @@ def _parse_timestamp(value: Any) -> datetime:
         return datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
         return datetime.min
+
+
+def account_snapshot_is_stale(account_snapshot: Optional[Dict[str, Any]], portfolio_data: Optional[Dict[str, Any]]) -> bool:
+    """Treat account snapshots older than the configured portfolio baseline as stale."""
+    if not account_snapshot or not portfolio_data:
+        return False
+    baseline_date = str(portfolio_data.get("baseline_date") or "").strip()
+    account_date = str(account_snapshot.get("date") or "").strip()
+    if not baseline_date or not account_date:
+        return False
+    return account_date < baseline_date
+
+
+def get_portfolio_baseline_date(portfolio_data: Optional[Dict[str, Any]] = None) -> Optional[str]:
+    """Return the configured paper-ledger baseline date if present."""
+    payload = portfolio_data if portfolio_data is not None else load_json(PORTFOLIO_FILE, {})
+    baseline_date = str((payload or {}).get("baseline_date") or "").strip()
+    return baseline_date or None
+
+
+def timestamp_on_or_after_baseline(value: Any, baseline_date: Optional[str]) -> bool:
+    """Return True when a timestamp/date string is on or after the active ledger baseline."""
+    if not baseline_date:
+        return True
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return text[:10] >= baseline_date
 
 
 def ensure_storage_tables(db_path: Path = DB_PATH) -> None:
@@ -596,11 +625,127 @@ def load_account(
     return fallback if isinstance(fallback, dict) else (default or {})
 
 
+def _fetch_table_rows(conn: sqlite3.Connection, table_name: str, order_by: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Fetch rows from a table for lightweight archival/debug workflows."""
+    query = f"SELECT * FROM {table_name}"
+    if order_by:
+        query += f" ORDER BY {order_by}"
+    rows = conn.execute(query).fetchall()
+    return [dict(row) for row in rows]
+
+
+def reset_operational_ledger(
+    initial_capital: float,
+    *,
+    reset_at: Optional[datetime] = None,
+    reason: str = "",
+    db_path: Path = DB_PATH,
+    portfolio_file: Path = PORTFOLIO_FILE,
+    positions_file: Path = POSITIONS_FILE,
+    trade_history_file: Path = TRADE_HISTORY_FILE,
+    archive_dir: Path = LEDGER_ARCHIVE_DIR,
+) -> Dict[str, Any]:
+    """Archive current paper-trading ledger data and reset live state to a fresh baseline."""
+    reset_at = reset_at or datetime.now()
+    db_path = Path(db_path)
+    portfolio_file = Path(portfolio_file)
+    positions_file = Path(positions_file)
+    trade_history_file = Path(trade_history_file)
+    archive_dir = Path(archive_dir)
+
+    ensure_storage_tables(db_path)
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = reset_at.strftime("%Y%m%d_%H%M%S")
+    archive_path = archive_dir / f"ledger_reset_{timestamp}.json"
+
+    current_portfolio = load_json(portfolio_file, {})
+    current_positions = load_json(positions_file, {})
+    current_trade_history = load_json(trade_history_file, [])
+
+    with get_db(db_path) as conn:
+        archive_payload = {
+            "archived_at": reset_at.isoformat(),
+            "reason": reason,
+            "portfolio": current_portfolio,
+            "positions_json": current_positions,
+            "trade_history_json": current_trade_history,
+            "account_rows": _fetch_table_rows(conn, "account", "date ASC, updated_at ASC"),
+            "positions_rows": _fetch_table_rows(conn, "positions", "symbol ASC"),
+            "trades_rows": _fetch_table_rows(conn, "trades", "executed_at ASC, id ASC"),
+            "simulated_orders_rows": _fetch_table_rows(conn, "simulated_orders", "created_at ASC, id ASC"),
+            "simulated_fills_rows": _fetch_table_rows(conn, "simulated_fills", "created_at ASC, id ASC"),
+        }
+
+    save_json(archive_path, archive_payload)
+
+    baseline_date = reset_at.strftime("%Y-%m-%d")
+    baseline_iso = reset_at.isoformat()
+    baseline_capital = float(initial_capital or 0.0)
+    baseline_portfolio = {
+        "total_capital": baseline_capital,
+        "available_cash": baseline_capital,
+        "market_value": 0.0,
+        "total_asset": baseline_capital,
+        "total_return": 0.0,
+        "baseline_date": baseline_date,
+        "updated_at": baseline_iso,
+        "note": f"账本已于 {baseline_date} 重置，当前以 ¥{baseline_capital:,.0f} 作为新的模拟基线",
+    }
+
+    save_json(portfolio_file, baseline_portfolio)
+    save_json(positions_file, {})
+    save_json(trade_history_file, [])
+
+    with get_db(db_path) as conn:
+        conn.execute("DELETE FROM simulated_fills")
+        conn.execute("DELETE FROM simulated_orders")
+        conn.execute("DELETE FROM trades")
+        conn.execute("DELETE FROM positions")
+        conn.execute("DELETE FROM account")
+        conn.execute(
+            """
+            INSERT INTO account (
+                date, total_asset, cash, market_value, total_profit, total_profit_pct,
+                daily_profit, daily_profit_pct, position_count, max_drawdown, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                baseline_date,
+                baseline_capital,
+                baseline_capital,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0,
+                0.0,
+                baseline_iso,
+            ),
+        )
+        conn.commit()
+
+    return {
+        "archive_path": str(archive_path),
+        "baseline_date": baseline_date,
+        "total_capital": baseline_capital,
+        "available_cash": baseline_capital,
+        "total_asset": baseline_capital,
+    }
+
+
 def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
-    """Build a current portfolio snapshot from DB holdings plus portfolio cash."""
+    """Build a current portfolio snapshot from live account rows plus current holdings.
+
+    `portfolio.json` keeps baseline configuration. Once SQLite has an account snapshot,
+    runtime cash should follow the DB row instead of raw file overrides.
+    """
     positions = load_positions({}, db_path=db_path)
-    latest_account = load_account({}, db_path=db_path)
     raw_portfolio = load_json(PORTFOLIO_FILE, {})
+    latest_account = load_account({}, db_path=db_path)
+    if account_snapshot_is_stale(latest_account, raw_portfolio):
+        latest_account = {}
 
     position_details = []
     total_value = 0.0
@@ -635,9 +780,9 @@ def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
             }
         )
 
-    available_cash = raw_portfolio.get("available_cash")
+    available_cash = latest_account.get("cash")
     if available_cash is None:
-        available_cash = latest_account.get("cash", 0.0)
+        available_cash = raw_portfolio.get("available_cash")
     available_cash = float(available_cash or 0.0)
 
     total_capital = raw_portfolio.get("total_capital")
@@ -649,9 +794,11 @@ def build_portfolio_snapshot(db_path: Path = DB_PATH) -> Dict[str, Any]:
     total_assets = available_cash + total_value
     current_total_profit = total_assets - total_capital
     total_profit_pct = (current_total_profit / total_capital * 100) if total_capital else 0.0
-    override_present = raw_portfolio.get("available_cash") is not None or raw_portfolio.get("total_capital") is not None
-    snapshot_date = datetime.now().strftime("%Y-%m-%d") if override_present else (latest_account.get("date") if latest_account else None)
-    snapshot_updated_at = datetime.now().isoformat() if override_present else (latest_account.get("updated_at") if latest_account else None)
+    bootstrap_from_file = not latest_account and (
+        raw_portfolio.get("available_cash") is not None or raw_portfolio.get("total_capital") is not None
+    )
+    snapshot_date = datetime.now().strftime("%Y-%m-%d") if bootstrap_from_file else (latest_account.get("date") if latest_account else None)
+    snapshot_updated_at = datetime.now().isoformat() if bootstrap_from_file else (latest_account.get("updated_at") if latest_account else None)
     account_snapshot = dict(latest_account or {})
     account_snapshot.update(
         {
@@ -1358,17 +1505,30 @@ def sync_positions_and_account_to_db(
 def load_recent_simulated_orders(limit: int = 20, db_path: Path = DB_PATH) -> List[Dict[str, Any]]:
     """Return recent simulated paper-trading orders from SQLite."""
     ensure_storage_tables(db_path)
+    baseline_date = get_portfolio_baseline_date()
     try:
         with get_db(db_path) as conn:
-            rows = conn.execute(
-                """
-                SELECT *
-                FROM simulated_orders
-                ORDER BY created_at DESC
-                LIMIT ?
-                """,
-                (limit,),
-            ).fetchall()
+            if baseline_date:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM simulated_orders
+                    WHERE substr(created_at, 1, 10) >= ?
+                    ORDER BY created_at DESC
+                    LIMIT ?
+                    """,
+                    (baseline_date, limit),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM simulated_orders
+                    ORDER BY created_at DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
     except sqlite3.Error:
         rows = []
     return [dict(row) for row in rows]
@@ -1377,16 +1537,29 @@ def load_recent_simulated_orders(limit: int = 20, db_path: Path = DB_PATH) -> Li
 def load_open_simulated_orders(db_path: Path = DB_PATH) -> List[Dict[str, Any]]:
     """Return pending or partially-filled paper-trading orders."""
     ensure_storage_tables(db_path)
+    baseline_date = get_portfolio_baseline_date()
     try:
         with get_db(db_path) as conn:
-            rows = conn.execute(
-                """
-                SELECT *
-                FROM simulated_orders
-                WHERE status IN ('pending', 'partial_filled')
-                ORDER BY created_at ASC
-                """
-            ).fetchall()
+            if baseline_date:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM simulated_orders
+                    WHERE status IN ('pending', 'partial_filled')
+                      AND substr(created_at, 1, 10) >= ?
+                    ORDER BY created_at ASC
+                    """,
+                    (baseline_date,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT *
+                    FROM simulated_orders
+                    WHERE status IN ('pending', 'partial_filled')
+                    ORDER BY created_at ASC
+                    """
+                ).fetchall()
     except sqlite3.Error:
         rows = []
     return [dict(row) for row in rows]
@@ -1396,6 +1569,7 @@ def get_simulated_order_metrics(db_path: Path = DB_PATH) -> Dict[str, Any]:
     """Summarize the current paper-trading execution ledger."""
     ensure_storage_tables(db_path)
     today = datetime.now().strftime("%Y-%m-%d")
+    baseline_date = get_portfolio_baseline_date()
     default = {
         "today_order_count": 0,
         "today_filled_count": 0,
@@ -1407,8 +1581,8 @@ def get_simulated_order_metrics(db_path: Path = DB_PATH) -> Dict[str, Any]:
     }
     try:
         with get_db(db_path) as conn:
-            summary = conn.execute(
-                """
+            summary_params: Tuple[Any, ...] = (today,)
+            summary_sql = """
                 SELECT
                     COUNT(*) AS today_order_count,
                     SUM(CASE WHEN status IN ('filled', 'partial_filled') THEN 1 ELSE 0 END) AS today_filled_count,
@@ -1418,17 +1592,27 @@ def get_simulated_order_metrics(db_path: Path = DB_PATH) -> Dict[str, Any]:
                     SUM(CASE WHEN slippage_cost IS NOT NULL THEN slippage_cost ELSE 0 END) AS today_slippage_cost
                 FROM simulated_orders
                 WHERE substr(created_at, 1, 10) = ?
-                """,
-                (today,),
-            ).fetchone()
-            recent_orders = conn.execute(
-                """
+            """
+            recent_sql = """
                 SELECT *
                 FROM simulated_orders
                 ORDER BY created_at DESC
                 LIMIT 10
+            """
+            recent_params: Tuple[Any, ...] = ()
+            if baseline_date:
+                summary_sql += " AND substr(created_at, 1, 10) >= ?"
+                summary_params = (today, baseline_date)
+                recent_sql = """
+                    SELECT *
+                    FROM simulated_orders
+                    WHERE substr(created_at, 1, 10) >= ?
+                    ORDER BY created_at DESC
+                    LIMIT 10
                 """
-            ).fetchall()
+                recent_params = (baseline_date,)
+            summary = conn.execute(summary_sql, summary_params).fetchone()
+            recent_orders = conn.execute(recent_sql, recent_params).fetchall()
     except sqlite3.Error:
         return default
 
