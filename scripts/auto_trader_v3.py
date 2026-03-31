@@ -14,6 +14,7 @@
 """
 
 import sys
+import json
 import sqlite3
 import urllib.request
 from datetime import datetime, timedelta
@@ -727,19 +728,39 @@ class AutoTraderV3:
             conn = sqlite3.connect(str(DATABASE_FILE))
             cursor = conn.cursor()
 
-            # 获取或创建 proposal
-            cursor.execute("""
-                INSERT OR IGNORE INTO proposals
-                (symbol, name, direction, status, created_at)
-                VALUES (?, ?, ?, ?, ?)
-            """, (code, "", "buy", "pending", datetime.now().isoformat()))
-
-            proposal_id = cursor.lastrowid
-            if proposal_id == 0:
-                cursor.execute("""
-                    SELECT id FROM proposals WHERE symbol = ? ORDER BY id DESC LIMIT 1
-                """, (code,))
-                proposal_id = cursor.fetchone()[0]
+            cursor.execute(
+                """
+                SELECT id
+                FROM proposals
+                WHERE symbol = ? AND direction = 'buy' AND status IN ('pending', 'risk_checked', 'approved')
+                ORDER BY created_at DESC, id DESC
+                LIMIT 1
+                """,
+                (code,),
+            )
+            row = cursor.fetchone()
+            if row:
+                proposal_id = row[0]
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO proposals
+                    (symbol, name, direction, thesis, source_agent, priority, status, created_at, metadata)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        code,
+                        "",
+                        "buy",
+                        notes,
+                        "Trader",
+                        "normal",
+                        "risk_checked",
+                        datetime.now().isoformat(),
+                        json.dumps({"risk_level": risk_level}, ensure_ascii=False),
+                    ),
+                )
+                proposal_id = cursor.lastrowid
 
             # 保存风控评估
             cursor.execute("""
@@ -767,13 +788,27 @@ class AutoTraderV3:
         except Exception as e:
             logger.error(f"保存风控评估失败: {e}")
 
+    def calculate_buy_budget(self) -> float:
+        """根据现金和风控上限计算本次可用买入预算。"""
+        total_positions_value = sum(
+            pos.get("shares", 0) * pos.get("cost_price", 0)
+            for pos in self.positions.values()
+        )
+        total_capital = max(0.0, float(self.cash or 0.0) + float(total_positions_value or 0.0))
+        risk_budget = total_capital * min(
+            self.RISK_CONFIG["max_single_trade"],
+            self.RISK_CONFIG["max_single_position"],
+        )
+        return min(
+            50000.0,
+            max(0.0, float(self.cash or 0.0) * 0.25),
+            max(0.0, float(self.cash or 0.0) - 1000.0),
+            max(0.0, risk_budget),
+        )
+
     def execute_buy(self, signal: Dict) -> bool:
         """执行模拟买入，下单后按成交结果回写主账本。"""
-        budget = min(
-            50000.0,
-            max(0.0, self.cash * 0.25),
-            max(0.0, self.cash - 1000),
-        )
+        budget = self.calculate_buy_budget()
         requested_shares = int(budget / max(float(signal["price"]), 0.01))
         requested_shares = (requested_shares // 100) * 100
         if requested_shares <= 0:
