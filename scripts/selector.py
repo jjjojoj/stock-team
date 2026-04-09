@@ -30,6 +30,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 from core.fundamentals import get_fundamental_bundles
+from core.proposals import create_or_update_selection_proposal
 from core.runtime_guardrails import (
     evaluate_runtime_mode,
     record_datasource_fallback,
@@ -38,6 +39,7 @@ from core.runtime_guardrails import (
     task_lock,
     TaskLockedError,
 )
+from core.storage import load_watchlist, save_watchlist
 
 # 导入新适配器
 ADAPTER_IMPORT_ERROR = None
@@ -485,6 +487,80 @@ def format_top_report(stocks: List[Dict]) -> str:
     return "\n".join(lines).strip()
 
 
+def _build_selection_watchlist_entry(stock: Dict) -> Dict:
+    """Convert selector output into a watchlist entry."""
+    price = float(stock.get("price") or 0.0)
+    score = stock.get("score") or {}
+    total_score = int(score.get("total") or 0)
+    details = str(score.get("details") or "动态选股入池")
+    technical = stock.get("technical") or {}
+    proposal_reasons = [
+        f"动态选股综合评分 {total_score}/100",
+        details,
+        f"行业 {stock.get('sector', '未知')} > {stock.get('sub_sector', '未知')}",
+    ]
+    if technical.get("technical_score") is not None:
+        proposal_reasons.append(
+            f"技术评分 {technical.get('technical_score')}，MACD {technical.get('macd', '未知')}，KDJ {technical.get('kdj', '未知')}"
+        )
+
+    target_multiplier = 1.10 if total_score >= 60 else 1.06
+    stop_multiplier = 0.92 if total_score >= 60 else 0.94
+    return {
+        "name": stock.get("name", ""),
+        "industry": stock.get("sub_sector") or stock.get("sector") or "",
+        "controller": stock.get("controller"),
+        "reason": details,
+        "proposal_reasons": proposal_reasons,
+        "target_price": round(price * target_multiplier, 2) if price else None,
+        "stop_loss": round(price * stop_multiplier, 2) if price else None,
+        "score": total_score,
+        "priority": "high" if total_score >= 60 else "medium",
+        "status": "active",
+        "added_date": datetime.now().strftime("%Y-%m-%d"),
+        "updated_at": datetime.now().isoformat(),
+        "source": "selector",
+        "selection_snapshot": {
+            "sector": stock.get("sector"),
+            "sub_sector": stock.get("sub_sector"),
+            "price": price,
+            "change_pct": float(stock.get("change_pct") or 0.0),
+            "market_cap": float(stock.get("market_cap") or 0.0),
+            "details": details,
+            "technical": technical,
+        },
+    }
+
+
+def sync_selection_candidates(stocks: List[Dict]) -> Dict[str, int]:
+    """Persist top selector candidates into the watchlist and proposal pipeline."""
+    if not stocks:
+        return {"watchlist_updated": 0, "proposal_updated": 0}
+
+    watchlist = load_watchlist({})
+    proposal_updates = 0
+
+    for stock in stocks:
+        code = stock["code"]
+        entry = _build_selection_watchlist_entry(stock)
+        existing = dict(watchlist.get(code, {}))
+        merged_entry = {**existing, **entry}
+        watchlist[code] = merged_entry
+
+        create_or_update_selection_proposal(
+            {
+                **stock,
+                "target_price": merged_entry.get("target_price"),
+                "stop_loss": merged_entry.get("stop_loss"),
+                "proposal_reasons": merged_entry.get("proposal_reasons", []),
+            }
+        )
+        proposal_updates += 1
+
+    save_watchlist(watchlist)
+    return {"watchlist_updated": len(stocks), "proposal_updated": proposal_updates}
+
+
 def main():
     """主函数"""
     import argparse
@@ -516,6 +592,12 @@ def main():
             elif args.action == "top":
                 n = int(args.arg) if args.arg else 5
                 top_stocks = selector.top(n, filter_controller=not args.all)
+                sync_result = sync_selection_candidates(top_stocks)
+                if top_stocks:
+                    print(
+                        f"✅ 已同步 {sync_result['watchlist_updated']} 只候选到观察池，"
+                        f"{sync_result['proposal_updated']} 条提案进入流水线"
+                    )
                 try:
                     sys.path.insert(0, os.path.join(PROJECT_ROOT, "scripts"))
                     from feishu_notifier import send_feishu_message

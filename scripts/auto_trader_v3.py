@@ -46,6 +46,14 @@ from core.storage import (
     sync_positions_and_account_to_db,
 )
 from core.fundamentals import get_fundamental_bundles
+from core.proposals import (
+    apply_cio_decision,
+    ensure_pipeline_tables,
+    get_latest_open_proposal,
+    get_pipeline_candidates,
+    mark_proposal_executed,
+    record_risk_review,
+)
 from core.runtime_guardrails import (
     evaluate_runtime_mode,
     record_datasource_fallback,
@@ -130,6 +138,12 @@ class AutoTraderV3:
 
         # 单笔交易金额限制
         "max_single_trade": 0.20,  # 单笔交易最多 20%
+    }
+
+    PIPELINE_CONFIG = {
+        "cio_min_confidence": 65,
+        "cio_min_analysis_score": 50,
+        "cio_min_upside_pct": 5.0,
     }
     
     def __init__(self):
@@ -621,6 +635,214 @@ class AutoTraderV3:
 
         return latest_prediction_id
 
+    def _get_latest_prediction(self, code: str) -> Optional[Dict[str, Any]]:
+        """返回单只股票最新的预测记录。"""
+        latest_prediction: Optional[Dict[str, Any]] = None
+
+        for pred in self.predictions.get("active", {}).values():
+            if pred.get("code") == code:
+                if latest_prediction is None or pred.get("created_at", "") > latest_prediction.get("created_at", ""):
+                    latest_prediction = pred
+
+        if latest_prediction is None:
+            for pred in self.predictions.get("history", []):
+                if pred.get("code") == code:
+                    if latest_prediction is None or pred.get("created_at", "") > latest_prediction.get("created_at", ""):
+                        latest_prediction = pred
+
+        return latest_prediction
+
+    def _proposal_metadata(self, proposal: Dict[str, Any]) -> Dict[str, Any]:
+        raw = proposal.get("metadata")
+        if isinstance(raw, dict):
+            return dict(raw)
+        if not raw:
+            return {}
+        try:
+            payload = json.loads(raw)
+        except (TypeError, json.JSONDecodeError):
+            return {}
+        return payload if isinstance(payload, dict) else {}
+
+    def _estimate_buy_shares(self, price: float) -> int:
+        budget = self.calculate_buy_budget()
+        shares = int(budget / max(float(price or 0.0), 0.01))
+        return max(0, (shares // 100) * 100)
+
+    def _build_buy_signal_from_proposal(self, proposal: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        code = str(proposal.get("symbol") or "")
+        if not code:
+            return None, "提案缺少股票代码"
+        if code in self.positions:
+            return None, "该股票已在持仓中"
+
+        prediction = self._get_latest_prediction(code)
+        if not prediction:
+            return None, "缺少活跃预测"
+
+        direction = str(prediction.get("direction") or "neutral")
+        if direction != "up":
+            return None, f"量化方向为 {direction}"
+
+        confidence = int(prediction.get("confidence") or 0)
+        if confidence < 60:
+            return None, f"量化置信度不足 ({confidence}%)"
+
+        quote = self.get_trade_quote(code)
+        price = quote.get("price")
+        if not price:
+            return None, "无法获取交易报价"
+
+        requested_shares = self._estimate_buy_shares(float(price))
+        if requested_shares <= 0:
+            return None, "买入预算不足"
+
+        metadata = self._proposal_metadata(proposal)
+        research = metadata.get("research", {})
+        risk = metadata.get("risk", {})
+
+        signal = {
+            "proposal_id": proposal.get("id"),
+            "proposal_status": proposal.get("status"),
+            "code": code,
+            "name": proposal.get("name") or prediction.get("name") or quote.get("name") or code,
+            "price": float(price),
+            "shares": requested_shares,
+            "confidence": confidence,
+            "direction": direction,
+            "target_price": float(
+                proposal.get("target_price")
+                or prediction.get("target_price")
+                or research.get("target_price")
+                or 0.0
+            ),
+            "stop_loss": float(proposal.get("stop_loss") or research.get("stop_loss") or 0.0),
+            "reasons": proposal.get("thesis") or "；".join(prediction.get("reasons") or []),
+            "price_source": quote.get("source", "unknown"),
+            "market_cap": quote.get("market_cap"),
+            "fundamental_source": quote.get("fundamental_source"),
+            "industry": research.get("industry") or self._get_stock_info(code).get("industry", "unknown"),
+            "prediction_id": prediction.get("id") or self._find_latest_prediction(code),
+            "risk_prechecked": bool(risk) and proposal.get("status") in {"risk_checked", "approved"},
+            "risk_level": risk.get("risk_level"),
+            "risk_message": risk.get("notes"),
+        }
+        return signal, None
+
+    def _evaluate_cio_decision(
+        self,
+        proposal: Dict[str, Any],
+        signal: Dict[str, Any],
+        *,
+        risk_passed: bool,
+        risk_level: Optional[str],
+        risk_message: str,
+    ) -> Tuple[bool, str, Dict[str, Any]]:
+        metadata = self._proposal_metadata(proposal)
+        research = metadata.get("research", {})
+        selection = metadata.get("selection", {})
+        analysis_score = int(research.get("score") or selection.get("score") or 0)
+        confidence = int(signal.get("confidence") or 0)
+        current_price = float(signal.get("price") or 0.0)
+        target_price = float(signal.get("target_price") or 0.0)
+        upside_pct = ((target_price - current_price) / current_price * 100) if current_price and target_price else 0.0
+
+        summary = {
+            "analysis_score": analysis_score,
+            "research_score": int(research.get("score") or 0),
+            "selection_score": int(selection.get("score") or 0),
+            "confidence": confidence,
+            "upside_pct": round(upside_pct, 2),
+            "risk_level": risk_level,
+            "risk_message": risk_message,
+        }
+
+        if not risk_passed:
+            return False, f"风控未通过：{risk_message}", summary
+        if confidence < self.PIPELINE_CONFIG["cio_min_confidence"]:
+            return False, f"量化置信度不足 ({confidence}%)", summary
+        if analysis_score < self.PIPELINE_CONFIG["cio_min_analysis_score"]:
+            return False, f"前置分析评分不足 ({analysis_score})", summary
+        if target_price and current_price and target_price <= current_price:
+            return False, "目标价缺乏上行空间", summary
+        if upside_pct < self.PIPELINE_CONFIG["cio_min_upside_pct"]:
+            return False, f"预期收益空间不足 ({upside_pct:.1f}%)", summary
+        return True, f"分析{analysis_score}分 / 量化{confidence}% / 风控{risk_level or 'low'}，批准交易", summary
+
+    def build_pipeline_buy_signals(self) -> List[Dict[str, Any]]:
+        """只从正式审批链获取买入候选。"""
+        ensure_pipeline_tables(DATABASE_FILE)
+        approved_signals: List[Dict[str, Any]] = []
+        proposals = get_pipeline_candidates(
+            ("quant_validated", "risk_checked", "approved"),
+            db_path=DATABASE_FILE,
+        )
+
+        for proposal in proposals:
+            signal, block_reason = self._build_buy_signal_from_proposal(proposal)
+            proposal_id = int(proposal["id"])
+
+            if proposal.get("status") == "approved":
+                if signal:
+                    signal["risk_prechecked"] = True
+                    approved_signals.append(signal)
+                elif block_reason:
+                    logger.warning("已批准提案暂不可执行 #%s %s: %s", proposal_id, proposal.get("symbol"), block_reason)
+                continue
+
+            if not signal:
+                reason = f"量化提案失效：{block_reason}"
+                apply_cio_decision(
+                    proposal_id,
+                    approved=False,
+                    reason=reason,
+                    summary={"blocked_reason": block_reason},
+                    db_path=DATABASE_FILE,
+                )
+                logger.info("CIO 驳回提案 #%s %s: %s", proposal_id, proposal.get("symbol"), reason)
+                continue
+
+            if proposal.get("status") == "quant_validated":
+                passed, risk_msg, risk_level = self.check_risk_assessment(signal["code"], signal)
+                self.save_risk_assessment(
+                    signal["code"],
+                    risk_level or "medium",
+                    risk_msg,
+                    proposal_id=proposal_id,
+                    passed=passed,
+                )
+            else:
+                risk_meta = self._proposal_metadata(proposal).get("risk", {})
+                passed = bool(risk_meta.get("passed"))
+                risk_level = str(risk_meta.get("risk_level") or "medium")
+                risk_msg = str(risk_meta.get("notes") or "已有风控评估")
+
+            approved, cio_reason, cio_summary = self._evaluate_cio_decision(
+                proposal,
+                signal,
+                risk_passed=passed,
+                risk_level=risk_level,
+                risk_message=risk_msg,
+            )
+            apply_cio_decision(
+                proposal_id,
+                approved=approved,
+                reason=cio_reason,
+                summary=cio_summary,
+                db_path=DATABASE_FILE,
+            )
+
+            if approved:
+                signal["risk_prechecked"] = True
+                signal["risk_level"] = risk_level
+                signal["risk_message"] = risk_msg
+                approved_signals.append(signal)
+                logger.info("CIO 批准提案 #%s %s", proposal_id, signal["code"])
+            else:
+                logger.info("CIO 驳回提案 #%s %s: %s", proposal_id, signal["code"], cio_reason)
+
+        return approved_signals
+
     def check_risk_assessment(self, code: str, signal: Dict) -> Tuple[bool, str, Optional[str]]:
         """
         【修复 P0-4】风控检查
@@ -722,71 +944,62 @@ class AutoTraderV3:
 
         return {"industry": "unknown"}
 
-    def save_risk_assessment(self, code: str, risk_level: str, notes: str):
+    def save_risk_assessment(
+        self,
+        code: str,
+        risk_level: str,
+        notes: str,
+        *,
+        proposal_id: Optional[int] = None,
+        passed: bool = True,
+    ):
         """保存风控评估到数据库"""
         try:
-            conn = sqlite3.connect(str(DATABASE_FILE))
-            cursor = conn.cursor()
+            ensure_pipeline_tables(DATABASE_FILE)
+            if proposal_id is None:
+                proposal = get_latest_open_proposal(code, db_path=DATABASE_FILE)
+                if proposal:
+                    proposal_id = int(proposal["id"])
+                else:
+                    with sqlite3.connect(str(DATABASE_FILE)) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            """
+                            INSERT INTO proposals
+                            (symbol, name, direction, thesis, source_agent, priority, status, created_at, metadata)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            (
+                                code,
+                                "",
+                                "buy",
+                                notes,
+                                "Trader",
+                                "normal",
+                                "pending",
+                                datetime.now().isoformat(),
+                                json.dumps({"created_by": "Trader"}, ensure_ascii=False),
+                            ),
+                        )
+                        proposal_id = int(cursor.lastrowid)
+                        conn.commit()
 
-            cursor.execute(
-                """
-                SELECT id
-                FROM proposals
-                WHERE symbol = ? AND direction = 'buy' AND status IN ('pending', 'risk_checked', 'approved')
-                ORDER BY created_at DESC, id DESC
-                LIMIT 1
-                """,
-                (code,),
-            )
-            row = cursor.fetchone()
-            if row:
-                proposal_id = row[0]
-            else:
-                cursor.execute(
-                    """
-                    INSERT INTO proposals
-                    (symbol, name, direction, thesis, source_agent, priority, status, created_at, metadata)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        code,
-                        "",
-                        "buy",
-                        notes,
-                        "Trader",
-                        "normal",
-                        "risk_checked",
-                        datetime.now().isoformat(),
-                        json.dumps({"risk_level": risk_level}, ensure_ascii=False),
-                    ),
-                )
-                proposal_id = cursor.lastrowid
-
-            # 保存风控评估
-            cursor.execute("""
-                INSERT INTO risk_assessment
-                (proposal_id, symbol, risk_level, suggested_position, max_position,
-                 var_95, volatility, industry_concentration, correlation_market, risk_notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                proposal_id,
+            payload = record_risk_review(
+                int(proposal_id),
                 code,
-                risk_level,
-                0.15,  # 建议仓位
-                self.RISK_CONFIG["max_single_position"],  # 最大仓位
-                0.05,  # 95% VaR
-                0.15,  # 波动率
-                0.30,  # 行业集中度
-                0.80,  # 与市场相关性
-                notes
-            ))
-
-            conn.commit()
-            conn.close()
-            logger.info(f"💾 风控评估已保存: {code} - {risk_level}")
+                risk_level=risk_level,
+                notes=notes,
+                passed=passed,
+                suggested_position=self.RISK_CONFIG["max_single_position"],
+                max_position=self.RISK_CONFIG["max_single_position"],
+                db_path=DATABASE_FILE,
+            )
+            logger.info("💾 风控评估已保存: %s - %s -> %s", code, risk_level, payload["status"])
+            return payload
 
         except Exception as e:
             logger.error(f"保存风控评估失败: {e}")
+            return None
 
     def calculate_buy_budget(self) -> float:
         """根据现金和风控上限计算本次可用买入预算。"""
@@ -808,23 +1021,43 @@ class AutoTraderV3:
 
     def execute_buy(self, signal: Dict) -> bool:
         """执行模拟买入，下单后按成交结果回写主账本。"""
-        budget = self.calculate_buy_budget()
-        requested_shares = int(budget / max(float(signal["price"]), 0.01))
-        requested_shares = (requested_shares // 100) * 100
+        requested_shares = int(signal.get("shares") or 0)
+        if requested_shares <= 0:
+            budget = self.calculate_buy_budget()
+            requested_shares = int(budget / max(float(signal["price"]), 0.01))
+            requested_shares = (requested_shares // 100) * 100
         if requested_shares <= 0:
             logger.warning("买入预算不足: %s", signal["code"])
             return False
 
         signal = dict(signal)
         signal["shares"] = requested_shares
+        proposal_id = signal.get("proposal_id")
 
-        passed, risk_msg, risk_level = self.check_risk_assessment(signal["code"], signal)
-        if not passed:
-            logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
-            self.save_risk_assessment(signal["code"], risk_level, risk_msg)
-            return False
+        if signal.get("risk_prechecked"):
+            passed = True
+            risk_msg = str(signal.get("risk_message") or "风控检查已通过")
+            risk_level = str(signal.get("risk_level") or "low")
+        else:
+            passed, risk_msg, risk_level = self.check_risk_assessment(signal["code"], signal)
+            if not passed:
+                logger.warning(f"⚠️ {signal['name']}: {risk_msg}")
+                self.save_risk_assessment(
+                    signal["code"],
+                    risk_level or "medium",
+                    risk_msg,
+                    proposal_id=int(proposal_id) if proposal_id else None,
+                    passed=False,
+                )
+                return False
 
-        self.save_risk_assessment(signal["code"], risk_level, risk_msg)
+            self.save_risk_assessment(
+                signal["code"],
+                risk_level or "low",
+                risk_msg,
+                proposal_id=int(proposal_id) if proposal_id else None,
+                passed=True,
+            )
         prediction_id = self._find_latest_prediction(signal["code"])
         execution = self.execution_engine.submit_order(
             symbol=signal["code"],
@@ -847,6 +1080,12 @@ class AutoTraderV3:
         if not self._apply_execution_result(execution, trade_context=signal):
             logger.warning("买入未成交: %s (%s)", signal["code"], execution.get("status"))
             return False
+
+        if proposal_id:
+            try:
+                mark_proposal_executed(int(proposal_id), execution, db_path=DATABASE_FILE)
+            except Exception as exc:
+                logger.warning("提案执行状态回写失败 #%s: %s", proposal_id, exc)
 
         logger.info(
             "买入成交: %s %s股 @ ¥%.2f | 手续费 ¥%.2f | 状态 %s",
@@ -1070,35 +1309,14 @@ def main():
                     logger.info("🧾 已补记 %s 笔未完成订单成交", len(reconciled))
 
                 logger.info("执行买入逻辑...")
-                buy_signals = []
-                watchlist = load_json(WATCHLIST_FILE, {})
-
-                for code, stock in watchlist.items():
-                    for pred_id, pred in trader.predictions.get("active", {}).items():
-                        if pred.get("code") == code:
-                            confidence = pred.get("confidence", 0)
-                            if confidence >= 80 and code not in trader.positions:
-                                quote = trader.get_trade_quote(code)
-                                price = quote.get("price")
-                                if price:
-                                    buy_signals.append({
-                                        "code": code,
-                                        "name": stock.get("name", code),
-                                        "price": price,
-                                        "confidence": confidence,
-                                        "reasons": stock.get("reason", stock.get("added_reason", "")),
-                                        "price_source": quote.get("source", "unknown"),
-                                        "market_cap": quote.get("market_cap"),
-                                        "fundamental_source": quote.get("fundamental_source"),
-                                        "industry": stock.get("industry", "unknown"),
-                                    })
-
+                buy_signals = trader.build_pipeline_buy_signals()
                 buy_signals.sort(key=lambda x: x["confidence"], reverse=True)
 
                 if buy_signals:
-                    logger.info(f"\n发现 {len(buy_signals)} 个买入信号:")
+                    logger.info(f"\n发现 {len(buy_signals)} 个已审批买入提案:")
                     for i, signal in enumerate(buy_signals, 1):
                         logger.info(f"\n[{i}] {signal['name']} ({signal['code']})")
+                        logger.info(f"    提案ID: #{signal.get('proposal_id', '--')}")
                         logger.info(f"    价格: ¥{signal['price']:.2f}")
                         logger.info(f"    置信度: {signal['confidence']}%")
                         logger.info(f"    理由: {signal['reasons']}")

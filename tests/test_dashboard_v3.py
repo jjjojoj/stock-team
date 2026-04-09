@@ -49,6 +49,12 @@ class DashboardSnapshotTests(unittest.TestCase):
             patch.object(dashboard, "get_positions", return_value=[]),
             patch.object(dashboard, "get_trades", return_value=[]),
             patch.object(dashboard, "get_simulated_order_metrics", return_value={"recent_orders": []}),
+            patch.object(dashboard, "get_pipeline_snapshot", return_value={"counts": {"approved": 1}, "recent_handoffs": []}),
+            patch.object(
+                dashboard,
+                "_get_prediction_activity_summary",
+                return_value={"today_count": 1, "active_count": 1, "today_active_count": 1, "latest_created_at": "2026-03-31 09:30:00"},
+            ),
             patch.object(dashboard, "load_recent_simulated_orders", return_value=[]),
             patch.object(dashboard, "get_portfolio_baseline_date", return_value="2026-03-31"),
             patch.object(dashboard, "query_sql", return_value=[{"id": 9, "created_at": "2026-03-31 10:00:00"}]) as query_sql,
@@ -56,6 +62,8 @@ class DashboardSnapshotTests(unittest.TestCase):
             snapshot = dashboard.get_trading_snapshot()
 
         self.assertEqual(snapshot["proposals"], [{"id": 9, "created_at": "2026-03-31 10:00:00"}])
+        self.assertEqual(snapshot["proposal_pipeline"]["counts"]["approved"], 1)
+        self.assertEqual(snapshot["trade_readiness"]["label"], "等待交易条件成熟")
         query_sql.assert_called_once_with(
             """
             SELECT id, symbol, name, direction, status, created_at
@@ -262,6 +270,16 @@ class DashboardSnapshotTests(unittest.TestCase):
                     "recent_orders": [{"order_id": "sim_1", "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}],
                 },
             ),
+            patch.object(
+                dashboard,
+                "_get_prediction_activity_summary",
+                return_value={"today_count": 0, "active_count": 0, "today_active_count": 0, "latest_created_at": "2026-04-02 09:30:00"},
+            ),
+            patch.object(
+                dashboard,
+                "get_pipeline_snapshot",
+                return_value={"counts": {"pending": 1, "quant_validated": 0, "risk_checked": 0, "approved": 0}, "recent_handoffs": []},
+            ),
             patch.object(dashboard, "load_recent_simulated_orders", return_value=[{"order_id": "sim_1"}]),
             patch.object(dashboard, "query_sql", return_value=[]),
         ):
@@ -269,6 +287,8 @@ class DashboardSnapshotTests(unittest.TestCase):
 
         self.assertEqual(snapshot["order_metrics"]["open_order_count"], 1)
         self.assertEqual(snapshot["recent_orders"][0]["order_id"], "sim_1")
+        self.assertEqual(snapshot["trade_readiness"]["status"], "error")
+        self.assertTrue(any("今日尚未生成新预测" in item for item in snapshot["trade_readiness"]["blockers"]))
 
     def test_get_news_snapshot_filters_low_quality_rows_and_normalizes_direction(self):
         today = datetime.now().strftime("%Y-%m-%d")

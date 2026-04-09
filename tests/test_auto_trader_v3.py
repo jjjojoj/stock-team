@@ -81,6 +81,77 @@ class AutoTraderV3Tests(unittest.TestCase):
         self.assertEqual(proposal, ("sz.000831", "buy", "Trader", "risk_checked"))
         self.assertEqual(assessment, ("sz.000831", "medium", "单笔交易金额过大"))
 
+    def test_build_pipeline_buy_signals_only_uses_proposals(self):
+        trader = auto_trader.AutoTraderV3.__new__(auto_trader.AutoTraderV3)
+        trader.cash = 200000.0
+        trader.positions = {}
+        trader.predictions = {
+            "active": {
+                "pred-1": {
+                    "id": "pred-1",
+                    "code": "sz.000831",
+                    "name": "中国稀土",
+                    "direction": "up",
+                    "confidence": 80,
+                    "target_price": 52.80,
+                    "reasons": ["稀土景气改善"],
+                    "created_at": "2026-03-31T09:00:00",
+                }
+            }
+        }
+        trader.RISK_CONFIG = dict(auto_trader.AutoTraderV3.RISK_CONFIG)
+
+        proposal = {
+            "id": 7,
+            "symbol": "sz.000831",
+            "name": "中国稀土",
+            "status": "quant_validated",
+            "target_price": 52.80,
+            "stop_loss": 44.00,
+            "thesis": "稀土行业进入修复阶段",
+            "metadata": '{"research":{"score":55,"industry":"稀土"}}',
+        }
+
+        with (
+            patch.object(auto_trader, "get_pipeline_candidates", return_value=[proposal]),
+            patch.object(auto_trader, "apply_cio_decision") as cio_decision,
+            patch.object(trader, "get_trade_quote", return_value={"price": 48.0, "source": "live_api", "market_cap": 300.0, "fundamental_source": "live"}),
+            patch.object(trader, "check_risk_assessment", return_value=(True, "风控检查通过", "low")),
+            patch.object(trader, "save_risk_assessment", return_value={"status": "risk_checked"}),
+        ):
+            signals = trader.build_pipeline_buy_signals()
+
+        self.assertEqual(len(signals), 1)
+        self.assertEqual(signals[0]["proposal_id"], 7)
+        self.assertEqual(signals[0]["code"], "sz.000831")
+        self.assertTrue(signals[0]["risk_prechecked"])
+        cio_decision.assert_called_once()
+
+    def test_evaluate_cio_decision_accepts_conservative_65_confidence(self):
+        trader = auto_trader.AutoTraderV3.__new__(auto_trader.AutoTraderV3)
+        trader.PIPELINE_CONFIG = dict(auto_trader.AutoTraderV3.PIPELINE_CONFIG)
+
+        proposal = {
+            "metadata": '{"research":{"score":60}}',
+        }
+        signal = {
+            "confidence": 65,
+            "price": 48.0,
+            "target_price": 51.0,
+        }
+
+        approved, reason, summary = trader._evaluate_cio_decision(
+            proposal,
+            signal,
+            risk_passed=True,
+            risk_level="low",
+            risk_message="风控通过",
+        )
+
+        self.assertTrue(approved)
+        self.assertEqual(summary["analysis_score"], 60)
+        self.assertIn("批准交易", reason)
+
 
 if __name__ == "__main__":
     unittest.main()

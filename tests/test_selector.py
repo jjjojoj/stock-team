@@ -52,6 +52,40 @@ class SelectorTests(unittest.TestCase):
         self.assertIn("- 亮点：PB=2.05(+9)", report)
         self.assertIn("- 技术面：MACD=死叉", report)
 
+    def test_sync_selection_candidates_updates_watchlist_and_pipeline(self):
+        stocks = [
+            {
+                "name": "宝地矿业",
+                "code": "sh.601121",
+                "controller": "新疆国资委",
+                "sector": "有色金属",
+                "sub_sector": "其他",
+                "price": 7.43,
+                "change_pct": -0.13,
+                "market_cap": 65.4,
+                "score": {"total": 27, "details": "PB=2.05(+9)"},
+                "technical": {"macd": "死叉", "kdj": "正常", "technical_score": 20},
+            }
+        ]
+
+        with (
+            patch.object(selector, "load_watchlist", return_value={}),
+            patch.object(selector, "save_watchlist") as save_watchlist,
+            patch.object(selector, "create_or_update_selection_proposal", return_value={"proposal_id": 3}) as create_proposal,
+        ):
+            result = selector.sync_selection_candidates(stocks)
+
+        self.assertEqual(result["watchlist_updated"], 1)
+        self.assertEqual(result["proposal_updated"], 1)
+        create_proposal.assert_called_once()
+        saved_watchlist = save_watchlist.call_args.args[0]
+        self.assertIn("sh.601121", saved_watchlist)
+        entry = saved_watchlist["sh.601121"]
+        self.assertEqual(entry["status"], "active")
+        self.assertEqual(entry["source"], "selector")
+        self.assertGreater(entry["target_price"], stocks[0]["price"])
+        self.assertLess(entry["stop_loss"], stocks[0]["price"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -60,6 +60,7 @@ openclaw cron list --json
 
 - cron 状态
 - 监控摘要
+- 交易执行页（proposal pipeline / recent handoffs）
 - 规则库 / 验证池
 - watchlist
 - news summary
@@ -91,6 +92,7 @@ openclaw cron list --json
 
 ```bash
 python3 -m unittest tests.test_runtime_guardrails tests.test_midday_review tests.test_fundamentals tests.test_ai_predictor tests.test_real_data_paths
+python3 scripts/proposal_pipeline.py status
 python3 scripts/rule_validator.py report
 python3 scripts/ai_predictor.py brief
 ```
@@ -112,6 +114,7 @@ python3 scripts/ai_predictor.py brief
 - 自动交易价格只能落到模拟价
 - 同一任务出现重入锁冲突并持续发生
 - 规则验证、复盘、预测三者数据明显打架
+- `pending / quant_validated / risk_checked / approved` 长时间堵在同一阶段
 
 ### 建议切换只读模式
 
@@ -218,6 +221,25 @@ python3 scripts/ai_predictor.py brief
 - `simulated_orders` 是否存在 `partial_filled / pending`
 - 是否已经触发自动补记或超时撤单
 - `trades.execution_order_id` 是否和订单账本对得上
+- `proposals` 是否完成 `Research -> Quant -> Risk -> CIO -> Trader` 交接链
+
+### 6. 迟迟没有发生交易
+
+先查：
+
+- `python3 scripts/proposal_pipeline.py status`
+- `scripts/auto_trader_v3.py`
+- 交易执行页中的 proposal pipeline 统计
+- 交易执行页中的“今日未交易原因”
+
+重点看：
+
+- 是否已经有 `approved` 提案
+- 提案是否停在 `quant_validated / risk_checked`
+- CIO 是否因为置信度、研究评分或预期收益空间驳回
+- 是否因空仓基线重置后尚未积累新的研究提案
+- `ai_predictor` 是否真的在当日刷新了新预测，而不是反复复用旧 active prediction
+- `selector` 是否已把当日 Top 候选同步进 watchlist 和 proposal pipeline
 - 当前现金和持仓是否已经按成交结果回写
 
 ## 七、OpenClaw 应记住的升级规则
@@ -237,6 +259,7 @@ python3 scripts/ai_predictor.py brief
 - `docs/REFACTOR_PHASE12_2026-03-26.md`
 - `docs/REFACTOR_PHASE13_2026-03-26.md`
 - `docs/REFACTOR_PHASE14_2026-03-26.md`
+- `docs/REFACTOR_PHASE16_2026-04-10.md`
 - `config/runtime_guardrails.json`
 - `core/runtime_guardrails.py`
 - `core/fundamentals.py`

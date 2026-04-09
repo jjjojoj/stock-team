@@ -98,6 +98,34 @@
 - `scripts/ai_predictor.py`
 - `scripts/auto_trader_v3.py`
 
+### 4.2 多 Agent 提案流水线已落地
+
+已完成：
+
+- 新增统一 proposal workflow 层
+- Research 会正式提交提案
+- Quant 会把验证结果挂回提案
+- Trader 买入现在只执行正式审批链中的提案
+- Dashboard 交易页已能展示 proposal pipeline 状态与最近交接记录
+
+当前正式状态流：
+
+- `pending`
+- `quant_validated`
+- `risk_checked`
+- `approved`
+- `executed`
+
+关键文件：
+
+- `core/proposals.py`
+- `scripts/daily_stock_research.py`
+- `scripts/ai_predictor.py`
+- `scripts/auto_trader_v3.py`
+- `scripts/proposal_pipeline.py`
+- `scripts/team_coordinator.py`
+- `web/dashboard_v3.py`
+
 ### 5. 监控面板改为真实数据
 
 已完成：
@@ -217,6 +245,8 @@ openclaw cron list --json
 - `docs/REFACTOR_PHASE12_2026-03-26.md`
 - `docs/REFACTOR_PHASE13_2026-03-26.md`
 - `docs/REFACTOR_PHASE14_2026-03-26.md`
+- `docs/REFACTOR_PHASE15_2026-03-31.md`
+- `docs/REFACTOR_PHASE16_2026-04-10.md`
 
 ## 五、后续 OpenClaw 需要记住的判断
 
@@ -228,3 +258,5 @@ openclaw cron list --json
 6. 当前主链已经接近真闭环，但午盘学习和运行安全现在由 `runtime_guardrails` 统一托底；后续任何“自动调参/自动交易”改动都不应绕过这一层。
 7. 当前交易执行层已经升级为“模拟订单 -> 成交/部分成交 -> 账本回写 -> 自动补记”，不要再把 `auto_trader_v3.py` 当作“信号直接改仓位”的脚本来理解。
 8. 当前值守不仅要看 guardrails 事件，还要看 `self_healing` 和 `simulated_orders`，因为这两者已经决定系统是否真的处于可托管状态。
+9. 从 2026-04-10 开始，`ai_predictor` 改成按交易日刷新，同标的旧 active prediction 会先归档再生成今日新预测，不应再把 4 月初那种“老预测连续多日复用”视为正常。
+10. 从 2026-04-10 开始，`selector top` 会正式同步 watchlist 和 proposal pipeline；Dashboard 交易页也会直接解释“今天为什么没交易”。

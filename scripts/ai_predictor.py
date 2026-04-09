@@ -31,6 +31,7 @@ except ImportError:
     PredictionSystem = prediction_module.PredictionSystem
 from news_fetcher import NewsFetcher
 from news_trigger import NewsMonitor
+from core.proposals import record_quant_validation
 from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 from core.storage import load_positions, load_rules, load_watchlist
 
@@ -82,6 +83,53 @@ class AIPredictor:
     
     def _load_watchlist(self) -> Dict:
         return load_watchlist({})
+
+    def _prediction_trade_date(self, prediction: Dict) -> str:
+        """Return the trade date encoded in a prediction record."""
+        created_at = str(prediction.get("created_at") or prediction.get("updated_at") or "")
+        return created_at[:10] if created_at else ""
+
+    def _retire_prediction_for_refresh(self, prediction_id: str, prediction: Dict, *, reason: str) -> None:
+        """Archive an older active prediction so today's run can generate a fresh one."""
+        archived = dict(prediction)
+        archived["status"] = "expired"
+        archived["retired_reason"] = reason
+        archived["retired_at"] = datetime.now().isoformat()
+        archived["result"] = {
+            "status": "expired",
+            "correct": False,
+            "partial": False,
+            "note": reason,
+        }
+        self.prediction_system.predictions["history"].append(archived)
+        self.prediction_system.predictions["active"].pop(prediction_id, None)
+
+    def _prepare_prediction_slot(self, code: str, *, force: bool = False) -> bool:
+        """Allow one fresh prediction per symbol per trade date."""
+        today = datetime.now().strftime("%Y-%m-%d")
+        active_predictions = self.prediction_system.predictions.get("active", {})
+        stale_predictions = []
+
+        for prediction_id, prediction in list(active_predictions.items()):
+            if prediction.get("code") != code:
+                continue
+            prediction_date = self._prediction_trade_date(prediction)
+            if prediction_date == today and not force:
+                print(f"  {code} 今日已有预测，跳过")
+                return False
+            stale_predictions.append((prediction_id, prediction))
+
+        if stale_predictions:
+            for prediction_id, prediction in stale_predictions:
+                self._retire_prediction_for_refresh(
+                    prediction_id,
+                    prediction,
+                    reason=f"按交易日刷新，已由 {today} 新预测接替",
+                )
+            self.prediction_system._save_predictions()
+            print(f"  {code} 已归档 {len(stale_predictions)} 条旧预测，准备生成今日新预测")
+
+        return True
     
     def _get_current_price(self, code: str) -> Optional[float]:
         """获取当前价格"""
@@ -360,14 +408,8 @@ class AIPredictor:
             code: 股票代码
             force: 是否强制生成（即使已有活跃预测）
         """
-        # 检查是否已有活跃预测
-        active = self.prediction_system.get_active_predictions()
-        for pred in active:
-            if pred["code"] == code:
-                if not force:
-                    print(f"  {code} 已有活跃预测，跳过")
-                    return None
-                break
+        if not self._prepare_prediction_slot(code, force=force):
+            return None
         
         # 获取股票信息
         stock_info = self.positions.get(code) or self.watchlist.get(code)
@@ -566,11 +608,27 @@ class AIPredictor:
         }
         
         pred_id = self.prediction_system.make_prediction(prediction)
-        
-        return {
+
+        prediction_payload = {
             "id": pred_id,
             **prediction,
         }
+        quant_sync = record_quant_validation(
+            code,
+            prediction_payload,
+            technicals={
+                "technical_score": tech_score,
+                "rsi": rsi,
+                "macd": "golden_cross" if macd and macd.get("golden_cross") else "dead_cross" if macd and macd.get("dead_cross") else "neutral",
+                "kdj": "oversold" if rsi and rsi < 30 else "overbought" if rsi and rsi > 70 else "normal",
+                "ma5": ma5,
+                "ma20": ma20,
+                "recommendation": "buy" if direction == "up" and confidence >= 65 else "hold" if direction == "neutral" else "sell",
+            },
+        )
+        if quant_sync:
+            print(f"  🧮 Quant 已验证提案 #{quant_sync['proposal_id']} -> {quant_sync['status']}")
+        return prediction_payload
     
     def _get_industry_cycle(self, industry: str) -> str:
         """获取行业周期位置"""

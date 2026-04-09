@@ -44,6 +44,7 @@ from core.runtime_guardrails import (
     load_guardrail_config,
     load_guardrail_state,
 )
+from core.proposals import get_pipeline_snapshot
 
 PORT = 8082
 
@@ -892,12 +893,99 @@ def get_autopilot_snapshot(cron_tasks: Optional[List[Dict[str, Any]]] = None) ->
     }
 
 
+def _get_prediction_activity_summary(*, today: str, baseline_date: Optional[str] = None) -> Dict[str, Any]:
+    """Summarize how fresh the prediction feed is for the trading pipeline."""
+    where_clauses = []
+    params: List[Any] = [today, today]
+    if baseline_date:
+        where_clauses.append("substr(created_at, 1, 10) >= ?")
+        params.append(baseline_date)
+
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    row = query_one(
+        f"""
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_count,
+            SUM(CASE WHEN substr(created_at, 1, 10) = ? THEN 1 ELSE 0 END) AS today_count,
+            SUM(CASE WHEN status = 'active' AND substr(created_at, 1, 10) = ? THEN 1 ELSE 0 END) AS today_active_count,
+            MAX(created_at) AS latest_created_at
+        FROM predictions
+        {where_sql}
+        """,
+        tuple(params),
+    ) or {}
+    return {
+        "total": int(row.get("total") or 0),
+        "active_count": int(row.get("active_count") or 0),
+        "today_count": int(row.get("today_count") or 0),
+        "today_active_count": int(row.get("today_active_count") or 0),
+        "latest_created_at": row.get("latest_created_at"),
+    }
+
+
+def _build_trade_readiness_snapshot(
+    *,
+    today_trades: List[Dict[str, Any]],
+    today_orders: List[Dict[str, Any]],
+    proposal_pipeline: Dict[str, Any],
+    prediction_activity: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Explain why the trading page is or isn't producing executions today."""
+    counts = proposal_pipeline.get("counts") or {}
+    blockers: List[str] = []
+    status = "success"
+    label = "今日已有成交"
+    detail = "交易链已经产生成交记录。"
+
+    if not today_trades:
+        latest_prediction = prediction_activity.get("latest_created_at") or "--"
+        status = "warning"
+        label = "等待交易条件成熟"
+        detail = "当前交易链没有形成今日成交，重点看提案流转和预测新鲜度。"
+
+        if int(counts.get("approved") or 0) > 0:
+            blockers.append("已有 CIO 批准提案，但今日尚未成交，需继续检查价格条件、风控或订单执行链。")
+        elif int(counts.get("risk_checked") or 0) > 0:
+            blockers.append("提案已完成风控评估，当前阻塞在 CIO 审批。")
+        elif int(counts.get("quant_validated") or 0) > 0:
+            blockers.append("提案已完成 Quant 验证，当前阻塞在 Risk 评估。")
+        elif int(counts.get("pending") or 0) > 0:
+            blockers.append("已有 Research 提案，但仍停留在 pending，Quant 还没有把它推进到下一阶段。")
+        else:
+            blockers.append("当前没有进入正式交易流水线的提案，Trader 没有可执行对象。")
+            status = "error"
+            label = "交易链缺少输入"
+
+        if int(prediction_activity.get("today_count") or 0) == 0:
+            blockers.append(f"今日尚未生成新预测，最近一批预测创建时间停留在 {latest_prediction}。")
+            status = "error"
+            if label == "等待交易条件成熟":
+                label = "预测未刷新"
+        elif int(prediction_activity.get("today_active_count") or 0) == 0:
+            blockers.append("今日虽然有预测写入，但没有新的活跃预测进入交易链。")
+            status = "warning"
+
+        if not blockers and not today_orders:
+            blockers.append("当前没有今日订单，也没有今日成交，交易执行层暂时处于空闲状态。")
+
+    return {
+        "status": status,
+        "label": label,
+        "detail": detail,
+        "blockers": blockers[:4],
+        "prediction_activity": prediction_activity,
+        "today_order_count": len(today_orders),
+    }
+
+
 def get_trading_snapshot() -> Dict[str, Any]:
     """Return current trading summary plus recent trades."""
     account = get_account_latest() or {}
     positions = get_positions()
     trades = get_trades(20)
     order_metrics = get_simulated_order_metrics()
+    proposal_pipeline = get_pipeline_snapshot()
     baseline_date = get_portfolio_baseline_date()
     today = datetime.now().strftime("%Y-%m-%d")
     today_trades = [trade for trade in trades if str(trade.get("executed_at", "")).startswith(today)]
@@ -926,6 +1014,14 @@ def get_trading_snapshot() -> Dict[str, Any]:
             """
         )
 
+    prediction_activity = _get_prediction_activity_summary(today=today, baseline_date=baseline_date)
+    trade_readiness = _build_trade_readiness_snapshot(
+        today_trades=today_trades,
+        today_orders=today_orders,
+        proposal_pipeline=proposal_pipeline,
+        prediction_activity=prediction_activity,
+    )
+
     return {
         "account": account,
         "positions": positions,
@@ -935,6 +1031,9 @@ def get_trading_snapshot() -> Dict[str, Any]:
         "recent_orders": load_recent_simulated_orders(20),
         "order_metrics": order_metrics,
         "proposals": proposals,
+        "proposal_pipeline": proposal_pipeline,
+        "prediction_activity": prediction_activity,
+        "trade_readiness": trade_readiness,
     }
 
 
@@ -1578,12 +1677,25 @@ HTML_CONTENT = '''<!DOCTYPE html>
 
             <div class="page" id="page-trading">
                 <div class="page-header"><h1 class="page-title">交易执行</h1><p class="page-subtitle">交易系统与执行记录</p></div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-label">研究待处理</div><div class="stat-value" id="trading-proposal-pending">--</div><div class="stat-sub">pending</div></div>
+                    <div class="stat-card"><div class="stat-label">量化已验证</div><div class="stat-value" id="trading-proposal-quant">--</div><div class="stat-sub">quant_validated</div></div>
+                    <div class="stat-card"><div class="stat-label">风控待批</div><div class="stat-value" id="trading-proposal-risk">--</div><div class="stat-sub">risk_checked</div></div>
+                    <div class="stat-card"><div class="stat-label">CIO 已批准</div><div class="stat-value" id="trading-proposal-approved">--</div><div class="stat-sub">approved</div></div>
+                </div>
                 <div class="card"><div class="card-title"><span>持仓汇总</span><span class="badge" id="trading-positions-count">--</span></div><div class="card-content">
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">总市值</div><div class="status-meta" id="trading-market-value">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">今日盈亏</div><div class="status-meta" id="trading-today-profit">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">模拟订单</div><div class="status-meta" id="trading-open-orders">--</div></div></div>
+                    <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">多 Agent 流水线</div><div class="status-meta" id="trading-proposal-summary">--</div></div></div>
                     <div class="status-row"><div class="status-dot idle"></div><div class="status-info"><div class="status-name">熔断状态</div><div class="status-meta"><span class="risk-badge risk-low">🟢 正常</span></div></div></div>
                 </div></div>
+                <div class="card banner-card" id="trading-readiness-banner"><div class="card-title"><span>今日未交易原因</span><span class="badge" id="trading-readiness-badge">--</span></div><div class="card-content">
+                    <div class="banner-title" id="trading-readiness-title">加载交易诊断...</div>
+                    <div class="banner-desc" id="trading-readiness-desc">系统会根据提案状态、预测新鲜度和订单执行情况解释为什么今天还没有交易。</div>
+                    <div class="banner-desc" id="trading-readiness-meta" style="margin-top:8px">--</div>
+                </div></div>
+                <div class="card"><div class="card-title"><span>最近交接记录</span><span class="badge" id="trading-handoff-count">--</span></div><div class="card-content" id="trading-handoffs"><p class="empty-tip">暂无交接记录</p></div></div>
                 <div class="card"><div class="card-title"><span>今日交易记录</span><span class="badge" id="trading-today-count">--</span></div><table class="data-table"><thead><tr><th>时间</th><th>代码</th><th>方向</th><th>数量</th><th>价格</th><th>金额</th><th>原因</th></tr></thead><tbody id="trading-today-body"><tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">暂无今日交易</td></tr></tbody></table></div>
             </div>
 
@@ -1953,11 +2065,41 @@ HTML_CONTENT = '''<!DOCTYPE html>
             const acc = data.account || {};
             const todayTrades = Array.isArray(data.today_trades) ? data.today_trades : [];
             const orderMetrics = data.order_metrics || {};
+            const pipeline = data.proposal_pipeline || {};
+            const counts = pipeline.counts || {};
+            const handoffs = Array.isArray(pipeline.recent_handoffs) ? pipeline.recent_handoffs : [];
+            const tradeReadiness = data.trade_readiness || {};
+            const blockers = Array.isArray(tradeReadiness.blockers) ? tradeReadiness.blockers : [];
+            const predictionActivity = tradeReadiness.prediction_activity || {};
             document.getElementById('trading-market-value').textContent = '¥' + (acc.market_value || 0).toLocaleString('zh-CN', {minimumFractionDigits:2});
             document.getElementById('trading-today-profit').textContent = (acc.daily_profit || 0).toFixed(2);
             document.getElementById('trading-positions-count').textContent = data.positions?.length || 0;
             document.getElementById('trading-today-count').textContent = todayTrades.length;
             document.getElementById('trading-open-orders').textContent = '未完成 ' + (orderMetrics.open_order_count || 0) + ' 笔 | 部分成交 ' + (orderMetrics.partial_fill_count || 0) + ' 笔';
+            document.getElementById('trading-proposal-pending').textContent = counts.pending || 0;
+            document.getElementById('trading-proposal-quant').textContent = counts.quant_validated || 0;
+            document.getElementById('trading-proposal-risk').textContent = counts.risk_checked || 0;
+            document.getElementById('trading-proposal-approved').textContent = counts.approved || 0;
+            document.getElementById('trading-proposal-summary').textContent = 'pending ' + (counts.pending || 0) + ' | quant ' + (counts.quant_validated || 0) + ' | risk ' + (counts.risk_checked || 0) + ' | approved ' + (counts.approved || 0);
+            const readinessBanner = document.getElementById('trading-readiness-banner');
+            readinessBanner.className = 'card banner-card ' + (tradeReadiness.status === 'success' ? 'success' : (tradeReadiness.status === 'error' ? 'error' : 'warning'));
+            document.getElementById('trading-readiness-badge').textContent = tradeReadiness.label || '--';
+            document.getElementById('trading-readiness-title').textContent = tradeReadiness.label || '交易诊断待生成';
+            document.getElementById('trading-readiness-desc').textContent = blockers.join('；') || tradeReadiness.detail || '当前没有额外诊断信息';
+            document.getElementById('trading-readiness-meta').textContent =
+                '今日预测 ' + (predictionActivity.today_count || 0) +
+                ' 条 | 活跃预测 ' + (predictionActivity.active_count || 0) +
+                ' 条 | 今日订单 ' + (tradeReadiness.today_order_count || 0) +
+                ' 笔 | 最近预测 ' + (predictionActivity.latest_created_at || '--');
+            document.getElementById('trading-handoff-count').textContent = handoffs.length;
+            document.getElementById('trading-handoffs').innerHTML = handoffs.map(item => {
+                const reason = item.reason ? (' | ' + item.reason) : '';
+                return '<div style="padding:12px 0;border-bottom:1px solid var(--border)">' +
+                    '<div style="color:var(--text-primary);margin-bottom:4px">' + (item.agent || '--') + ' -> ' + (item.status || item.event_type || '--') + '</div>' +
+                    '<div style="color:var(--text-secondary);font-size:11px">' + (item.symbol || '--') + reason + '</div>' +
+                    '<div style="color:var(--text-secondary);font-size:11px;margin-top:4px">' + (item.created_at || '--') + '</div>' +
+                '</div>';
+            }).join('') || '<p class="empty-tip">暂无交接记录</p>';
             document.getElementById('trading-today-body').innerHTML = todayTrades.map(trade => {
                 const fillRatio = trade.fill_ratio ? (' | 成交率 ' + Math.round((trade.fill_ratio || 0) * 100) + '%') : '';
                 const status = trade.execution_status ? (' | ' + trade.execution_status) : '';

@@ -17,15 +17,18 @@ import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
-PROJECT_ROOT = os.path.expanduser("~/.openclaw/workspace/china-stock-team")
-sys.path.insert(0, PROJECT_ROOT)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 # Agent角色
 from scripts.ai_predictor import AIPredictor  # 量化师
 from scripts.daily_stock_research import StockResearcher  # 研究员
-from core.storage import load_watchlist
+from scripts.auto_trader_v3 import AutoTraderV3  # 交易员
+from core.proposals import get_pipeline_snapshot
+from core.storage import build_portfolio_snapshot, load_positions, load_watchlist
 # 风控官、CIO、交易员 - 功能已分散在现有脚本中
 
 
@@ -34,9 +37,9 @@ class TeamCoordinator:
     
     def __init__(self):
         self.config = self._load_config()
-        self.positions = self._load_json("config/positions.json", {})
+        self.positions = load_positions({})
         self.watchlist = load_watchlist({})
-        self.portfolio = self._load_json("config/portfolio.json", {})
+        self.portfolio = build_portfolio_snapshot()
         
     def _load_config(self):
         config_file = os.path.join(PROJECT_ROOT, "config", "trading_config.json")
@@ -102,17 +105,27 @@ class TeamCoordinator:
         
         print()
         print("【CIO】最终决策...")
-        # CIO：综合决策
-        decisions = self._cio_decision(proposals, risk_report)
-        
-        for decision in decisions:
-            print(f"  {decision['action']}: {decision['stock']} ({decision['code']})")
-            print(f"     理由: {decision['reason']}")
+        trader = AutoTraderV3()
+        approved_signals = trader.build_pipeline_buy_signals()
+        pipeline = get_pipeline_snapshot()
+        counts = pipeline.get("counts", {})
+        print(
+            "  状态流: "
+            f"pending={counts.get('pending', 0)} | "
+            f"quant={counts.get('quant_validated', 0)} | "
+            f"risk={counts.get('risk_checked', 0)} | "
+            f"approved={counts.get('approved', 0)}"
+        )
+        if approved_signals:
+            for signal in approved_signals:
+                print(f"  批准: {signal['name']} ({signal['code']})")
+                print(f"     理由: 研究/量化/风控均已通过，等待交易员执行")
+        else:
+            print("  当前无已批准提案")
         
         print()
         print("【交易员】执行交易...")
-        # 交易员：执行决策（实际执行由auto_trader.py处理）
-        print("  ✅ 决策已记录，等待交易员执行")
+        print("  ✅ 已完成审批流转，实际下单由 auto_trader_v3.py --buy 负责")
         
         print()
         print("=" * 60)

@@ -29,6 +29,7 @@ LOG_DIR = PROJECT_ROOT / "logs"
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.fundamentals import get_fundamental_bundle
+from core.proposals import create_or_update_research_proposal
 from core.runtime_guardrails import evaluate_runtime_mode, record_guardrail_event, record_guardrail_success, task_lock, TaskLockedError
 from core.storage import load_positions, load_watchlist, save_watchlist
 
@@ -326,6 +327,23 @@ ROE: {analysis['roe']:.1f}%
         print(f"发送飞书通知失败：{e}")
 
 
+class StockResearcher:
+    """Research agent facade used by the coordinator and cron entrypoints."""
+
+    def research_daily(self) -> List[Dict[str, object]]:
+        code, name, industry = select_stock_to_research()
+        analysis = analyze_stock(code, name, industry)
+        if not analysis:
+            return []
+
+        add_to_watchlist(analysis)
+        proposal = create_or_update_research_proposal(analysis)
+        analysis["proposal_id"] = proposal["proposal_id"]
+        analysis["proposal_status"] = proposal["status"]
+        send_feishu_notification(analysis)
+        return [analysis]
+
+
 def select_stock_to_research():
     """从股票池选择 1 只未研究的股票"""
     positions = set(load_positions({}).keys())
@@ -376,6 +394,10 @@ def main():
                 return
 
             add_to_watchlist(analysis)
+            proposal = create_or_update_research_proposal(analysis)
+            analysis["proposal_id"] = proposal["proposal_id"]
+            analysis["proposal_status"] = proposal["status"]
+            print(f"\n🧾 已提交研究提案：#{proposal['proposal_id']} -> {proposal['status']}")
             send_feishu_notification(analysis)
 
             report_file = DATA_DIR / f"research_{code}_{analysis['date']}.json"
